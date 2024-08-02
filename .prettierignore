@@ -1,0 +1,12 @@
+# Compiled binary
+build
+
+# Dependency directories
+node_modules/
+
+# dotenv environment variable files
+.env*
+!.env-sample
+
+# Mac files
+.DS_Store

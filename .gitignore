@@ -1,0 +1,14 @@
+# Compiled binary
+build
+
+# Dependency directories
+node_modules/
+
+# dotenv environment variable files
+.env
+
+# test coverage 
+coverage/
+
+temp/
+upload/
