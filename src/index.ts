@@ -3,6 +3,17 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import session from 'express-session'
 import passport from 'passport'
+import { PostgresDatabase } from 'infrastructure/database/PostgresDatabase'
+import { UuidService } from 'infrastructure/utils/UuidService'
+import { BcryptHashGenerator } from 'infrastructure/utils/BcryptHashGenerator'
+import { UserController } from 'infrastructure/http/controllers/UserController'
+import { CreateDoctorUseCase } from 'application/doctor/CreateDoctorUseCase'
+import { CreateUserUseCase } from 'application/user/CreateUserUseCase'
+import { UserRepository } from 'infrastructure/entities/user/UserRepository'
+import { PassportConfig } from 'infrastructure/config/passportConfig'
+import { UserRoutes } from 'infrastructure/http/routes/UserRoutes'
+import { MainRoutes } from 'infrastructure/http/routes'
+import { DoctorRepository } from 'infrastructure/entities/doctor/DoctorRepository'
 
 void main()
 
@@ -26,6 +37,32 @@ async function main(): Promise<void> {
 
   const app: Express = express()
 
+  const postgresDatabase = await PostgresDatabase.getInstance()
+  const dataSource = postgresDatabase.getDataSource()
+
+  const uuidService = new UuidService()
+  const hashGenerator = new BcryptHashGenerator()
+
+  const userRepository = new UserRepository(dataSource)
+  const doctorRepository = new DoctorRepository(dataSource)
+
+  const createUserUseCase = new CreateUserUseCase(
+    userRepository,
+    uuidService,
+    hashGenerator
+  )
+
+  const createDoctorUseCase = new CreateDoctorUseCase(
+    doctorRepository,
+    uuidService
+  )
+
+  const userController = new UserController(
+    createUserUseCase,
+    createDoctorUseCase,
+    doctorRepository
+  )
+
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
 
@@ -37,9 +74,17 @@ async function main(): Promise<void> {
     })
   )
 
+  // eslint-disable-next-line no-new
+  new PassportConfig(userRepository)
   app.use(passport.session())
 
+  const userRoutes = new UserRoutes(userController)
+
+  const mainRoutes = new MainRoutes(userRoutes)
+
   app.use(cors(corsOptions))
+
+  app.use('/api', mainRoutes.createRouter())
 
   app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`)

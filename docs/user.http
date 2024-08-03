@@ -1,0 +1,31 @@
+@hostname = http://localhost:10000
+@usersPath = {{hostname}}/api/users
+
+### Register new user
+POST {{usersPath}}
+Content-Type: application/json
+
+{
+  "email": "ann@gmail.com",
+  "password": "ann",
+  "firstName":"ann",
+  "lastName":"Lin",
+  "role": "DOCTOR",
+  "onboardDate":"2022-01-03",
+  "gender":"FEMALE",
+  "birthDate": "1990-01-02"
+}
+###
+
+### user signin
+# @name signin
+POST {{usersPath}}/signin
+Content-Type: application/json
+
+{
+  "email": "ann@gmail.com",
+  "password": "ann"
+}
+###
+@accessToken = Bearer {{signin.response.body.token}}
+
