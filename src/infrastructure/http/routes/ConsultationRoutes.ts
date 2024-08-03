@@ -5,6 +5,7 @@ import { validator } from '../middlewares/Validator'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import {
   getConsultationListSchema,
+  getConsultationOnlineBookingRateSchema,
   getSingleConsultationSchema,
 } from 'application/consultation/ConsultationValidator'
 
@@ -15,6 +16,14 @@ export class ConsultationRoutes {
   ) {
     this.routes = Router()
     this.routes
+      .get(
+        '/onlineBookingRate',
+        authenticated,
+        validator(getConsultationOnlineBookingRateSchema),
+        asyncHandler(
+          this.consultationController.getConsultationOnlineBookingRate
+        )
+      )
       .get(
         '/:id',
         authenticated,

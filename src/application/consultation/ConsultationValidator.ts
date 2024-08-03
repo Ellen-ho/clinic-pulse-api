@@ -23,3 +23,11 @@ export const getSingleConsultationSchema = {
     id: Joi.string().uuid().required(),
   }),
 }
+
+export const getConsultationOnlineBookingRateSchema = {
+  query: Joi.object({
+    startDate: Joi.string().required(),
+    endDate: Joi.string().required(),
+    clinicId: Joi.string().optional(),
+  }),
+}

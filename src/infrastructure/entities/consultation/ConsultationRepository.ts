@@ -220,21 +220,6 @@ export class ConsultationRepository
 
       const modifiedDoctorId = doctorId !== undefined ? doctorId : null
 
-      const queryParams = [
-        startDate,
-        endDate,
-        clinicId, // 确保如果未定义则为 null
-        timePeriod,
-        totalDurationMin,
-        totalDurationMax,
-        patientId,
-        doctorId,
-        limit,
-        offset,
-      ]
-
-      console.log(queryParams)
-
       const rawConsultations = await this.getQuery<
         Array<{
           id: string
@@ -401,6 +386,51 @@ export class ConsultationRepository
         'ConsultationRepository findByQuery error',
         e as Error
       )
+    }
+  }
+
+  public async findByDateRangeAndClinic(
+    startDate: string,
+    endDate: string,
+    clinicId?: string
+  ): Promise<{
+    totalConsultation: number
+    consultationWithOnlineBooking: number
+  }> {
+    try {
+      let baseQuery = `
+      SELECT COUNT(*) 
+      FROM consultations
+      JOIN time_slots ON consultations.time_slot_id = time_slots.id
+      WHERE check_in_at >= $1 AND check_in_at <= $2
+    `
+      const queryParams = [startDate, endDate]
+
+      if (clinicId !== undefined) {
+        baseQuery += ' AND time_slots.clinic_id = $3'
+        queryParams.push(clinicId)
+      }
+
+      const totalResult = await this.getQuery<Array<{ count: number }>>(
+        baseQuery,
+        queryParams
+      )
+      const totalConsultation = totalResult[0].count
+
+      const onlineQuery = `${baseQuery} AND source = 'ONLINE_BOOKING'`
+      const onlineResult = await this.getQuery<Array<{ count: number }>>(
+        onlineQuery,
+        queryParams
+      )
+      const consultationWithOnlineBooking = onlineResult[0].count
+
+      return {
+        totalConsultation,
+        consultationWithOnlineBooking,
+      }
+    } catch (error) {
+      console.error('Failed to fetch data', error)
+      throw new Error('Database query failed')
     }
   }
 
