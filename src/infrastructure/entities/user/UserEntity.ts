@@ -1,4 +1,4 @@
-import { UserRoleType } from 'domain/user/User'
+import { UserRoleType } from '../../../domain/user/User'
 import {
   Column,
   CreateDateColumn,

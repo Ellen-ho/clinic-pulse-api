@@ -1,6 +1,6 @@
 import { IEntityMapper } from 'domain/shared/IEntityMapper'
 import { UserEntity } from './UserEntity'
-import { User } from 'domain/user/User'
+import { User } from '../../../domain/user/User'
 
 export class UserMapper implements IEntityMapper<UserEntity, User> {
   public toDomainModel(entity: UserEntity): User {
