@@ -14,6 +14,10 @@ import { PassportConfig } from 'infrastructure/config/passportConfig'
 import { UserRoutes } from 'infrastructure/http/routes/UserRoutes'
 import { MainRoutes } from 'infrastructure/http/routes'
 import { DoctorRepository } from 'infrastructure/entities/doctor/DoctorRepository'
+import { ConsultationRepository } from 'infrastructure/entities/consultation/ConsultationRepository'
+import { GetConsultationListUseCase } from 'application/consultation/GetConsultationListUseCase'
+import { ConsultationController } from 'infrastructure/http/controllers/ConsultationController'
+import { ConsultationRoutes } from 'infrastructure/http/routes/ConsultationRoutes'
 
 void main()
 
@@ -45,6 +49,7 @@ async function main(): Promise<void> {
 
   const userRepository = new UserRepository(dataSource)
   const doctorRepository = new DoctorRepository(dataSource)
+  const consultationRepository = new ConsultationRepository(dataSource)
 
   const createUserUseCase = new CreateUserUseCase(
     userRepository,
@@ -57,10 +62,18 @@ async function main(): Promise<void> {
     uuidService
   )
 
+  const getConsultationListUseCase = new GetConsultationListUseCase(
+    consultationRepository
+  )
+
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
     doctorRepository
+  )
+
+  const consultationController = new ConsultationController(
+    getConsultationListUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))
@@ -79,8 +92,9 @@ async function main(): Promise<void> {
   app.use(passport.session())
 
   const userRoutes = new UserRoutes(userController)
+  const consultationRoutes = new ConsultationRoutes(consultationController)
 
-  const mainRoutes = new MainRoutes(userRoutes)
+  const mainRoutes = new MainRoutes(userRoutes, consultationRoutes)
 
   app.use(cors(corsOptions))
 
