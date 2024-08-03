@@ -1,4 +1,4 @@
-import { GenderType } from 'domain/common'
+import { GenderType } from '../../domain/common'
 import { Doctor } from 'domain/doctor/Doctor'
 import { User } from 'domain/user/User'
 import { IUuidService } from 'domain/utils/IUuidService'
