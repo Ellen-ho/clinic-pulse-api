@@ -17,3 +17,9 @@ export const getConsultationListSchema = {
     page: Joi.number().required(),
   }),
 }
+
+export const getSingleConsultationSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+}

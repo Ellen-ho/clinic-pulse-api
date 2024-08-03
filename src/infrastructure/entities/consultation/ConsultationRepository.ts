@@ -20,6 +20,158 @@ export class ConsultationRepository
     super(ConsultationEntity, new ConsultationMapper(), dataSource)
   }
 
+  public async findById(id: string): Promise<{
+    consultationDate: string
+    consultationTimePeriod: TimePeriodType
+    consultationNumber: number
+    onsiteCancelAt: Date | null
+    onsiteCancelReason: OnsiteCancelReasonType | null
+    checkInAt: Date
+    startAt: Date | null
+    endAt: Date | null
+    checkOutAt: Date | null
+    treatmentType: TreatmentType
+    patient: {
+      firstName: string
+      lastName: string
+      gender: GenderType
+      age: number
+    }
+    doctor: {
+      firstName: string
+      lastName: string
+    }
+    acupunctureTreatment: {
+      id: string | null
+      startAt: Date | null
+      endAt: Date | null
+      assignBedAt: Date | null
+      removeNeedleAt: Date | null
+    } | null
+    medicineTreatment: {
+      id: string | null
+      getMedicineAt: Date | null
+    } | null
+  } | null> {
+    try {
+      const rawConsultation = await this.getQuery<
+        Array<{
+          consultation_date: string
+          consultation_time_period: TimePeriodType
+          consultation_number: number
+          onsite_cancel_at: Date | null
+          onsite_cancel_reason: OnsiteCancelReasonType | null
+          check_in_at: Date
+          start_at: Date | null
+          end_at: Date | null
+          check_out_at: Date | null
+          has_acupuncture: boolean
+          has_medicine: boolean
+          doctor_first_name: string
+          doctor_last_name: string
+          patient_first_name: string
+          patient_last_name: string
+          patient_gender: GenderType
+          patient_age: number
+          acupuncture_treatment_id: string | null
+          acupuncture_treatment_start_at: Date | null
+          acupuncture_treatment_end_at: Date | null
+          acupuncture_treatment_assign_bed_at: Date | null
+          acupuncture_treatment_remove_needle_at: Date | null
+          medicine_treatment_id: string | null
+          medicine_treatment_get_medicine_at: Date | null
+        }>
+      >(
+        `
+        SELECT
+          TO_CHAR(c.check_in_at, 'YYYY-MM-DD') AS consultation_date,
+          ts.time_period AS consultation_time_period,
+          c.consultation_number,
+          c.onsite_cancle_at AS onsite_cancel_at,
+          c.onsite_cancle_reason AS onsite_cancel_reason,
+          c.check_in_at,
+          c.start_at,
+          c.end_at,
+          c.check_out_at,
+          CASE WHEN at.id IS NOT NULL THEN true ELSE false END AS has_acupuncture,
+          CASE WHEN mt.id IS NOT NULL THEN true ELSE false END AS has_medicine,
+          at.id AS acupuncture_treatment_id,
+          at.start_at AS acupuncture_treatment_start_at,
+          at.end_at AS acupuncture_treatment_end_at,
+          at.assign_bed_at AS acupuncture_treatment_assign_bed_at,
+          at.remove_needle_at AS acupuncture_treatment_remove_needle_at,
+          mt.id AS medicine_treatment_id,
+          mt.get_medicine_at AS medicine_treatment_get_medicine_at,
+          d.first_name AS doctor_first_name,
+          d.last_name AS doctor_last_name,
+          p.first_name AS patient_first_name,
+          p.last_name AS patient_last_name,
+          p.gender AS patient_gender,
+          date_part('year', age(p.birth_date)) AS patient_age
+        FROM consultations c
+        LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
+        LEFT JOIN doctors d ON d.id = ts.doctor_id
+        LEFT JOIN patients p ON p.id = c.patient_id
+        LEFT JOIN acupuncture_treatments at ON at.id = c.acupuncture_treatment_id
+        LEFT JOIN medicine_treatments mt ON mt.id = c.medicine_treatment_id
+        WHERE c.id = $1
+      `,
+        [id]
+      )
+
+      return rawConsultation.length === 0
+        ? null
+        : {
+            consultationDate: rawConsultation[0].consultation_date,
+            consultationTimePeriod: rawConsultation[0].consultation_time_period,
+            consultationNumber: rawConsultation[0].consultation_number,
+            onsiteCancelAt: rawConsultation[0].onsite_cancel_at,
+            onsiteCancelReason: rawConsultation[0].onsite_cancel_reason,
+            checkInAt: rawConsultation[0].check_in_at,
+            startAt: rawConsultation[0].start_at,
+            endAt: rawConsultation[0].end_at,
+            checkOutAt: rawConsultation[0].check_out_at,
+            treatmentType: this.determineTreatmentType(
+              rawConsultation[0].has_acupuncture,
+              rawConsultation[0].has_medicine
+            ),
+            patient: {
+              firstName: rawConsultation[0].patient_first_name,
+              lastName: rawConsultation[0].patient_last_name,
+              gender: rawConsultation[0].patient_gender,
+              age: rawConsultation[0].patient_age,
+            },
+            doctor: {
+              firstName: rawConsultation[0].doctor_first_name,
+              lastName: rawConsultation[0].doctor_last_name,
+            },
+            acupunctureTreatment: rawConsultation[0].has_acupuncture
+              ? {
+                  id: rawConsultation[0].acupuncture_treatment_id,
+                  startAt: rawConsultation[0].acupuncture_treatment_start_at,
+                  endAt: rawConsultation[0].acupuncture_treatment_end_at,
+                  assignBedAt:
+                    rawConsultation[0].acupuncture_treatment_assign_bed_at,
+                  removeNeedleAt:
+                    rawConsultation[0].acupuncture_treatment_remove_needle_at,
+                }
+              : null,
+            medicineTreatment: rawConsultation[0].has_medicine
+              ? {
+                  id: rawConsultation[0].medicine_treatment_id,
+                  getMedicineAt:
+                    rawConsultation[0].medicine_treatment_get_medicine_at,
+                }
+              : null,
+          }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository findById error',
+        e as Error
+      )
+    }
+  }
+
   public async findByQuery(
     limit: number,
     offset: number,

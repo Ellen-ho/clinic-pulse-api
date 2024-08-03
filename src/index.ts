@@ -18,6 +18,7 @@ import { ConsultationRepository } from 'infrastructure/entities/consultation/Con
 import { GetConsultationListUseCase } from 'application/consultation/GetConsultationListUseCase'
 import { ConsultationController } from 'infrastructure/http/controllers/ConsultationController'
 import { ConsultationRoutes } from 'infrastructure/http/routes/ConsultationRoutes'
+import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
 
 void main()
 
@@ -66,6 +67,10 @@ async function main(): Promise<void> {
     consultationRepository
   )
 
+  const getSingleConsultationUseCase = new GetSingleConsultationUseCase(
+    consultationRepository
+  )
+
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
@@ -73,7 +78,8 @@ async function main(): Promise<void> {
   )
 
   const consultationController = new ConsultationController(
-    getConsultationListUseCase
+    getConsultationListUseCase,
+    getSingleConsultationUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))

@@ -22,3 +22,10 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
+### get single consult 
+@consultationId = 56f8f1ae-4071-4606-b9b8-a6f807481b6f
+GET {{consultationsPath}}/{{consultationId}}
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+

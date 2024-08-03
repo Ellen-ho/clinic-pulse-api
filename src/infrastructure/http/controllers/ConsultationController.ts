@@ -1,14 +1,17 @@
 import { Request, Response } from 'express'
 import { GetConsultationListUseCase } from 'application/consultation/GetConsultationListUseCase'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
+import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
+  getSingleConsultation: (req: Request, res: Response) => Promise<Response>
 }
 
 export class ConsultationController implements IConsultationController {
   constructor(
-    private readonly getConsultationListUseCase: GetConsultationListUseCase
+    private readonly getConsultationListUseCase: GetConsultationListUseCase,
+    private readonly getSingleConsultationUseCase: GetSingleConsultationUseCase
   ) {}
 
   public getConsultationList = async (
@@ -32,6 +35,18 @@ export class ConsultationController implements IConsultationController {
       patientId: req.query.patientId as string,
     }
     const result = await this.getConsultationListUseCase.execute(request)
+
+    return res.status(200).json(result)
+  }
+
+  public getSingleConsultation = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      consultationId: req.params.id,
+    }
+    const result = await this.getSingleConsultationUseCase.execute(request)
 
     return res.status(200).json(result)
   }
