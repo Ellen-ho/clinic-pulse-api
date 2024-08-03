@@ -1,0 +1,31 @@
+@hostname = http://localhost:10000
+
+@usersPath = {{hostname}}/api/users
+
+### user login
+# @name signin
+POST {{usersPath}}/signin
+Content-Type: application/json
+
+{
+  "email": "ann@gmail.com",
+  "password": "ann"
+}
+###
+@accessToken = Bearer {{signin.response.body.token}}
+
+@consultationsPath = {{hostname}}/api/consultations
+
+### get consult list
+GET {{consultationsPath}}?limit=20&page=1&startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### get single consult 
+@consultationId = 56f8f1ae-4071-4606-b9b8-a6f807481b6f
+GET {{consultationsPath}}/{{consultationId}}
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+

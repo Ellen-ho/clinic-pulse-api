@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import { UserRoleType } from '../../domain/user/User'
-import { GenderType } from 'domain/common'
+import { GenderType } from '../../domain/common'
 
 export const signUpUserSchema = {
   body: Joi.object({
