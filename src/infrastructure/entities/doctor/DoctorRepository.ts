@@ -1,10 +1,10 @@
-import { IDoctorRepository } from 'application/doctor/interfaces/repositories/IDoctorRepository'
 import { BaseRepository } from 'infrastructure/database/BaseRepository'
 import { DoctorEntity } from './DoctorEntity'
 import { DataSource } from 'typeorm'
 import { DoctorMapper } from './DoctorMapper'
 import { Doctor } from 'domain/doctor/Doctor'
 import { RepositoryError } from 'infrastructure/error/RepositoryError'
+import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
 
 export class DoctorRepository
   extends BaseRepository<DoctorEntity, Doctor>
