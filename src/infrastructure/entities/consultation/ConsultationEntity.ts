@@ -9,6 +9,7 @@ import {
 } from 'typeorm'
 import {
   ConsultationSource,
+  ConsultationStatus,
   OnsiteCancelReasonType,
 } from '../../../domain/consultation/Consultation'
 
@@ -22,6 +23,14 @@ import { MedicineTreatmentEntity } from '../treatement/MedicineTreatmentEntity'
 export class ConsultationEntity {
   @PrimaryGeneratedColumn('uuid')
   public id!: string
+
+  @Column({
+    name: 'status',
+    type: 'varchar',
+    length: 255,
+    default: ConsultationStatus.WAITING_FOR_CONSULTATION,
+  })
+  public status!: ConsultationStatus
 
   @Column({
     name: 'source',
