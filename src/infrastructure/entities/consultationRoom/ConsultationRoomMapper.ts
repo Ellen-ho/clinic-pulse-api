@@ -1,6 +1,6 @@
 import { IEntityMapper } from 'domain/shared/IEntityMapper'
 import { ConsultationRoomEntity } from './ConsultationRoomEntity'
-import { ConsultationRoom } from 'domain/consultationRoom/ConsultationRoom'
+import { ConsultationRoom } from '../../../domain/consultationRoom/ConsultationRoom'
 
 export class PatientMapper
   implements IEntityMapper<ConsultationRoomEntity, ConsultationRoom>
@@ -9,6 +9,7 @@ export class PatientMapper
     const consultationRoom = new ConsultationRoom({
       id: entity.id,
       clinicId: entity.clinicId,
+      roomNumber: entity.roomNumber,
     })
     return consultationRoom
   }
@@ -17,6 +18,7 @@ export class PatientMapper
     const consultationRoomEntity = new ConsultationRoomEntity()
     consultationRoomEntity.id = domainModel.id
     consultationRoomEntity.clinicId = domainModel.clinicId
+    consultationRoomEntity.roomNumber = domainModel.roomNumber
 
     return consultationRoomEntity
   }

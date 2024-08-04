@@ -5,6 +5,8 @@ import { validator } from '../middlewares/Validator'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import {
   getConsultationListSchema,
+  getConsultationRealTimeCountSchema,
+  getConsultationRelatedRatiosSchema,
   getSingleConsultationSchema,
 } from 'application/consultation/ConsultationValidator'
 
@@ -15,6 +17,18 @@ export class ConsultationRoutes {
   ) {
     this.routes = Router()
     this.routes
+      .get(
+        '/related_ratios',
+        authenticated,
+        validator(getConsultationRelatedRatiosSchema),
+        asyncHandler(this.consultationController.getConsultationRelatedRatios)
+      )
+      .get(
+        '/real_time_count',
+        authenticated,
+        validator(getConsultationRealTimeCountSchema),
+        asyncHandler(this.consultationController.getConsultationRealTimeCount)
+      )
       .get(
         '/:id',
         authenticated,

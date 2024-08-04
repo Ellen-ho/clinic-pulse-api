@@ -76,4 +76,24 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     }>
     totalCounts: number
   }>
+  findByDateRangeAndClinic: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string
+  ) => Promise<{
+    totalConsultation: number
+    consultationWithOnlineBooking: number
+    consultationWithOnsiteCancel: number
+  }>
+  getRealTimeCounts: (
+    clinicId?: string,
+    consultationRoomNumber?: string
+  ) => Promise<{
+    waitForConsultationCount: number
+    waitForBedAssignedCount: number
+    waitForAcupunctureTreatmentCount: number
+    waitForNeedleRemovedCount: number
+    waitForMedicineCount: number
+    completedCount: number
+  }>
 }

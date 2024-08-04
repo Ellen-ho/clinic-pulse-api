@@ -10,6 +10,7 @@ export class ConsultationMapper
   public toDomainModel(entity: ConsultationEntity): Consultation {
     const consultation = new Consultation({
       id: entity.id,
+      status: entity.status,
       source: entity.source,
       consultationNumber: entity.consultationNumber,
       checkInAt: entity.checkInAt,
@@ -38,6 +39,7 @@ export class ConsultationMapper
   public toPersistence(domainModel: Consultation): ConsultationEntity {
     const consultationEntity = new ConsultationEntity()
     consultationEntity.id = domainModel.id
+    consultationEntity.status = domainModel.status
     consultationEntity.source = domainModel.source
     consultationEntity.consultationNumber = domainModel.consultationNumber
     consultationEntity.checkInAt = domainModel.checkInAt

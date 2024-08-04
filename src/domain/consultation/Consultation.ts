@@ -3,6 +3,7 @@ import { MedicineTreatment } from 'domain/treatment/MedicineTreatment'
 
 export interface IConsultationProps {
   id: string
+  status: ConsultationStatus
   source: ConsultationSource
   consultationNumber: number
   checkInAt: Date
@@ -19,6 +20,15 @@ export interface IConsultationProps {
 export enum ConsultationSource {
   ONLINE_BOOKING = 'ONLINE_BOOKING',
   ONSITE_REGISTRATION = 'ONSITE_REGISTRATION',
+}
+
+export enum ConsultationStatus {
+  WAITING_FOR_CONSULTATION = 'WAITING_FOR_CONSULTATION',
+  WAITING_FOR_BED_ASSIGNMENT = 'WAITING_FOR_BED_ASSIGNMENT',
+  WAITING_FOR_ACUPUNCTURE_TREATMENT = 'WAITING_FOR_ACUPUNCTURE_TREATMENT',
+  WAITING_FOR_NEEDLE_REMOVAL = 'WAITING_FOR_NEEDLE_REMOVAL',
+  ONSITE_CANCEL = 'ONSITE_CANCEL',
+  CONSULTATION_COMPLETED = 'CONSULTATION_COMPLETED',
 }
 
 export enum TreatmentType {
@@ -40,6 +50,10 @@ export class Consultation {
 
   public get id(): string {
     return this.props.id
+  }
+
+  public get status(): ConsultationStatus {
+    return this.props.status
   }
 
   public get source(): ConsultationSource {

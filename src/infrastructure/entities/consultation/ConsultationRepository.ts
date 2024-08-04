@@ -3,6 +3,7 @@ import { ConsultationEntity } from './ConsultationEntity'
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
 import {
   Consultation,
+  ConsultationStatus,
   OnsiteCancelReasonType,
   TreatmentType,
 } from 'domain/consultation/Consultation'
@@ -220,21 +221,6 @@ export class ConsultationRepository
 
       const modifiedDoctorId = doctorId !== undefined ? doctorId : null
 
-      const queryParams = [
-        startDate,
-        endDate,
-        clinicId, // 确保如果未定义则为 null
-        timePeriod,
-        totalDurationMin,
-        totalDurationMax,
-        patientId,
-        doctorId,
-        limit,
-        offset,
-      ]
-
-      console.log(queryParams)
-
       const rawConsultations = await this.getQuery<
         Array<{
           id: string
@@ -324,7 +310,7 @@ export class ConsultationRepository
         ]
       )
 
-      const totalCounts = await this.getQuery<Array<{ count: number }>>(
+      const totalCounts = await this.getQuery<Array<{ count: string }>>(
         `
         SELECT COUNT(*) AS count
         FROM consultations c
@@ -394,11 +380,147 @@ export class ConsultationRepository
 
       return {
         data,
-        totalCounts: totalCounts[0].count,
+        totalCounts: parseInt(totalCounts[0].count, 10),
       }
     } catch (e) {
       throw new RepositoryError(
         'ConsultationRepository findByQuery error',
+        e as Error
+      )
+    }
+  }
+
+  public async findByDateRangeAndClinic(
+    startDate: string,
+    endDate: string,
+    clinicId?: string
+  ): Promise<{
+    totalConsultation: number
+    consultationWithOnlineBooking: number
+    consultationWithOnsiteCancel: number
+  }> {
+    try {
+      let baseQuery = `
+      SELECT COUNT(*) 
+      FROM consultations
+      JOIN time_slots ON consultations.time_slot_id = time_slots.id
+      WHERE check_in_at >= $1 AND check_in_at <= $2
+    `
+      const queryParams = [startDate, endDate]
+
+      if (clinicId !== undefined) {
+        baseQuery += ' AND time_slots.clinic_id = $3'
+        queryParams.push(clinicId)
+      }
+
+      const totalResult = await this.getQuery<Array<{ count: string }>>(
+        baseQuery,
+        queryParams
+      )
+      const totalConsultation = parseInt(totalResult[0].count, 10)
+
+      const onlineQuery = `${baseQuery} AND source = 'ONLINE_BOOKING'`
+      const onlineResult = await this.getQuery<Array<{ count: string }>>(
+        onlineQuery,
+        queryParams
+      )
+      const consultationWithOnlineBooking = parseInt(onlineResult[0].count, 10)
+
+      const onsiteCancelQuery = `${baseQuery} AND onsite_cancle_at IS NOT NULL`
+      const onsiteCancelResult = await this.getQuery<Array<{ count: string }>>(
+        onsiteCancelQuery,
+        queryParams
+      )
+      const consultationWithOnsiteCancel = parseInt(
+        onsiteCancelResult[0].count,
+        10
+      )
+
+      return {
+        totalConsultation,
+        consultationWithOnlineBooking,
+        consultationWithOnsiteCancel,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository findByDateRangeAndClinic error',
+        e as Error
+      )
+    }
+  }
+
+  public async getRealTimeCounts(
+    clinicId?: string,
+    consultationRoomNumber?: string
+  ): Promise<{
+    waitForConsultationCount: number
+    waitForBedAssignedCount: number
+    waitForAcupunctureTreatmentCount: number
+    waitForNeedleRemovedCount: number
+    waitForMedicineCount: number
+    completedCount: number
+  }> {
+    try {
+      let baseQuery = `
+        SELECT status, COUNT(*) as count
+        FROM consultations
+        JOIN time_slots ON consultations.time_slot_id = time_slots.id
+        WHERE 1=1
+      `
+
+      const queryParams = []
+
+      if (clinicId !== undefined) {
+        baseQuery += ' AND time_slots.clinic_id = $1'
+        queryParams.push(clinicId)
+      }
+
+      if (consultationRoomNumber !== undefined) {
+        baseQuery +=
+          ' AND time_slots.consultation_room_id = (SELECT id FROM consultation_rooms WHERE room_number = $2)'
+        queryParams.push(consultationRoomNumber)
+      }
+
+      baseQuery += ' GROUP BY status'
+
+      const results = await this.getQuery<
+        Array<{ status: ConsultationStatus; count: string }>
+      >(baseQuery, queryParams)
+
+      const response = {
+        waitForConsultationCount: 0,
+        waitForBedAssignedCount: 0,
+        waitForAcupunctureTreatmentCount: 0,
+        waitForNeedleRemovedCount: 0,
+        waitForMedicineCount: 0,
+        completedCount: 0,
+      }
+
+      results.forEach((result) => {
+        const count = parseInt(result.count, 10)
+        switch (result.status) {
+          case ConsultationStatus.WAITING_FOR_CONSULTATION:
+            response.waitForConsultationCount = count
+            break
+          case ConsultationStatus.WAITING_FOR_BED_ASSIGNMENT:
+            response.waitForBedAssignedCount = count
+            break
+          case ConsultationStatus.WAITING_FOR_ACUPUNCTURE_TREATMENT:
+            response.waitForAcupunctureTreatmentCount = count
+            break
+          case ConsultationStatus.WAITING_FOR_NEEDLE_REMOVAL:
+            response.waitForNeedleRemovedCount = count
+            break
+          case ConsultationStatus.CONSULTATION_COMPLETED:
+            response.completedCount = count
+            break
+        }
+      })
+
+      return response
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository getRealTimeCounts error',
         e as Error
       )
     }

@@ -23,3 +23,18 @@ export const getSingleConsultationSchema = {
     id: Joi.string().uuid().required(),
   }),
 }
+
+export const getConsultationRelatedRatiosSchema = {
+  query: Joi.object({
+    startDate: Joi.string().required(),
+    endDate: Joi.string().required(),
+    clinicId: Joi.string().optional(),
+  }),
+}
+
+export const getConsultationRealTimeCountSchema = {
+  query: Joi.object({
+    clinicId: Joi.string().optional(),
+    consultationRoomNumber: Joi.string().optional(),
+  }),
+}

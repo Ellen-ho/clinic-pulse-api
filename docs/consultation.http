@@ -2,7 +2,7 @@
 
 @usersPath = {{hostname}}/api/users
 
-### user login
+### user signin
 # @name signin
 POST {{usersPath}}/signin
 Content-Type: application/json
@@ -16,16 +16,27 @@ Content-Type: application/json
 
 @consultationsPath = {{hostname}}/api/consultations
 
-### get consult list
+### get consultation list
 GET {{consultationsPath}}?limit=20&page=1&startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
-### get single consult 
+### get single consultation 
 @consultationId = 56f8f1ae-4071-4606-b9b8-a6f807481b6f
 GET {{consultationsPath}}/{{consultationId}}
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
+### get consultation related ratios
+GET {{consultationsPath}}/related_ratios?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### get consultation related ratios
+GET {{consultationsPath}}/real_time_count?clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b&consultationRoomNumber=ROOM_ONE
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
