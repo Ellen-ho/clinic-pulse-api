@@ -2,7 +2,7 @@
 
 @usersPath = {{hostname}}/api/users
 
-### user login
+### user signin
 # @name signin
 POST {{usersPath}}/signin
 Content-Type: application/json
@@ -29,8 +29,8 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
-### get consult online booking rate
-GET {{consultationsPath}}/onlineBookingRate?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+### get consult related ratios
+GET {{consultationsPath}}/related_ratios?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###

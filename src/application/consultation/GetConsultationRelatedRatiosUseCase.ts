@@ -1,26 +1,28 @@
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
 import { NotFoundError } from 'infrastructure/error/NotFoundError'
 
-interface GetConsultationOnlineBookingRateRequest {
+interface GetConsultationRelatedRatiosRequest {
   startDate: string
   endDate: string
-  clinicId: string
+  clinicId?: string
 }
 
-interface GetConsultationOnlineBookingRateResponse {
+interface GetConsultationRelatedRatiosResponse {
   totalConsultation: number
   consultationWithOnlineBooking: number
+  consultationWithOnsiteCancel: number
   onlineBookingRate: number
+  onsiteCancelRate: number
 }
 
-export class GetConsultationOnlineBookingRateUseCase {
+export class GetConsultationRelatedRatiosUseCase {
   constructor(
     private readonly consultationRepository: IConsultationRepository
   ) {}
 
   public async execute(
-    request: GetConsultationOnlineBookingRateRequest
-  ): Promise<GetConsultationOnlineBookingRateResponse> {
+    request: GetConsultationRelatedRatiosRequest
+  ): Promise<GetConsultationRelatedRatiosResponse> {
     const { startDate, endDate, clinicId } = request
 
     const result = await this.consultationRepository.findByDateRangeAndClinic(
@@ -38,10 +40,15 @@ export class GetConsultationOnlineBookingRateUseCase {
     const onlineBookingRate =
       (result.consultationWithOnlineBooking / result.totalConsultation) * 100
 
+    const onsiteCancelRate =
+      (result.consultationWithOnsiteCancel / result.totalConsultation) * 100
+
     return {
       totalConsultation: result.totalConsultation,
       consultationWithOnlineBooking: result.consultationWithOnlineBooking,
+      consultationWithOnsiteCancel: result.consultationWithOnsiteCancel,
       onlineBookingRate,
+      onsiteCancelRate,
     }
   }
 }

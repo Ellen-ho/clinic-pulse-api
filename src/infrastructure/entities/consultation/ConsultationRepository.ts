@@ -309,7 +309,7 @@ export class ConsultationRepository
         ]
       )
 
-      const totalCounts = await this.getQuery<Array<{ count: number }>>(
+      const totalCounts = await this.getQuery<Array<{ count: string }>>(
         `
         SELECT COUNT(*) AS count
         FROM consultations c
@@ -379,7 +379,7 @@ export class ConsultationRepository
 
       return {
         data,
-        totalCounts: totalCounts[0].count,
+        totalCounts: parseInt(totalCounts[0].count, 10),
       }
     } catch (e) {
       throw new RepositoryError(
@@ -396,6 +396,7 @@ export class ConsultationRepository
   ): Promise<{
     totalConsultation: number
     consultationWithOnlineBooking: number
+    consultationWithOnsiteCancel: number
   }> {
     try {
       let baseQuery = `
@@ -411,26 +412,39 @@ export class ConsultationRepository
         queryParams.push(clinicId)
       }
 
-      const totalResult = await this.getQuery<Array<{ count: number }>>(
+      const totalResult = await this.getQuery<Array<{ count: string }>>(
         baseQuery,
         queryParams
       )
-      const totalConsultation = totalResult[0].count
+      const totalConsultation = parseInt(totalResult[0].count, 10)
 
       const onlineQuery = `${baseQuery} AND source = 'ONLINE_BOOKING'`
-      const onlineResult = await this.getQuery<Array<{ count: number }>>(
+      const onlineResult = await this.getQuery<Array<{ count: string }>>(
         onlineQuery,
         queryParams
       )
-      const consultationWithOnlineBooking = onlineResult[0].count
+      const consultationWithOnlineBooking = parseInt(onlineResult[0].count, 10)
+
+      const onsiteCancelQuery = `${baseQuery} AND onsite_cancle_at IS NOT NULL`
+      const onsiteCancelResult = await this.getQuery<Array<{ count: string }>>(
+        onsiteCancelQuery,
+        queryParams
+      )
+      const consultationWithOnsiteCancel = parseInt(
+        onsiteCancelResult[0].count,
+        10
+      )
 
       return {
         totalConsultation,
         consultationWithOnlineBooking,
+        consultationWithOnsiteCancel,
       }
-    } catch (error) {
-      console.error('Failed to fetch data', error)
-      throw new Error('Database query failed')
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository findByDateRangeAndClinic error',
+        e as Error
+      )
     }
   }
 

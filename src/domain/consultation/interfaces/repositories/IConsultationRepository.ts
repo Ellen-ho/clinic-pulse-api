@@ -83,5 +83,6 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
   ) => Promise<{
     totalConsultation: number
     consultationWithOnlineBooking: number
+    consultationWithOnsiteCancel: number
   }>
 }

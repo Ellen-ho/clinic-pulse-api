@@ -2,12 +2,12 @@ import { Request, Response } from 'express'
 import { GetConsultationListUseCase } from 'application/consultation/GetConsultationListUseCase'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
-import { GetConsultationOnlineBookingRateUseCase } from 'application/consultation/GetConsultationOnlineBookingRateUseCase'
+import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/GetConsultationRelatedRatiosUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
   getSingleConsultation: (req: Request, res: Response) => Promise<Response>
-  getConsultationOnlineBookingRate: (
+  getConsultationRelatedRatios: (
     req: Request,
     res: Response
   ) => Promise<Response>
@@ -17,7 +17,7 @@ export class ConsultationController implements IConsultationController {
   constructor(
     private readonly getConsultationListUseCase: GetConsultationListUseCase,
     private readonly getSingleConsultationUseCase: GetSingleConsultationUseCase,
-    private readonly getConsultationOnlineBookingRateUseCase: GetConsultationOnlineBookingRateUseCase
+    private readonly getConsultationRelatedRatiosUseCase: GetConsultationRelatedRatiosUseCase
   ) {}
 
   public getConsultationList = async (
@@ -57,7 +57,7 @@ export class ConsultationController implements IConsultationController {
     return res.status(200).json(result)
   }
 
-  public getConsultationOnlineBookingRate = async (
+  public getConsultationRelatedRatios = async (
     req: Request,
     res: Response
   ): Promise<Response> => {
@@ -66,7 +66,7 @@ export class ConsultationController implements IConsultationController {
       endDate: req.query.endDate as string,
       clinicId: req.query.clinicId as string,
     }
-    const result = await this.getConsultationOnlineBookingRateUseCase.execute(
+    const result = await this.getConsultationRelatedRatiosUseCase.execute(
       request
     )
 

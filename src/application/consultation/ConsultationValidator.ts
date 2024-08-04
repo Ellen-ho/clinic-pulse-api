@@ -24,7 +24,7 @@ export const getSingleConsultationSchema = {
   }),
 }
 
-export const getConsultationOnlineBookingRateSchema = {
+export const getConsultationRelatedRatiosSchema = {
   query: Joi.object({
     startDate: Joi.string().required(),
     endDate: Joi.string().required(),
