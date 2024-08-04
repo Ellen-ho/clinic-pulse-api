@@ -3,11 +3,16 @@ import { GetConsultationListUseCase } from 'application/consultation/GetConsulta
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
 import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/GetConsultationRelatedRatiosUseCase'
+import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
   getSingleConsultation: (req: Request, res: Response) => Promise<Response>
   getConsultationRelatedRatios: (
+    req: Request,
+    res: Response
+  ) => Promise<Response>
+  getConsultationRealTimeCount: (
     req: Request,
     res: Response
   ) => Promise<Response>
@@ -17,7 +22,8 @@ export class ConsultationController implements IConsultationController {
   constructor(
     private readonly getConsultationListUseCase: GetConsultationListUseCase,
     private readonly getSingleConsultationUseCase: GetSingleConsultationUseCase,
-    private readonly getConsultationRelatedRatiosUseCase: GetConsultationRelatedRatiosUseCase
+    private readonly getConsultationRelatedRatiosUseCase: GetConsultationRelatedRatiosUseCase,
+    private readonly getConsultationRealTimeCountUseCase: GetConsultationRealTimeCountUseCase
   ) {}
 
   public getConsultationList = async (
@@ -67,6 +73,21 @@ export class ConsultationController implements IConsultationController {
       clinicId: req.query.clinicId as string,
     }
     const result = await this.getConsultationRelatedRatiosUseCase.execute(
+      request
+    )
+
+    return res.status(200).json(result)
+  }
+
+  public getConsultationRealTimeCount = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      clinicId: req.query.clinicId as string,
+      consultaionRoomNumber: req.query.consultaionRoomNumber as string,
+    }
+    const result = await this.getConsultationRealTimeCountUseCase.execute(
       request
     )
 

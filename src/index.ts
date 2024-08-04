@@ -20,6 +20,7 @@ import { ConsultationController } from 'infrastructure/http/controllers/Consulta
 import { ConsultationRoutes } from 'infrastructure/http/routes/ConsultationRoutes'
 import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
 import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/GetConsultationRelatedRatiosUseCase'
+import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
 
 void main()
 
@@ -75,6 +76,9 @@ async function main(): Promise<void> {
   const getConsultationRelatedRatiosUseCase =
     new GetConsultationRelatedRatiosUseCase(consultationRepository)
 
+  const getConsultationRealTimeCountUseCase =
+    new GetConsultationRealTimeCountUseCase(consultationRepository)
+
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
@@ -84,7 +88,8 @@ async function main(): Promise<void> {
   const consultationController = new ConsultationController(
     getConsultationListUseCase,
     getSingleConsultationUseCase,
-    getConsultationRelatedRatiosUseCase
+    getConsultationRelatedRatiosUseCase,
+    getConsultationRealTimeCountUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))

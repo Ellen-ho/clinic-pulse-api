@@ -31,3 +31,10 @@ export const getConsultationRelatedRatiosSchema = {
     clinicId: Joi.string().optional(),
   }),
 }
+
+export const getConsultationRealTimeCountSchema = {
+  query: Joi.object({
+    clinicId: Joi.string().optional(),
+    consultationRoomNumber: Joi.string().optional(),
+  }),
+}

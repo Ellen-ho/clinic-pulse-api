@@ -3,6 +3,7 @@ import { ConsultationEntity } from './ConsultationEntity'
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
 import {
   Consultation,
+  ConsultationStatus,
   OnsiteCancelReasonType,
   TreatmentType,
 } from 'domain/consultation/Consultation'
@@ -443,6 +444,83 @@ export class ConsultationRepository
     } catch (e) {
       throw new RepositoryError(
         'ConsultationRepository findByDateRangeAndClinic error',
+        e as Error
+      )
+    }
+  }
+
+  public async getRealTimeCounts(
+    clinicId?: string,
+    consultationRoomNumber?: string
+  ): Promise<{
+    waitForConsultationCount: number
+    waitForBedAssignedCount: number
+    waitForAcupunctureTreatmentCount: number
+    waitForNeedleRemovedCount: number
+    waitForMedicineCount: number
+    completedCount: number
+  }> {
+    try {
+      let baseQuery = `
+        SELECT status, COUNT(*) as count
+        FROM consultations
+        JOIN time_slots ON consultations.time_slot_id = time_slots.id
+        WHERE 1=1
+      `
+
+      const queryParams = []
+
+      if (clinicId !== undefined) {
+        baseQuery += ' AND time_slots.clinic_id = $1'
+        queryParams.push(clinicId)
+      }
+
+      if (consultationRoomNumber !== undefined) {
+        baseQuery +=
+          ' AND time_slots.consultation_room_id = (SELECT id FROM consultation_rooms WHERE room_number = $2)'
+        queryParams.push(consultationRoomNumber)
+      }
+
+      baseQuery += ' GROUP BY status'
+
+      const results = await this.getQuery<
+        Array<{ status: ConsultationStatus; count: string }>
+      >(baseQuery, queryParams)
+
+      const response = {
+        waitForConsultationCount: 0,
+        waitForBedAssignedCount: 0,
+        waitForAcupunctureTreatmentCount: 0,
+        waitForNeedleRemovedCount: 0,
+        waitForMedicineCount: 0,
+        completedCount: 0,
+      }
+
+      results.forEach((result) => {
+        const count = parseInt(result.count, 10)
+        switch (result.status) {
+          case ConsultationStatus.WAITING_FOR_CONSULTATION:
+            response.waitForConsultationCount = count
+            break
+          case ConsultationStatus.WAITING_FOR_BED_ASSIGNMENT:
+            response.waitForBedAssignedCount = count
+            break
+          case ConsultationStatus.WAITING_FOR_ACUPUNCTURE_TREATMENT:
+            response.waitForAcupunctureTreatmentCount = count
+            break
+          case ConsultationStatus.WAITING_FOR_NEEDLE_REMOVAL:
+            response.waitForNeedleRemovedCount = count
+            break
+          case ConsultationStatus.CONSULTATION_COMPLETED:
+            response.completedCount = count
+            break
+        }
+      })
+
+      return response
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository getRealTimeCounts error',
         e as Error
       )
     }
