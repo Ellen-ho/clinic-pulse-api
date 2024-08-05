@@ -526,6 +526,115 @@ export class ConsultationRepository
     }
   }
 
+  public async getAverageWaitingTime(
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    timePeriod?: TimePeriodType,
+    doctorId?: string,
+    patientId?: string
+  ): Promise<{
+    averageConsultationWait: number
+    averageBedAssignmentWait: number
+    averageAcupunctureWait: number
+    averageNeedleRemovalWait: number
+    averageMedicationWait: number
+  }> {
+    try {
+      const result = await this.getQuery<
+        Array<{
+          averageConsultationWait: number
+          averageBedAssignmentWait: number
+          averageAcupunctureWait: number
+          averageNeedleRemovalWait: number
+          averageMedicationWait: number
+        }>
+      >(
+        `
+        SELECT
+          ROUND(AVG(EXTRACT(EPOCH FROM 
+            CASE 
+              WHEN c.onsite_cancle_at IS NOT NULL THEN c.onsite_cancle_at - c.check_in_at
+              ELSE c.start_at - c.check_in_at 
+            END) / 60)) AS "averageConsultationWait",
+          
+          ROUND(AVG(EXTRACT(EPOCH FROM 
+            CASE 
+              WHEN c.onsite_cancle_at IS NOT NULL THEN INTERVAL '0'
+              WHEN at.id IS NOT NULL THEN at.assign_bed_at - c.end_at
+              ELSE NULL
+            END) / 60)) AS "averageBedAssignmentWait",
+
+          ROUND(AVG(EXTRACT(EPOCH FROM 
+            CASE 
+              WHEN c.onsite_cancle_at IS NOT NULL THEN INTERVAL '0'
+              WHEN at.id IS NOT NULL THEN at.start_at - at.assign_bed_at
+              ELSE NULL
+            END) / 60)) AS "averageAcupunctureWait",
+
+          ROUND(AVG(EXTRACT(EPOCH FROM 
+            CASE 
+              WHEN c.onsite_cancle_at IS NOT NULL THEN INTERVAL '0'
+              WHEN at.id IS NOT NULL THEN at.remove_needle_at - at.end_at
+              ELSE NULL
+            END) / 60)) AS "averageNeedleRemovalWait",
+
+          ROUND(AVG(EXTRACT(EPOCH FROM 
+            CASE 
+              WHEN c.onsite_cancle_at IS NOT NULL THEN INTERVAL '0'
+              WHEN at.id IS NOT NULL AND mt.id IS NOT NULL THEN mt.get_medicine_at - at.end_at
+              WHEN mt.id IS NOT NULL THEN mt.get_medicine_at - c.end_at
+              ELSE NULL
+            END) / 60)) AS "averageMedicationWait"
+
+        FROM consultations c
+        LEFT JOIN acupuncture_treatments at ON c.acupuncture_treatment_id = at.id
+        LEFT JOIN medicine_treatments mt ON c.medicine_treatment_id = mt.id
+        LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+        WHERE c.check_in_at BETWEEN $1 AND $2
+          AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
+          AND ($4::varchar IS NULL OR ts.time_period = $4::varchar)
+          AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid)
+          AND ($6::uuid IS NULL OR c.patient_id = $6::uuid);
+        `,
+        [startDate, endDate, clinicId, timePeriod, doctorId, patientId]
+      )
+
+      const averageTimes = result[0]
+
+      return {
+        averageConsultationWait: isNaN(
+          Number(averageTimes.averageConsultationWait)
+        )
+          ? 0
+          : Number(averageTimes.averageConsultationWait),
+        averageBedAssignmentWait: isNaN(
+          Number(averageTimes.averageBedAssignmentWait)
+        )
+          ? 0
+          : Number(averageTimes.averageBedAssignmentWait),
+        averageAcupunctureWait: isNaN(
+          Number(averageTimes.averageAcupunctureWait)
+        )
+          ? 0
+          : Number(averageTimes.averageAcupunctureWait),
+        averageNeedleRemovalWait: isNaN(
+          Number(averageTimes.averageNeedleRemovalWait)
+        )
+          ? 0
+          : Number(averageTimes.averageNeedleRemovalWait),
+        averageMedicationWait: isNaN(Number(averageTimes.averageMedicationWait))
+          ? 0
+          : Number(averageTimes.averageMedicationWait),
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository getAverageWaitingTime error',
+        e as Error
+      )
+    }
+  }
+
   private determineTreatmentType(
     hasAcupuncture: boolean,
     hasMedicine: boolean

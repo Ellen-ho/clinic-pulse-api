@@ -4,6 +4,7 @@ import { authenticated } from '../middlewares/Auth'
 import { validator } from '../middlewares/Validator'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import {
+  getAverageWaitingTimeSchema,
   getConsultationListSchema,
   getConsultationRealTimeCountSchema,
   getConsultationRelatedRatiosSchema,
@@ -17,6 +18,12 @@ export class ConsultationRoutes {
   ) {
     this.routes = Router()
     this.routes
+      .get(
+        '/related_average_waiting_time',
+        authenticated,
+        validator(getAverageWaitingTimeSchema),
+        asyncHandler(this.consultationController.getAverageWaitingTime)
+      )
       .get(
         '/related_ratios',
         authenticated,

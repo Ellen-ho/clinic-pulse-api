@@ -21,6 +21,7 @@ import { ConsultationRoutes } from 'infrastructure/http/routes/ConsultationRoute
 import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
 import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/GetConsultationRelatedRatiosUseCase'
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
+import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
 
 void main()
 
@@ -79,6 +80,10 @@ async function main(): Promise<void> {
   const getConsultationRealTimeCountUseCase =
     new GetConsultationRealTimeCountUseCase(consultationRepository)
 
+  const getAverageWaitingTimeUseCase = new GetAverageWaitingTimeUseCase(
+    consultationRepository
+  )
+
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
@@ -89,7 +94,8 @@ async function main(): Promise<void> {
     getConsultationListUseCase,
     getSingleConsultationUseCase,
     getConsultationRelatedRatiosUseCase,
-    getConsultationRealTimeCountUseCase
+    getConsultationRealTimeCountUseCase,
+    getAverageWaitingTimeUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))

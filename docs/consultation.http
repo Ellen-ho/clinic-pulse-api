@@ -35,8 +35,14 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
-### get consultation related ratios
+### get consultation real time count
 GET {{consultationsPath}}/real_time_count?clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b&consultationRoomNumber=ROOM_ONE
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### get average waiting time
+GET {{consultationsPath}}/related_average_waiting_time?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###

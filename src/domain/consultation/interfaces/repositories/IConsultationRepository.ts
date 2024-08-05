@@ -96,4 +96,18 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     waitForMedicineCount: number
     completedCount: number
   }>
+  getAverageWaitingTime: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    timePeriod?: TimePeriodType,
+    doctorId?: string,
+    patientId?: string
+  ) => Promise<{
+    averageConsultationWait: number
+    averageBedAssignmentWait: number
+    averageAcupunctureWait: number
+    averageNeedleRemovalWait: number
+    averageMedicationWait: number
+  }>
 }

@@ -4,6 +4,7 @@ import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
 import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/GetConsultationRelatedRatiosUseCase'
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
+import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
@@ -16,6 +17,7 @@ export interface IConsultationController {
     req: Request,
     res: Response
   ) => Promise<Response>
+  getAverageWaitingTime: (req: Request, res: Response) => Promise<Response>
 }
 
 export class ConsultationController implements IConsultationController {
@@ -23,7 +25,8 @@ export class ConsultationController implements IConsultationController {
     private readonly getConsultationListUseCase: GetConsultationListUseCase,
     private readonly getSingleConsultationUseCase: GetSingleConsultationUseCase,
     private readonly getConsultationRelatedRatiosUseCase: GetConsultationRelatedRatiosUseCase,
-    private readonly getConsultationRealTimeCountUseCase: GetConsultationRealTimeCountUseCase
+    private readonly getConsultationRealTimeCountUseCase: GetConsultationRealTimeCountUseCase,
+    private readonly getAverageWaitingTimeUseCase: GetAverageWaitingTimeUseCase
   ) {}
 
   public getConsultationList = async (
@@ -90,6 +93,23 @@ export class ConsultationController implements IConsultationController {
     const result = await this.getConsultationRealTimeCountUseCase.execute(
       request
     )
+
+    return res.status(200).json(result)
+  }
+
+  public getAverageWaitingTime = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      startDate: req.query.startDate as string,
+      endDate: req.query.endDate as string,
+      clinicId: req.query.clinicId as string,
+      timePeriod: req.query.timePeriod as TimePeriodType,
+      doctorId: req.query.clinidoctorId as string,
+      patientId: req.query.patientId as string,
+    }
+    const result = await this.getAverageWaitingTimeUseCase.execute(request)
 
     return res.status(200).json(result)
   }

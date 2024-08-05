@@ -29,13 +29,6 @@ export class GetConsultationRealTimeCountUseCase {
       consultationRoomNumber
     )
 
-    return {
-      waitForConsultationCount: result.waitForConsultationCount,
-      waitForBedAssignedCount: result.waitForBedAssignedCount,
-      waitForAcupunctureTreatmentCount: result.waitForAcupunctureTreatmentCount,
-      waitForNeedleRemovedCount: result.waitForNeedleRemovedCount,
-      waitForMedicineCount: result.waitForMedicineCount,
-      completedCount: result.completedCount,
-    }
+    return result
   }
 }
