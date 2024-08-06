@@ -635,6 +635,61 @@ export class ConsultationRepository
     }
   }
 
+  public async getFirstTimeConsultationCounts(
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    timePeriod?: TimePeriodType,
+    doctorId?: string
+  ): Promise<{
+    totalConsultationCount: number
+    firstTimeConsultationCount: number
+  }> {
+    try {
+      const result = await this.getQuery<
+        Array<{
+          totalConsultationCount: number
+          firstTimeConsultationCount: number
+        }>
+      >(
+        `
+        SELECT 
+        COUNT(*) AS "totalConsultationCount",
+        COUNT(CASE WHEN c.is_first_time_visit THEN 1 END) AS "firstTimeConsultationCount"
+        FROM consultations c
+        LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+        WHERE c.check_in_at BETWEEN $1 AND $2
+          AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
+          AND ($4::varchar IS NULL OR ts.time_period = $4::varchar)
+          AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid);
+      `,
+        [startDate, endDate, clinicId, timePeriod, doctorId]
+      )
+
+      const totalConsultationCount = isNaN(
+        Number(result[0].totalConsultationCount)
+      )
+        ? 0
+        : Number(result[0].totalConsultationCount)
+
+      const firstTimeConsultationCount = isNaN(
+        Number(result[0].firstTimeConsultationCount)
+      )
+        ? 0
+        : Number(result[0].firstTimeConsultationCount)
+
+      return {
+        totalConsultationCount,
+        firstTimeConsultationCount,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository getFirstTimeConsultationCounts error',
+        e as Error
+      )
+    }
+  }
+
   private determineTreatmentType(
     hasAcupuncture: boolean,
     hasMedicine: boolean

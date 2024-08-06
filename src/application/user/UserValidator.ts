@@ -9,13 +9,13 @@ export const signUpUserSchema = {
     role: Joi.string()
       .valid(...Object.values(UserRoleType))
       .required(),
-    firstName: Joi.string().required(),
-    lastName: Joi.string().required(),
-    onboardDate: Joi.date().required(),
+    firstName: Joi.string().optional(),
+    lastName: Joi.string().optional(),
+    onboardDate: Joi.date().optional(),
     gender: Joi.string()
       .valid(...Object.values(GenderType))
-      .required(),
-    birthDate: Joi.date().required(),
+      .optional(),
+    birthDate: Joi.date().optional(),
   }),
 }
 

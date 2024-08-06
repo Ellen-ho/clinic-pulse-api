@@ -110,4 +110,14 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     averageNeedleRemovalWait: number
     averageMedicationWait: number
   }>
+  getFirstTimeConsultationCounts: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    timePeriod?: TimePeriodType,
+    doctorId?: string
+  ) => Promise<{
+    totalConsultationCount: number
+    firstTimeConsultationCount: number
+  }>
 }

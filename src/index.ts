@@ -22,6 +22,7 @@ import { GetSingleConsultationUseCase } from 'application/consultation/GetSingle
 import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/GetConsultationRelatedRatiosUseCase'
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
+import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
 
 void main()
 
@@ -83,6 +84,8 @@ async function main(): Promise<void> {
   const getAverageWaitingTimeUseCase = new GetAverageWaitingTimeUseCase(
     consultationRepository
   )
+  const getFirstTimeConsultationCountAndRateUseCase =
+    new GetFirstTimeConsultationCountAndRateUseCase(consultationRepository)
 
   const userController = new UserController(
     createUserUseCase,
@@ -95,7 +98,8 @@ async function main(): Promise<void> {
     getSingleConsultationUseCase,
     getConsultationRelatedRatiosUseCase,
     getConsultationRealTimeCountUseCase,
-    getAverageWaitingTimeUseCase
+    getAverageWaitingTimeUseCase,
+    getFirstTimeConsultationCountAndRateUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))

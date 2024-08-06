@@ -51,3 +51,15 @@ export const getAverageWaitingTimeSchema = {
     patientId: Joi.string().optional(),
   }),
 }
+
+export const getFirstTimeConsultationCountAndRateSchema = {
+  query: Joi.object({
+    startDate: Joi.string().required(),
+    endDate: Joi.string().required(),
+    clinicId: Joi.string().optional(),
+    timePeriod: Joi.string()
+      .valid(...Object.values(TimePeriodType))
+      .optional(),
+    doctorId: Joi.string().optional(),
+  }),
+}

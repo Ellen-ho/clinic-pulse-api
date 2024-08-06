@@ -65,6 +65,9 @@ export class ConsultationEntity {
   })
   public onsiteCancelReason!: OnsiteCancelReasonType | null
 
+  @Column({ name: 'is_first_time_visit', type: 'boolean', default: false })
+  public isFirstTimeVisit!: boolean
+
   @OneToOne(() => AcupunctureTreatmentEntity, { nullable: true })
   @JoinColumn({ name: 'acupuncture_treatment_id' })
   public acupunctureTreatment!: AcupunctureTreatmentEntity | null

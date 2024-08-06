@@ -46,3 +46,9 @@ GET {{consultationsPath}}/related_average_waiting_time?startDate=2024-07-01&endD
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
+
+### get first time consultation
+GET {{consultationsPath}}/first_time?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+Authorization: {{accessToken}}
+Content-Type: application/json
+###

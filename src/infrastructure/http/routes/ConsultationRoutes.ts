@@ -19,6 +19,14 @@ export class ConsultationRoutes {
     this.routes = Router()
     this.routes
       .get(
+        '/first_time',
+        authenticated,
+        validator(getAverageWaitingTimeSchema),
+        asyncHandler(
+          this.consultationController.getFirstTimeConsultationCountAndRate
+        )
+      )
+      .get(
         '/related_average_waiting_time',
         authenticated,
         validator(getAverageWaitingTimeSchema),

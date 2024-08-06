@@ -18,6 +18,7 @@ export class ConsultationMapper
       endAt: entity.endAt,
       onsiteCancelAt: entity.onsiteCancelAt,
       onsiteCancelReason: entity.onsiteCancelReason,
+      isFirstTimeVisit: entity.isFirstTimeVisit,
       acupunctureTreatment:
         entity.acupunctureTreatment !== null
           ? new AcupunctureTreatmentMapper().toDomainModel(
@@ -47,6 +48,7 @@ export class ConsultationMapper
     consultationEntity.endAt = domainModel.endAt
     consultationEntity.onsiteCancelAt = domainModel.onsiteCancelAt
     consultationEntity.onsiteCancelReason = domainModel.onsiteCancelReason
+    consultationEntity.isFirstTimeVisit = domainModel.isFirstTimeVisit
     consultationEntity.acupunctureTreatment =
       domainModel.acupunctureTreatment !== null
         ? new AcupunctureTreatmentMapper().toPersistence(
