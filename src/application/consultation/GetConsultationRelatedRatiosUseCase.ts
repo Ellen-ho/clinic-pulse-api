@@ -37,11 +37,13 @@ export class GetConsultationRelatedRatiosUseCase {
       )
     }
 
-    const onlineBookingRate =
+    const onlineBookingRate = Math.round(
       (result.consultationWithOnlineBooking / result.totalConsultation) * 100
+    )
 
-    const onsiteCancelRate =
+    const onsiteCancelRate = Math.round(
       (result.consultationWithOnsiteCancel / result.totalConsultation) * 100
+    )
 
     return {
       totalConsultation: result.totalConsultation,
