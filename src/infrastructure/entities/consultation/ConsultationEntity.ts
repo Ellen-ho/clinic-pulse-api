@@ -54,11 +54,11 @@ export class ConsultationEntity {
   @Column({ name: 'check_out_at', type: 'timestamp', nullable: true })
   public checkOutAt!: Date | null
 
-  @Column({ name: 'onsite_cancle_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'onsite_cancel_at', type: 'timestamp', nullable: true })
   public onsiteCancelAt!: Date | null
 
   @Column({
-    name: 'onsite_cancle_reason',
+    name: 'onsite_cancel_reason',
     type: 'varchar',
     length: 255,
     nullable: true,

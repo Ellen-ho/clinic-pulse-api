@@ -8,6 +8,7 @@ import {
   getConsultationListSchema,
   getConsultationRealTimeCountSchema,
   getConsultationRelatedRatiosSchema,
+  getPatientCountPerConsultationSchema,
   getSingleConsultationSchema,
 } from 'application/consultation/ConsultationValidator'
 
@@ -18,6 +19,12 @@ export class ConsultationRoutes {
   ) {
     this.routes = Router()
     this.routes
+      .get(
+        '/patient_counts',
+        authenticated,
+        validator(getPatientCountPerConsultationSchema),
+        asyncHandler(this.consultationController.getPatientCountPerConsultation)
+      )
       .get(
         '/first_time',
         authenticated,

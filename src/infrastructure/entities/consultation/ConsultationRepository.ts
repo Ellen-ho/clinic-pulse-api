@@ -88,8 +88,8 @@ export class ConsultationRepository
           TO_CHAR(c.check_in_at, 'YYYY-MM-DD') AS consultation_date,
           ts.time_period AS consultation_time_period,
           c.consultation_number,
-          c.onsite_cancle_at AS onsite_cancel_at,
-          c.onsite_cancle_reason AS onsite_cancel_reason,
+          c.onsite_cancel_at AS onsite_cancel_at,
+          c.onsite_cancel_reason AS onsite_cancel_reason,
           c.check_in_at,
           c.start_at,
           c.end_at,
@@ -252,15 +252,15 @@ export class ConsultationRepository
           p.last_name AS patient_last_name,
           p.gender AS patient_gender,
           date_part('year', age(p.birth_date)) AS patient_age,
-          CASE WHEN c.onsite_cancle_at IS NOT NULL THEN true ELSE false END AS is_onsite_canceled,
-          c.onsite_cancle_reason,
+          CASE WHEN c.onsite_cancel_at IS NOT NULL THEN true ELSE false END AS is_onsite_canceled,
+          c.onsite_cancel_reason,
           CASE WHEN at.id IS NOT NULL THEN true ELSE false END AS has_acupuncture,
           CASE WHEN mt.id IS NOT NULL THEN true ELSE false END AS has_medicine,
           CASE
             WHEN c.check_out_at IS NOT NULL THEN
               EXTRACT(EPOCH FROM (c.check_out_at - c.check_in_at)) / 60
-            WHEN c.onsite_cancle_at IS NOT NULL THEN
-              EXTRACT(EPOCH FROM (c.onsite_cancle_at - c.check_in_at)) / 60
+            WHEN c.onsite_cancel_at IS NOT NULL THEN
+              EXTRACT(EPOCH FROM (c.onsite_cancel_at - c.check_in_at)) / 60
             ELSE
               NULL
           END AS total_duration
@@ -278,7 +278,7 @@ export class ConsultationRepository
               (
                 COALESCE(
                   EXTRACT(EPOCH FROM (c.check_out_at - c.check_in_at)), 
-                  EXTRACT(EPOCH FROM (c.onsite_cancle_at - c.check_in_at))
+                  EXTRACT(EPOCH FROM (c.onsite_cancel_at - c.check_in_at))
                 ) / 60 > $5::int
               )
             )
@@ -287,7 +287,7 @@ export class ConsultationRepository
               (
                 COALESCE(
                   EXTRACT(EPOCH FROM (c.check_out_at - c.check_in_at)), 
-                  EXTRACT(EPOCH FROM (c.onsite_cancle_at - c.check_in_at))
+                  EXTRACT(EPOCH FROM (c.onsite_cancel_at - c.check_in_at))
                 ) / 60 < $6::int
               )
             )
@@ -323,7 +323,7 @@ export class ConsultationRepository
             (
               COALESCE(
                 EXTRACT(EPOCH FROM (c.check_out_at - c.check_in_at)), 
-                EXTRACT(EPOCH FROM (c.onsite_cancle_at - c.check_in_at))
+                EXTRACT(EPOCH FROM (c.onsite_cancel_at - c.check_in_at))
               ) / 60 > $5::int
             )
           )
@@ -332,7 +332,7 @@ export class ConsultationRepository
             (
               COALESCE(
                 EXTRACT(EPOCH FROM (c.check_out_at - c.check_in_at)), 
-                EXTRACT(EPOCH FROM (c.onsite_cancle_at - c.check_in_at))
+                EXTRACT(EPOCH FROM (c.onsite_cancel_at - c.check_in_at))
               ) / 60 < $6::int
             )
           )
@@ -426,7 +426,7 @@ export class ConsultationRepository
       )
       const consultationWithOnlineBooking = parseInt(onlineResult[0].count, 10)
 
-      const onsiteCancelQuery = `${baseQuery} AND onsite_cancle_at IS NOT NULL`
+      const onsiteCancelQuery = `${baseQuery} AND onsite_cancel_at IS NOT NULL`
       const onsiteCancelResult = await this.getQuery<Array<{ count: string }>>(
         onsiteCancelQuery,
         queryParams
@@ -554,34 +554,34 @@ export class ConsultationRepository
         SELECT
           ROUND(AVG(EXTRACT(EPOCH FROM 
             CASE 
-              WHEN c.onsite_cancle_at IS NOT NULL THEN c.onsite_cancle_at - c.check_in_at
+              WHEN c.onsite_cancel_at IS NOT NULL THEN c.onsite_cancel_at - c.check_in_at
               ELSE c.start_at - c.check_in_at 
             END) / 60)) AS "averageConsultationWait",
           
           ROUND(AVG(EXTRACT(EPOCH FROM 
             CASE 
-              WHEN c.onsite_cancle_at IS NOT NULL THEN INTERVAL '0'
+              WHEN c.onsite_cancel_at IS NOT NULL THEN INTERVAL '0'
               WHEN at.id IS NOT NULL THEN at.assign_bed_at - c.end_at
               ELSE NULL
             END) / 60)) AS "averageBedAssignmentWait",
 
           ROUND(AVG(EXTRACT(EPOCH FROM 
             CASE 
-              WHEN c.onsite_cancle_at IS NOT NULL THEN INTERVAL '0'
+              WHEN c.onsite_cancel_at IS NOT NULL THEN INTERVAL '0'
               WHEN at.id IS NOT NULL THEN at.start_at - at.assign_bed_at
               ELSE NULL
             END) / 60)) AS "averageAcupunctureWait",
 
           ROUND(AVG(EXTRACT(EPOCH FROM 
             CASE 
-              WHEN c.onsite_cancle_at IS NOT NULL THEN INTERVAL '0'
+              WHEN c.onsite_cancel_at IS NOT NULL THEN INTERVAL '0'
               WHEN at.id IS NOT NULL THEN at.remove_needle_at - at.end_at
               ELSE NULL
             END) / 60)) AS "averageNeedleRemovalWait",
 
           ROUND(AVG(EXTRACT(EPOCH FROM 
             CASE 
-              WHEN c.onsite_cancle_at IS NOT NULL THEN INTERVAL '0'
+              WHEN c.onsite_cancel_at IS NOT NULL THEN INTERVAL '0'
               WHEN at.id IS NOT NULL AND mt.id IS NOT NULL THEN mt.get_medicine_at - at.end_at
               WHEN mt.id IS NOT NULL THEN mt.get_medicine_at - c.end_at
               ELSE NULL
@@ -685,6 +685,76 @@ export class ConsultationRepository
     } catch (e) {
       throw new RepositoryError(
         'ConsultationRepository getFirstTimeConsultationCounts error',
+        e as Error
+      )
+    }
+  }
+
+  public async getAveragePatientCount(
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType
+  ): Promise<{
+    totalConsultations: number
+    data: Array<{
+      date: string
+      consultationCount: number
+    }>
+  }> {
+    try {
+      const totalConsultationsResult = await this.getQuery<
+        Array<{
+          count: string
+        }>
+      >(
+        `SELECT COUNT(*) AS count
+        FROM consultations c
+        LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+        WHERE c.check_in_at BETWEEN $1 AND $2
+          AND c.onsite_cancel_at IS NULL
+          AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
+          AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
+          AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)`,
+        [startDate, endDate, clinicId, doctorId, timePeriod]
+      )
+
+      const consultations = await this.getQuery<
+        Array<{
+          date: string
+          count: string
+        }>
+      >(
+        `
+        SELECT 
+        TO_CHAR(c.check_in_at, 'YYYY-MM-DD') as date,
+        COUNT(*) AS count
+        FROM consultations c
+        LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
+        WHERE c.check_in_at BETWEEN $1 AND $2
+          AND c.onsite_cancel_at IS NULL
+          AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
+          AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
+          AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)
+        GROUP BY TO_CHAR(c.check_in_at, 'YYYY-MM-DD')
+        ORDER BY date
+        `,
+        [startDate, endDate, clinicId, doctorId, timePeriod]
+      )
+
+      const data = consultations.map((consultation) => ({
+        date: consultation.date,
+        consultationCount: parseInt(consultation.count, 10),
+      }))
+
+      return {
+        totalConsultations: parseInt(totalConsultationsResult[0].count, 10),
+        data,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository getAveragePatientCount error',
         e as Error
       )
     }

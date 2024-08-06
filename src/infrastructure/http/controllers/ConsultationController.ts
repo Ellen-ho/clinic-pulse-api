@@ -6,6 +6,7 @@ import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/Ge
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
 import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
+import { GetPatientCountPerConsultationUseCase } from 'application/consultation/GetPatientCountPerConsultationUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
@@ -23,6 +24,10 @@ export interface IConsultationController {
     req: Request,
     res: Response
   ) => Promise<Response>
+  getPatientCountPerConsultation: (
+    req: Request,
+    res: Response
+  ) => Promise<Response>
 }
 
 export class ConsultationController implements IConsultationController {
@@ -32,7 +37,8 @@ export class ConsultationController implements IConsultationController {
     private readonly getConsultationRelatedRatiosUseCase: GetConsultationRelatedRatiosUseCase,
     private readonly getConsultationRealTimeCountUseCase: GetConsultationRealTimeCountUseCase,
     private readonly getAverageWaitingTimeUseCase: GetAverageWaitingTimeUseCase,
-    private readonly getFirstTimeConsultationCountAndRateUseCase: GetFirstTimeConsultationCountAndRateUseCase
+    private readonly getFirstTimeConsultationCountAndRateUseCase: GetFirstTimeConsultationCountAndRateUseCase,
+    private readonly getPatientCountPerConsultationUseCase: GetPatientCountPerConsultationUseCase
   ) {}
 
   public getConsultationList = async (
@@ -133,6 +139,24 @@ export class ConsultationController implements IConsultationController {
     }
     const result =
       await this.getFirstTimeConsultationCountAndRateUseCase.execute(request)
+
+    return res.status(200).json(result)
+  }
+
+  public getPatientCountPerConsultation = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      startDate: req.query.startDate as string,
+      endDate: req.query.endDate as string,
+      clinicId: req.query.clinicId as string,
+      timePeriod: req.query.timePeriod as TimePeriodType,
+      doctorId: req.query.clinidoctorId as string,
+    }
+    const result = await this.getPatientCountPerConsultationUseCase.execute(
+      request
+    )
 
     return res.status(200).json(result)
   }
