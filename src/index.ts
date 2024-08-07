@@ -25,6 +25,10 @@ import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverag
 import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
 import { GetPatientCountPerConsultationUseCase } from 'application/consultation/GetPatientCountPerConsultationUseCase'
 import { GetDifferentTreatmentConsultationUseCase } from 'application/consultation/GetDifferentTreatmentConsultationUseCase'
+import { FeedbackRepository } from 'infrastructure/entities/feedback/FeedbackRepository'
+import { GetFeedbackListUseCase } from 'application/feedback/GetFeedbackListUseCase'
+import { FeedbackController } from 'infrastructure/http/controllers/FeedbackController'
+import { FeedbackRoutes } from 'infrastructure/http/routes/FeedbackRoutes'
 
 void main()
 
@@ -57,6 +61,7 @@ async function main(): Promise<void> {
   const userRepository = new UserRepository(dataSource)
   const doctorRepository = new DoctorRepository(dataSource)
   const consultationRepository = new ConsultationRepository(dataSource)
+  const feedbackRepository = new FeedbackRepository(dataSource)
 
   const createUserUseCase = new CreateUserUseCase(
     userRepository,
@@ -95,6 +100,8 @@ async function main(): Promise<void> {
   const getDifferentTreatmentConsultationUseCase =
     new GetDifferentTreatmentConsultationUseCase(consultationRepository)
 
+  const getFeedbackListUseCase = new GetFeedbackListUseCase(feedbackRepository)
+
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
@@ -111,6 +118,8 @@ async function main(): Promise<void> {
     getPatientCountPerConsultationUseCase,
     getDifferentTreatmentConsultationUseCase
   )
+
+  const feedbackController = new FeedbackController(getFeedbackListUseCase)
 
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
@@ -129,8 +138,13 @@ async function main(): Promise<void> {
 
   const userRoutes = new UserRoutes(userController)
   const consultationRoutes = new ConsultationRoutes(consultationController)
+  const feedbackRoutes = new FeedbackRoutes(feedbackController)
 
-  const mainRoutes = new MainRoutes(userRoutes, consultationRoutes)
+  const mainRoutes = new MainRoutes(
+    userRoutes,
+    consultationRoutes,
+    feedbackRoutes
+  )
 
   app.use(cors(corsOptions))
 
