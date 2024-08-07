@@ -1,8 +1,14 @@
-import { Feedback } from 'domain/feedback/Feedback'
+import { Feedback, SelectedContent } from 'domain/feedback/Feedback'
 import { IBaseRepository } from 'domain/shared/IBaseRepository'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 
 export interface IFeedbackRepository extends IBaseRepository<Feedback> {
+  findById: (id: string) => Promise<{
+    feedbackRating: number
+    selectedContent: SelectedContent
+    detailedContent: string | null
+    consultationId: string
+  } | null>
   findByQuery: (
     limit: number,
     offset: number,

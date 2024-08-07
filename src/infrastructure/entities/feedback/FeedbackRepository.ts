@@ -5,7 +5,7 @@ import { FeedbackMapper } from './FeedbackMapper'
 import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFeedbackRepository'
 import { RepositoryError } from 'infrastructure/error/RepositoryError'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { Feedback } from 'domain/feedback/Feedback'
+import { Feedback, SelectedContent } from 'domain/feedback/Feedback'
 
 export class FeedbackRepository
   extends BaseRepository<FeedbackEntity, Feedback>
@@ -13,6 +13,53 @@ export class FeedbackRepository
 {
   constructor(dataSource: DataSource) {
     super(FeedbackEntity, new FeedbackMapper(), dataSource)
+  }
+
+  public async findById(id: string): Promise<{
+    receivedAt: Date
+    feedbackRating: number
+    selectedContent: SelectedContent
+    detailedContent: string | null
+    consultationId: string
+  } | null> {
+    try {
+      const rawFeedback = await this.getQuery<
+        Array<{
+          received_at: Date
+          feedback_rating: number
+          selected_content: SelectedContent
+          detailed_content: string | null
+          consultation_id: string
+        }>
+      >(
+        `
+          SELECT
+            f.received_at,
+            f.feedback_rating,
+            f.selected_content,
+            f.detailed_content,
+            f.consultation_id
+          FROM feedbacks f
+          WHERE f.id = $1
+        `,
+        [id]
+      )
+
+      if (rawFeedback.length === 0) {
+        return null
+      } else {
+        return {
+          receivedAt: rawFeedback[0].received_at,
+          feedbackRating: rawFeedback[0].feedback_rating,
+          selectedContent: rawFeedback[0].selected_content,
+          detailedContent: rawFeedback[0].detailed_content,
+          consultationId: rawFeedback[0].consultation_id,
+        }
+      }
+    } catch (e) {
+      console.error(e)
+      throw new RepositoryError('FeedbackRepository findById error', e as Error)
+    }
   }
 
   public async findByQuery(

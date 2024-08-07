@@ -20,3 +20,10 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
+### get single feedback
+@feedbackId = 4b790112-8b1e-465a-8ca8-e8f69182fe5b
+GET {{feedbacksPath}}/{{feedbackId}}
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+

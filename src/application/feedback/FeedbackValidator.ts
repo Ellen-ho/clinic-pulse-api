@@ -1,6 +1,12 @@
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import Joi from 'joi'
 
+export const getSingleFeedbackSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+}
+
 export const getFeedbackListSchema = {
   query: Joi.object({
     startDate: Joi.string().required(),

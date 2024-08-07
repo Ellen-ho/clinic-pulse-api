@@ -29,6 +29,7 @@ import { FeedbackRepository } from 'infrastructure/entities/feedback/FeedbackRep
 import { GetFeedbackListUseCase } from 'application/feedback/GetFeedbackListUseCase'
 import { FeedbackController } from 'infrastructure/http/controllers/FeedbackController'
 import { FeedbackRoutes } from 'infrastructure/http/routes/FeedbackRoutes'
+import { GetSingleFeedbackUseCase } from 'application/feedback/GetSingleFeedbackUseCase'
 
 void main()
 
@@ -102,6 +103,10 @@ async function main(): Promise<void> {
 
   const getFeedbackListUseCase = new GetFeedbackListUseCase(feedbackRepository)
 
+  const getSingleFeedbackUseCase = new GetSingleFeedbackUseCase(
+    feedbackRepository
+  )
+
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
@@ -119,7 +124,10 @@ async function main(): Promise<void> {
     getDifferentTreatmentConsultationUseCase
   )
 
-  const feedbackController = new FeedbackController(getFeedbackListUseCase)
+  const feedbackController = new FeedbackController(
+    getFeedbackListUseCase,
+    getSingleFeedbackUseCase
+  )
 
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
