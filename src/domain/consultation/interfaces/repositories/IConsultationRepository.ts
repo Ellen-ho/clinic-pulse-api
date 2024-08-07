@@ -133,4 +133,27 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       consultationCount: number
     }>
   }>
+  getDifferentTreatmentConsultation: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType
+  ) => Promise<{
+    totalConsultations: number
+    totalConsultationWithAcupuncture: number
+    totalConsultationWithMedicine: number
+    totalConsultationWithBothTreatment: number
+    totalOnlyAcupunctureCount: number
+    totalOnlyMedicineCount: number
+    data: Array<{
+      date: string
+      consultationCount: number
+      consultationWithAcupuncture: number
+      consultationWithMedicine: number
+      consultationWithBothTreatment: number
+      onlyAcupunctureCount: number
+      onlyMedicineCount: number
+    }>
+  }>
 }

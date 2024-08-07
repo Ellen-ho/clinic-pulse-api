@@ -760,6 +760,189 @@ export class ConsultationRepository
     }
   }
 
+  public async getDifferentTreatmentConsultation(
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType
+  ): Promise<{
+    totalConsultations: number
+    totalConsultationWithAcupuncture: number
+    totalConsultationWithMedicine: number
+    totalConsultationWithBothTreatment: number
+    totalOnlyAcupunctureCount: number
+    totalOnlyMedicineCount: number
+    data: Array<{
+      date: string
+      consultationCount: number
+      consultationWithAcupuncture: number
+      consultationWithMedicine: number
+      consultationWithBothTreatment: number
+      onlyAcupunctureCount: number
+      onlyMedicineCount: number
+    }>
+  }> {
+    try {
+      const { conditionString, params } = this.generateSQLConditions(
+        clinicId,
+        doctorId,
+        timePeriod
+      )
+
+      const baseQueryParams = [startDate, endDate, ...params]
+
+      const totalConsultationsResult = await this.getQuery<
+        Array<{
+          count: string
+        }>
+      >(
+        `
+        SELECT COUNT(*) AS count
+          FROM consultations c
+          LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+          WHERE c.check_in_at BETWEEN $1 AND $2
+            AND c.onsite_cancel_at IS NULL ${conditionString}`,
+        baseQueryParams
+      )
+
+      const totalWithAcupuncture = await this.getQuery<
+        Array<{ count: string }>
+      >(
+        ` SELECT COUNT(*) AS count
+          FROM consultations c
+          LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+          WHERE c.acupuncture_treatment_id IS NOT NULL
+            AND c.check_in_at BETWEEN $1 AND $2
+            AND c.onsite_cancel_at IS NULL ${conditionString}`,
+        baseQueryParams
+      )
+
+      const totalWithMedicine = await this.getQuery<Array<{ count: string }>>(
+        `SELECT COUNT(*) AS count
+          FROM consultations c
+          LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+          WHERE c.medicine_treatment_id IS NOT NULL
+            AND c.check_in_at BETWEEN $1 AND $2
+            AND c.onsite_cancel_at IS NULL ${conditionString}`,
+        baseQueryParams
+      )
+
+      const totalWithBoth = await this.getQuery<Array<{ count: string }>>(
+        `SELECT COUNT(*) AS count
+          FROM consultations c
+          LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+          WHERE c.acupuncture_treatment_id IS NOT NULL
+            AND c.medicine_treatment_id IS NOT NULL
+            AND c.check_in_at BETWEEN $1 AND $2
+            AND c.onsite_cancel_at IS NULL ${conditionString}`,
+        baseQueryParams
+      )
+
+      const totalOnlyAcupuncture = await this.getQuery<
+        Array<{ count: string }>
+      >(
+        `SELECT COUNT(*) AS count
+          FROM consultations c
+          LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+          WHERE c.acupuncture_treatment_id IS NOT NULL
+            AND c.medicine_treatment_id IS NULL
+            AND c.check_in_at BETWEEN $1 AND $2
+            AND c.onsite_cancel_at IS NULL ${conditionString}`,
+        baseQueryParams
+      )
+
+      const totalOnlyMedicine = await this.getQuery<Array<{ count: string }>>(
+        `SELECT COUNT(*) AS count
+          FROM consultations c
+          LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+          WHERE c.medicine_treatment_id IS NOT NULL
+            AND c.acupuncture_treatment_id IS NULL
+            AND c.check_in_at BETWEEN $1 AND $2
+            AND c.onsite_cancel_at IS NULL ${conditionString}`,
+        baseQueryParams
+      )
+
+      const dailyData = await this.getQuery<
+        Array<{
+          date: string
+          consultationcount: string
+          consultationwithacupuncture: string
+          consultationwithmedicine: string
+          consultationwithbothtreatment: string
+          onlyacupuncturecount: string
+          onlymedicinecount: string
+        }>
+      >(
+        `
+            SELECT 
+            TO_CHAR(c.check_in_at, 'YYYY-MM-DD') AS date,
+            COUNT(*) AS consultationcount,
+            COUNT(c.acupuncture_treatment_id) AS consultationwithacupuncture,
+            COUNT(c.medicine_treatment_id) AS consultationwithmedicine,
+            COUNT(*) FILTER (WHERE c.acupuncture_treatment_id IS NOT NULL AND c.medicine_treatment_id IS NOT NULL) AS consultationwithbothtreatment,
+            COUNT(*) FILTER (WHERE c.acupuncture_treatment_id IS NOT NULL AND c.medicine_treatment_id IS NULL) AS onlyacupuncturecount,
+            COUNT(*) FILTER (WHERE c.acupuncture_treatment_id IS NULL AND c.medicine_treatment_id IS NOT NULL) AS onlymedicinecount
+          FROM consultations c
+          LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+          WHERE c.check_in_at BETWEEN $1 AND $2
+            AND c.onsite_cancel_at IS NULL ${conditionString}
+          GROUP BY TO_CHAR(c.check_in_at, 'YYYY-MM-DD')
+          ORDER BY date;
+        `,
+        baseQueryParams
+      )
+
+      return {
+        totalConsultations: parseInt(totalConsultationsResult[0].count, 10),
+        totalConsultationWithAcupuncture: parseInt(
+          totalWithAcupuncture[0].count,
+          10
+        ),
+        totalConsultationWithMedicine: parseInt(totalWithMedicine[0].count, 10),
+        totalConsultationWithBothTreatment: parseInt(
+          totalWithBoth[0].count,
+          10
+        ),
+        totalOnlyAcupunctureCount: parseInt(totalOnlyAcupuncture[0].count, 10),
+        totalOnlyMedicineCount: parseInt(totalOnlyMedicine[0].count, 10),
+        data: dailyData.map((day) => ({
+          date: day.date,
+          consultationCount: parseInt(day.consultationcount, 10),
+          consultationWithAcupuncture: Number(day.consultationwithacupuncture),
+          consultationWithMedicine: Number(day.consultationwithmedicine),
+          consultationWithBothTreatment: Number(
+            day.consultationwithbothtreatment
+          ),
+          onlyAcupunctureCount: Number(day.onlyacupuncturecount),
+          onlyMedicineCount: Number(day.onlymedicinecount),
+        })),
+      }
+    } catch (error) {
+      console.error('Error fetching consultation data:', error)
+      throw error
+    }
+  }
+
+  private generateSQLConditions(
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType
+  ): {
+    conditionString: string
+    params: Array<string | undefined>
+  } {
+    const conditionString = `
+      AND ($3::uuid IS NULL OR ts.clinic_id = $3)
+      AND ($4::uuid IS NULL OR ts.doctor_id = $4)
+      AND ($5::varchar IS NULL OR ts.time_period = $5)
+    `
+    return {
+      conditionString,
+      params: [clinicId, doctorId, timePeriod],
+    }
+  }
+
   private determineTreatmentType(
     hasAcupuncture: boolean,
     hasMedicine: boolean

@@ -8,7 +8,7 @@ interface GetConsultationRelatedRatiosRequest {
 }
 
 interface GetConsultationRelatedRatiosResponse {
-  totalConsultation: number
+  totalConsultations: number
   consultationWithOnlineBooking: number
   consultationWithOnsiteCancel: number
   onlineBookingRate: number
@@ -46,7 +46,7 @@ export class GetConsultationRelatedRatiosUseCase {
     )
 
     return {
-      totalConsultation: result.totalConsultation,
+      totalConsultations: result.totalConsultation,
       consultationWithOnlineBooking: result.consultationWithOnlineBooking,
       consultationWithOnsiteCancel: result.consultationWithOnsiteCancel,
       onlineBookingRate,
