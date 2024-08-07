@@ -4,6 +4,7 @@ import { authenticated } from '../middlewares/Auth'
 import { validator } from '../middlewares/Validator'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import {
+  getFeedbackCountAndRateSchema,
   getFeedbackListSchema,
   getSingleFeedbackSchema,
 } from 'application/feedback/FeedbackValidator'
@@ -13,6 +14,12 @@ export class FeedbackRoutes {
   constructor(private readonly feedbackController: IFeedbackController) {
     this.routes = Router()
     this.routes
+      .get(
+        '/related_ratios',
+        authenticated,
+        validator(getFeedbackCountAndRateSchema),
+        asyncHandler(this.feedbackController.getFeedbackCountAndRate)
+      )
       .get(
         '/:id',
         authenticated,

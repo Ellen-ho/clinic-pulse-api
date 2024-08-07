@@ -124,7 +124,7 @@ export class ConsultationController implements IConsultationController {
       endDate: req.query.endDate as string,
       clinicId: req.query.clinicId as string,
       timePeriod: req.query.timePeriod as TimePeriodType,
-      doctorId: req.query.clinidoctorId as string,
+      doctorId: req.query.doctorId as string,
       patientId: req.query.patientId as string,
     }
     const result = await this.getAverageWaitingTimeUseCase.execute(request)
@@ -141,7 +141,7 @@ export class ConsultationController implements IConsultationController {
       endDate: req.query.endDate as string,
       clinicId: req.query.clinicId as string,
       timePeriod: req.query.timePeriod as TimePeriodType,
-      doctorId: req.query.clinidoctorId as string,
+      doctorId: req.query.doctorId as string,
     }
     const result =
       await this.getFirstTimeConsultationCountAndRateUseCase.execute(request)
@@ -158,7 +158,7 @@ export class ConsultationController implements IConsultationController {
       endDate: req.query.endDate as string,
       clinicId: req.query.clinicId as string,
       timePeriod: req.query.timePeriod as TimePeriodType,
-      doctorId: req.query.clinidoctorId as string,
+      doctorId: req.query.doctorId as string,
     }
     const result = await this.getPatientCountPerConsultationUseCase.execute(
       request
@@ -176,7 +176,7 @@ export class ConsultationController implements IConsultationController {
       endDate: req.query.endDate as string,
       clinicId: req.query.clinicId as string,
       timePeriod: req.query.timePeriod as TimePeriodType,
-      doctorId: req.query.clinidoctorId as string,
+      doctorId: req.query.doctorId as string,
     }
     const result = await this.getDifferentTreatmentConsultationUseCase.execute(
       request

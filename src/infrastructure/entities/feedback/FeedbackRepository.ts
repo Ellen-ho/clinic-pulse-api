@@ -179,4 +179,84 @@ export class FeedbackRepository
       )
     }
   }
+
+  public async getStarFeedback(
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    timePeriod?: TimePeriodType,
+    doctorId?: string,
+    patientId?: string
+  ): Promise<{
+    totalFeedbackCounts: number
+    oneStarFeedBackCount: number
+    twoStarFeedbackCount: number
+    threeStarFeedbackCount: number
+    fourStarFeedbackCount: number
+    fiveStarFeedbackCount: number
+  }> {
+    try {
+      const modifiedClinicId =
+        clinicId !== undefined && clinicId !== '' ? clinicId : null
+      const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+
+      const modifiedPatientId = patientId !== undefined ? patientId : null
+
+      const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+
+      const result = await this.getQuery<
+        Array<{
+          totalfeedbackcounts: string
+          onestarfeedbackcount: string
+          twostarfeedbackcount: string
+          threestarfeedbackcount: string
+          fourstarfeedbackcount: string
+          fivestarfeedbackcount: string
+        }>
+      >(
+        `SELECT 
+          COUNT(*) AS totalfeedbackcounts,
+          COUNT(CASE WHEN f.feedback_rating = 1 THEN 1 END) AS onestarfeedbackcount,
+          COUNT(CASE WHEN f.feedback_rating = 2 THEN 1 END) AS twostarfeedbackcount,
+          COUNT(CASE WHEN f.feedback_rating = 3 THEN 1 END) AS threestarfeedbackcount,
+          COUNT(CASE WHEN f.feedback_rating = 4 THEN 1 END) AS fourstarfeedbackcount,
+          COUNT(CASE WHEN f.feedback_rating = 5 THEN 1 END) AS fivestarfeedbackcount
+          FROM 
+              feedbacks f
+          JOIN 
+              consultations c ON f.consultation_id = c.id
+          JOIN 
+              time_slots ts ON c.time_slot_id = ts.id
+          WHERE 
+              f.received_at BETWEEN $1 AND $2
+              AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
+              AND ($4::text IS NULL OR ts.time_period = $4::text)
+              AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid)
+              AND ($6::uuid IS NULL OR c.patient_id = $6::uuid);
+        `,
+        [
+          startDate,
+          endDate,
+          modifiedClinicId,
+          modifiedTimePeriod,
+          modifiedDoctorId,
+          modifiedPatientId,
+        ]
+      )
+
+      return {
+        totalFeedbackCounts: parseInt(result[0].totalfeedbackcounts, 10),
+        oneStarFeedBackCount: parseInt(result[0].onestarfeedbackcount, 10),
+        twoStarFeedbackCount: parseInt(result[0].twostarfeedbackcount, 10),
+        threeStarFeedbackCount: parseInt(result[0].threestarfeedbackcount, 10),
+        fourStarFeedbackCount: parseInt(result[0].fourstarfeedbackcount, 10),
+        fiveStarFeedbackCount: parseInt(result[0].fivestarfeedbackcount, 10),
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'FeedbackRepository getStarFeedback error',
+        e as Error
+      )
+    }
+  }
 }

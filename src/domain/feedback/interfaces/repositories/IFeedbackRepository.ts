@@ -29,4 +29,19 @@ export interface IFeedbackRepository extends IBaseRepository<Feedback> {
     }>
     totalCounts: number
   }>
+  getStarFeedback: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    timePeriod?: TimePeriodType,
+    doctorId?: string,
+    patientId?: string
+  ) => Promise<{
+    totalFeedbackCounts: number
+    oneStarFeedBackCount: number
+    twoStarFeedbackCount: number
+    threeStarFeedbackCount: number
+    fourStarFeedbackCount: number
+    fiveStarFeedbackCount: number
+  }>
 }

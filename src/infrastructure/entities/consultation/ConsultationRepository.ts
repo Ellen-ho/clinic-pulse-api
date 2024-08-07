@@ -541,6 +541,14 @@ export class ConsultationRepository
     averageMedicationWait: number
   }> {
     try {
+      const modifiedClinicId =
+        clinicId !== undefined && clinicId !== '' ? clinicId : null
+      const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+
+      const modifiedPatientId = patientId !== undefined ? patientId : null
+
+      const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+
       const result = await this.getQuery<
         Array<{
           averageConsultationWait: number
@@ -597,7 +605,14 @@ export class ConsultationRepository
           AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid)
           AND ($6::uuid IS NULL OR c.patient_id = $6::uuid);
         `,
-        [startDate, endDate, clinicId, timePeriod, doctorId, patientId]
+        [
+          startDate,
+          endDate,
+          modifiedClinicId,
+          modifiedTimePeriod,
+          modifiedDoctorId,
+          modifiedPatientId,
+        ]
       )
 
       const averageTimes = result[0]
@@ -646,6 +661,10 @@ export class ConsultationRepository
     firstTimeConsultationCount: number
   }> {
     try {
+      const modifiedClinicId =
+        clinicId !== undefined && clinicId !== '' ? clinicId : null
+      const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+      const modifiedDoctorId = doctorId !== undefined ? doctorId : null
       const result = await this.getQuery<
         Array<{
           totalConsultationCount: number
@@ -663,7 +682,13 @@ export class ConsultationRepository
           AND ($4::varchar IS NULL OR ts.time_period = $4::varchar)
           AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid);
       `,
-        [startDate, endDate, clinicId, timePeriod, doctorId]
+        [
+          startDate,
+          endDate,
+          modifiedClinicId,
+          modifiedTimePeriod,
+          modifiedDoctorId,
+        ]
       )
 
       const totalConsultationCount = isNaN(
@@ -704,6 +729,10 @@ export class ConsultationRepository
     }>
   }> {
     try {
+      const modifiedClinicId =
+        clinicId !== undefined && clinicId !== '' ? clinicId : null
+      const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+      const modifiedDoctorId = doctorId !== undefined ? doctorId : null
       const totalConsultationsResult = await this.getQuery<
         Array<{
           count: string
@@ -717,7 +746,13 @@ export class ConsultationRepository
           AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
           AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
           AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)`,
-        [startDate, endDate, clinicId, doctorId, timePeriod]
+        [
+          startDate,
+          endDate,
+          modifiedClinicId,
+          modifiedDoctorId,
+          modifiedTimePeriod,
+        ]
       )
 
       const consultations = await this.getQuery<
@@ -740,7 +775,13 @@ export class ConsultationRepository
         GROUP BY TO_CHAR(c.check_in_at, 'YYYY-MM-DD')
         ORDER BY date
         `,
-        [startDate, endDate, clinicId, doctorId, timePeriod]
+        [
+          startDate,
+          endDate,
+          modifiedClinicId,
+          modifiedDoctorId,
+          modifiedTimePeriod,
+        ]
       )
 
       const data = consultations.map((consultation) => ({
@@ -928,10 +969,8 @@ export class ConsultationRepository
     clinicId?: string,
     doctorId?: string,
     timePeriod?: TimePeriodType
-  ): {
-    conditionString: string
-    params: Array<string | undefined>
-  } {
+  ): { conditionString: string; params: any[] } {
+    const params = [clinicId ?? null, doctorId ?? null, timePeriod ?? null]
     const conditionString = `
       AND ($3::uuid IS NULL OR ts.clinic_id = $3)
       AND ($4::uuid IS NULL OR ts.doctor_id = $4)
@@ -939,7 +978,7 @@ export class ConsultationRepository
     `
     return {
       conditionString,
-      params: [clinicId, doctorId, timePeriod],
+      params,
     }
   }
 

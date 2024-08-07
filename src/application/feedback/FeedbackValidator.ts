@@ -22,3 +22,16 @@ export const getFeedbackListSchema = {
     page: Joi.number().required(),
   }),
 }
+
+export const getFeedbackCountAndRateSchema = {
+  query: Joi.object({
+    startDate: Joi.string().required(),
+    endDate: Joi.string().required(),
+    clinicId: Joi.string().optional(),
+    timePeriod: Joi.string()
+      .valid(...Object.values(TimePeriodType))
+      .optional(),
+    doctorId: Joi.string().optional(),
+    patientId: Joi.string().optional(),
+  }),
+}
