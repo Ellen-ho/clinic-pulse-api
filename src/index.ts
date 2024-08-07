@@ -21,6 +21,10 @@ import { ConsultationRoutes } from 'infrastructure/http/routes/ConsultationRoute
 import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
 import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/GetConsultationRelatedRatiosUseCase'
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
+import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
+import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
+import { GetPatientCountPerConsultationUseCase } from 'application/consultation/GetPatientCountPerConsultationUseCase'
+import { GetDifferentTreatmentConsultationUseCase } from 'application/consultation/GetDifferentTreatmentConsultationUseCase'
 
 void main()
 
@@ -79,6 +83,18 @@ async function main(): Promise<void> {
   const getConsultationRealTimeCountUseCase =
     new GetConsultationRealTimeCountUseCase(consultationRepository)
 
+  const getAverageWaitingTimeUseCase = new GetAverageWaitingTimeUseCase(
+    consultationRepository
+  )
+  const getFirstTimeConsultationCountAndRateUseCase =
+    new GetFirstTimeConsultationCountAndRateUseCase(consultationRepository)
+
+  const getPatientCountPerConsultationUseCase =
+    new GetPatientCountPerConsultationUseCase(consultationRepository)
+
+  const getDifferentTreatmentConsultationUseCase =
+    new GetDifferentTreatmentConsultationUseCase(consultationRepository)
+
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
@@ -89,7 +105,11 @@ async function main(): Promise<void> {
     getConsultationListUseCase,
     getSingleConsultationUseCase,
     getConsultationRelatedRatiosUseCase,
-    getConsultationRealTimeCountUseCase
+    getConsultationRealTimeCountUseCase,
+    getAverageWaitingTimeUseCase,
+    getFirstTimeConsultationCountAndRateUseCase,
+    getPatientCountPerConsultationUseCase,
+    getDifferentTreatmentConsultationUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))

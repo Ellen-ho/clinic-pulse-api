@@ -54,16 +54,19 @@ export class ConsultationEntity {
   @Column({ name: 'check_out_at', type: 'timestamp', nullable: true })
   public checkOutAt!: Date | null
 
-  @Column({ name: 'onsite_cancle_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'onsite_cancel_at', type: 'timestamp', nullable: true })
   public onsiteCancelAt!: Date | null
 
   @Column({
-    name: 'onsite_cancle_reason',
+    name: 'onsite_cancel_reason',
     type: 'varchar',
     length: 255,
     nullable: true,
   })
   public onsiteCancelReason!: OnsiteCancelReasonType | null
+
+  @Column({ name: 'is_first_time_visit', type: 'boolean', default: false })
+  public isFirstTimeVisit!: boolean
 
   @OneToOne(() => AcupunctureTreatmentEntity, { nullable: true })
   @JoinColumn({ name: 'acupuncture_treatment_id' })

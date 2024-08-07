@@ -8,7 +8,7 @@ interface GetConsultationRelatedRatiosRequest {
 }
 
 interface GetConsultationRelatedRatiosResponse {
-  totalConsultation: number
+  totalConsultations: number
   consultationWithOnlineBooking: number
   consultationWithOnsiteCancel: number
   onlineBookingRate: number
@@ -37,14 +37,16 @@ export class GetConsultationRelatedRatiosUseCase {
       )
     }
 
-    const onlineBookingRate =
+    const onlineBookingRate = Math.round(
       (result.consultationWithOnlineBooking / result.totalConsultation) * 100
+    )
 
-    const onsiteCancelRate =
+    const onsiteCancelRate = Math.round(
       (result.consultationWithOnsiteCancel / result.totalConsultation) * 100
+    )
 
     return {
-      totalConsultation: result.totalConsultation,
+      totalConsultations: result.totalConsultation,
       consultationWithOnlineBooking: result.consultationWithOnlineBooking,
       consultationWithOnsiteCancel: result.consultationWithOnsiteCancel,
       onlineBookingRate,

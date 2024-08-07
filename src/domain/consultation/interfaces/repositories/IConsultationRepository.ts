@@ -96,4 +96,64 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     waitForMedicineCount: number
     completedCount: number
   }>
+  getAverageWaitingTime: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    timePeriod?: TimePeriodType,
+    doctorId?: string,
+    patientId?: string
+  ) => Promise<{
+    averageConsultationWait: number
+    averageBedAssignmentWait: number
+    averageAcupunctureWait: number
+    averageNeedleRemovalWait: number
+    averageMedicationWait: number
+  }>
+  getFirstTimeConsultationCounts: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    timePeriod?: TimePeriodType,
+    doctorId?: string
+  ) => Promise<{
+    totalConsultationCount: number
+    firstTimeConsultationCount: number
+  }>
+  getAveragePatientCount: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType
+  ) => Promise<{
+    totalConsultations: number
+    data: Array<{
+      date: string
+      consultationCount: number
+    }>
+  }>
+  getDifferentTreatmentConsultation: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType
+  ) => Promise<{
+    totalConsultations: number
+    totalConsultationWithAcupuncture: number
+    totalConsultationWithMedicine: number
+    totalConsultationWithBothTreatment: number
+    totalOnlyAcupunctureCount: number
+    totalOnlyMedicineCount: number
+    data: Array<{
+      date: string
+      consultationCount: number
+      consultationWithAcupuncture: number
+      consultationWithMedicine: number
+      consultationWithBothTreatment: number
+      onlyAcupunctureCount: number
+      onlyMedicineCount: number
+    }>
+  }>
 }

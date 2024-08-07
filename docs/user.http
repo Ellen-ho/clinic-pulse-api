@@ -6,14 +6,14 @@ POST {{usersPath}}
 Content-Type: application/json
 
 {
-  "email": "ann@gmail.com",
-  "password": "ann",
-  "firstName":"ann",
-  "lastName":"Lin",
-  "role": "DOCTOR",
-  "onboardDate":"2022-01-03",
-  "gender":"FEMALE",
-  "birthDate": "1990-01-02"
+  "email": "ellen@gmail.com",
+  "password": "ellen",
+  "firstName":null,
+  "lastName":null,
+  "role": "ADMIN",
+  "onboardDate":null,
+  "gender":null,
+  "birthDate": null,
 }
 ###
 
@@ -23,8 +23,8 @@ POST {{usersPath}}/signin
 Content-Type: application/json
 
 {
-  "email": "ann@gmail.com",
-  "password": "ann"
+  "email": "111@gmail.com",
+  "password": "111"
 }
 ###
 @accessToken = Bearer {{signin.response.body.token}}

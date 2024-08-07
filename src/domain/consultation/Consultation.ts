@@ -11,6 +11,7 @@ export interface IConsultationProps {
   endAt: Date | null
   onsiteCancelAt: Date | null
   onsiteCancelReason: OnsiteCancelReasonType | null
+  isFirstTimeVisit: boolean
   acupunctureTreatment: AcupunctureTreatment | null
   medicineTreatment: MedicineTreatment | null
   patientId: string
@@ -82,6 +83,10 @@ export class Consultation {
 
   public get onsiteCancelAt(): Date | null {
     return this.props.onsiteCancelAt
+  }
+
+  public get isFirstTimeVisit(): boolean {
+    return this.props.isFirstTimeVisit
   }
 
   public get onsiteCancelReason(): OnsiteCancelReasonType | null {
