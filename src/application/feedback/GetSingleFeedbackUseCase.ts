@@ -1,5 +1,11 @@
+import { GenderType } from 'domain/common'
+import {
+  OnsiteCancelReasonType,
+  TreatmentType,
+} from 'domain/consultation/Consultation'
 import { SelectedContent } from 'domain/feedback/Feedback'
 import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFeedbackRepository'
+import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import { NotFoundError } from 'infrastructure/error/NotFoundError'
 
 interface GetSingleFeedbackRequest {
@@ -7,10 +13,30 @@ interface GetSingleFeedbackRequest {
 }
 
 interface GetSingleFeedbackResponse {
+  id: string
+  receivedDate: string
+  receivedAt: Date
   feedbackRating: number
   selectedContent: SelectedContent
   detailedContent: string | null
-  consultationId: string
+  consultation: {
+    id: string
+    consultationDate: string
+    consultationTimePeriod: TimePeriodType
+    onsiteCancelAt: Date | null
+    onsiteCancelReason: OnsiteCancelReasonType | null
+    treatmentType: TreatmentType
+  }
+  doctor: {
+    firstName: string
+    lastName: string
+    gender: GenderType
+  }
+  patient: {
+    firstName: string
+    lastName: string
+    gender: GenderType
+  }
 }
 
 export class GetSingleFeedbackUseCase {
