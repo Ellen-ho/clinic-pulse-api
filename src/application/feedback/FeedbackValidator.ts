@@ -16,6 +16,7 @@ export const getFeedbackListSchema = {
       .valid(...Object.values(TimePeriodType))
       .optional(),
     doctorId: Joi.string().optional(),
+    patientName: Joi.string().optional(),
     patientId: Joi.string().optional(),
     feedbackRating: Joi.number().optional(),
     limit: Joi.number().required(),

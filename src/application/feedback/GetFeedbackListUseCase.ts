@@ -1,6 +1,6 @@
+import { GenderType } from 'domain/common'
 import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFeedbackRepository'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
 import { getOffset, getPagination } from 'infrastructure/utils/Pagination'
 
 interface GetFeedbackListRequest {
@@ -9,6 +9,7 @@ interface GetFeedbackListRequest {
   clinicId?: string
   timePeriod?: TimePeriodType
   doctorId?: string
+  patientName?: string
   patientId?: string
   feedbackRating?: number
   page: number
@@ -17,9 +18,21 @@ interface GetFeedbackListRequest {
 
 interface GetFeedbackListResponse {
   data: Array<{
+    doctor: {
+      firstName: string
+      lastName: string
+      gender: GenderType
+    }
+    patient: {
+      firstName: string
+      lastName: string
+      gender: GenderType
+    }
     id: string
+    receivedDate: string
     receivedAt: Date
     feedbackRating: number
+    clinicId: string
     clinicName: string
     consultationTimePeriod: TimePeriodType
   }>
@@ -45,6 +58,7 @@ export class GetFeedbackListUseCase {
       clinicId,
       timePeriod,
       doctorId,
+      patientName,
       patientId,
       feedbackRating,
     } = request
@@ -60,13 +74,10 @@ export class GetFeedbackListUseCase {
       clinicId,
       timePeriod,
       doctorId,
+      patientName,
       patientId,
       feedbackRating
     )
-
-    if (feedbackList.totalCounts === 0) {
-      throw new NotFoundError(' No feedback exists.')
-    }
 
     return {
       data: feedbackList.data,

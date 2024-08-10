@@ -32,6 +32,7 @@ export class FeedbackController implements IFeedbackController {
         ? undefined
         : Number(req.query.feedbackRating),
       doctorId: req.query.doctorId as string,
+      patientName: req.query.patientName as string,
       patientId: req.query.patientId as string,
     }
     const result = await this.getFeedbackListUseCase.execute(request)
