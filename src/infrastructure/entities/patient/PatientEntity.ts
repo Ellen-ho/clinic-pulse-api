@@ -18,6 +18,9 @@ export class PatientEntity {
   @Column({ name: 'last_name', type: 'varchar', length: 50 })
   public lastName!: string
 
+  @Column({ name: 'full_name', type: 'varchar', length: 50, default: '-' })
+  public fullName!: string
+
   @Column({ name: 'gender', type: 'varchar', length: 20 })
   public gender!: GenderType
 

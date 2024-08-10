@@ -2,6 +2,7 @@ export interface IPatientProps {
   id: string
   firstName: string
   lastName: string
+  fullName: string
   birthDate: Date
   gender: GenderType
   createdAt: Date
@@ -34,6 +35,10 @@ export class Patient {
 
   public get lastName(): string {
     return this.props.lastName
+  }
+
+  public get fullName(): string {
+    return this.props.fullName
   }
 
   public get birthDate(): Date {
