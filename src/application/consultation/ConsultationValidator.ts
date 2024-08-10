@@ -12,6 +12,7 @@ export const getConsultationListSchema = {
     totalDurationMin: Joi.number().optional(),
     totalDurationMax: Joi.number().optional(),
     doctorId: Joi.string().optional(),
+    patientName: Joi.string().optional(),
     patientId: Joi.string().optional(),
     limit: Joi.number().required(),
     page: Joi.number().required(),

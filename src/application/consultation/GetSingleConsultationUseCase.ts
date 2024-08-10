@@ -13,6 +13,7 @@ interface GetSingleConsultationRequest {
 }
 
 interface GetSingleConsultationResponse {
+  id: string
   consultationDate: string
   consultationTimePeriod: TimePeriodType
   consultationNumber: number
@@ -32,6 +33,7 @@ interface GetSingleConsultationResponse {
   doctor: {
     firstName: string
     lastName: string
+    gender: GenderType
   }
   acupunctureTreatment: {
     id: string | null
