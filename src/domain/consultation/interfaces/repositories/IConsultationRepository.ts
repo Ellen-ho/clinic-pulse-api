@@ -10,6 +10,7 @@ import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 export interface IConsultationRepository extends IBaseRepository<Consultation> {
   save: (consultation: Consultation) => Promise<void>
   findById: (id: string) => Promise<{
+    id: string
     consultationDate: string
     consultationTimePeriod: TimePeriodType
     consultationNumber: number
@@ -29,6 +30,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     doctor: {
       firstName: string
       lastName: string
+      gender: GenderType
     }
     acupunctureTreatment: {
       id: string | null
@@ -51,8 +53,9 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     timePeriod?: TimePeriodType,
     totalDurationMin?: number,
     totalDurationMax?: number,
-    doctorId?: string,
-    patientId?: string
+    patientName?: string,
+    patientId?: string,
+    doctorId?: string
   ) => Promise<{
     data: Array<{
       id: string

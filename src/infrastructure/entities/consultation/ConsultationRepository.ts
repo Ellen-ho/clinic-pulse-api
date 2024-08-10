@@ -22,6 +22,7 @@ export class ConsultationRepository
   }
 
   public async findById(id: string): Promise<{
+    id: string
     consultationDate: string
     consultationTimePeriod: TimePeriodType
     consultationNumber: number
@@ -41,6 +42,7 @@ export class ConsultationRepository
     doctor: {
       firstName: string
       lastName: string
+      gender: GenderType
     }
     acupunctureTreatment: {
       id: string | null
@@ -57,6 +59,7 @@ export class ConsultationRepository
     try {
       const rawConsultation = await this.getQuery<
         Array<{
+          id: string
           consultation_date: string
           consultation_time_period: TimePeriodType
           consultation_number: number
@@ -70,6 +73,7 @@ export class ConsultationRepository
           has_medicine: boolean
           doctor_first_name: string
           doctor_last_name: string
+          doctor_gender: GenderType
           patient_first_name: string
           patient_last_name: string
           patient_gender: GenderType
@@ -87,6 +91,7 @@ export class ConsultationRepository
         SELECT
           TO_CHAR(c.check_in_at, 'YYYY-MM-DD') AS consultation_date,
           ts.time_period AS consultation_time_period,
+          c.id,
           c.consultation_number,
           c.onsite_cancel_at AS onsite_cancel_at,
           c.onsite_cancel_reason AS onsite_cancel_reason,
@@ -105,6 +110,7 @@ export class ConsultationRepository
           mt.get_medicine_at AS medicine_treatment_get_medicine_at,
           d.first_name AS doctor_first_name,
           d.last_name AS doctor_last_name,
+          d.gender AS doctor_gender,
           p.first_name AS patient_first_name,
           p.last_name AS patient_last_name,
           p.gender AS patient_gender,
@@ -123,6 +129,7 @@ export class ConsultationRepository
       return rawConsultation.length === 0
         ? null
         : {
+            id: rawConsultation[0].id,
             consultationDate: rawConsultation[0].consultation_date,
             consultationTimePeriod: rawConsultation[0].consultation_time_period,
             consultationNumber: rawConsultation[0].consultation_number,
@@ -145,6 +152,7 @@ export class ConsultationRepository
             doctor: {
               firstName: rawConsultation[0].doctor_first_name,
               lastName: rawConsultation[0].doctor_last_name,
+              gender: rawConsultation[0].doctor_gender,
             },
             acupunctureTreatment: rawConsultation[0].has_acupuncture
               ? {
@@ -182,6 +190,7 @@ export class ConsultationRepository
     timePeriod?: TimePeriodType,
     totalDurationMin?: number,
     totalDurationMax?: number,
+    patientName?: string,
     patientId?: string,
     doctorId?: string
   ): Promise<{
@@ -216,6 +225,11 @@ export class ConsultationRepository
         totalDurationMin !== undefined ? totalDurationMin : null
       const modifiedTotalDurationMax =
         totalDurationMax !== undefined ? totalDurationMax : null
+
+      const modifiedPatientName =
+        patientName !== undefined && patientName.trim() !== ''
+          ? patientName.trim()
+          : null
 
       const modifiedPatientId = patientId !== undefined ? patientId : null
 
@@ -267,7 +281,7 @@ export class ConsultationRepository
           FROM consultations c
           LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
           LEFT JOIN doctors d ON d.id = ts.doctor_id
-          LEFT JOIN patients p ON p.id = c.patient_id
+          LEFT JOIN patients p ON p.id = c.patient_id 
           LEFT JOIN acupuncture_treatments at ON at.id = c.acupuncture_treatment_id
           LEFT JOIN medicine_treatments mt ON mt.id = c.medicine_treatment_id
           WHERE c.check_in_at BETWEEN $1 AND $2
@@ -291,10 +305,14 @@ export class ConsultationRepository
                 ) / 60 < $6::int
               )
             )
-            AND ($7::uuid IS NULL OR c.patient_id = $7::uuid)
-            AND ($8::uuid IS NULL OR ts.doctor_id = $8::uuid)
+            AND (
+              $7::text IS NULL OR
+              p.full_name ILIKE ('%' || $7 || '%')
+            )
+            AND ($8::uuid IS NULL OR c.patient_id = $8::uuid)
+            AND ($9::uuid IS NULL OR ts.doctor_id = $9::uuid)
           ORDER BY c.check_in_at ASC
-          LIMIT $9 OFFSET $10
+          LIMIT $10 OFFSET $11
         `,
         [
           startDate,
@@ -303,6 +321,7 @@ export class ConsultationRepository
           modifiedTimePeriod,
           modifiedTotalDurationMin,
           modifiedTotalDurationMax,
+          modifiedPatientName,
           modifiedPatientId,
           modifiedDoctorId,
           limit,
@@ -315,6 +334,8 @@ export class ConsultationRepository
         SELECT COUNT(*) AS count
         FROM consultations c
         LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
+        LEFT JOIN doctors d ON d.id = ts.doctor_id
+        LEFT JOIN patients p ON p.id = c.patient_id 
         WHERE c.check_in_at BETWEEN $1 AND $2
           AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
           AND ($4::text IS NULL OR ts.time_period = $4::text)  
@@ -336,8 +357,12 @@ export class ConsultationRepository
               ) / 60 < $6::int
             )
           )
-          AND ($7::uuid IS NULL OR c.patient_id = $7::uuid)
-          AND ($8::uuid IS NULL OR ts.doctor_id = $8::uuid)
+          AND (
+            $7::text IS NULL OR
+            p.full_name ILIKE ('%' || $7 || '%')
+          )
+          AND ($8::uuid IS NULL OR c.patient_id = $8::uuid)
+          AND ($9::uuid IS NULL OR ts.doctor_id = $9::uuid)
         `,
         [
           startDate,
@@ -346,6 +371,7 @@ export class ConsultationRepository
           modifiedTimePeriod,
           modifiedTotalDurationMin,
           modifiedTotalDurationMax,
+          modifiedPatientName,
           modifiedPatientId,
           modifiedDoctorId,
         ]

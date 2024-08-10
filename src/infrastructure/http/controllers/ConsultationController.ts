@@ -64,8 +64,9 @@ export class ConsultationController implements IConsultationController {
       totalDurationMax: isNaN(Number(req.query.totalDurationMax))
         ? undefined
         : Number(req.query.totalDurationMax),
-      doctorId: req.query.doctorId as string,
+      patientName: req.query.patientName as string,
       patientId: req.query.patientId as string,
+      doctorId: req.query.doctorId as string,
     }
     const result = await this.getConsultationListUseCase.execute(request)
 
