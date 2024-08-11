@@ -31,6 +31,11 @@ import { FeedbackController } from 'infrastructure/http/controllers/FeedbackCont
 import { FeedbackRoutes } from 'infrastructure/http/routes/FeedbackRoutes'
 import { GetSingleFeedbackUseCase } from 'application/feedback/GetSingleFeedbackUseCase'
 import { GetFeedbackCountAndRateUseCase } from 'application/feedback/GetFeedbackCountAndRateUseCase'
+import { PatientController } from 'infrastructure/http/controllers/PatientController'
+import { PatientRepository } from 'infrastructure/entities/patient/PatientRepository'
+import { GetPatientNameAutoCompleteUseCase } from 'application/patient/getPatientNameAutoComplete'
+import { PatientRoutes } from 'infrastructure/http/routes/PatientRoutes'
+import { errorHandler } from 'infrastructure/http/middlewares/ErrorHandler'
 
 void main()
 
@@ -64,6 +69,7 @@ async function main(): Promise<void> {
   const doctorRepository = new DoctorRepository(dataSource)
   const consultationRepository = new ConsultationRepository(dataSource)
   const feedbackRepository = new FeedbackRepository(dataSource)
+  const patientRepository = new PatientRepository(dataSource)
 
   const createUserUseCase = new CreateUserUseCase(
     userRepository,
@@ -77,11 +83,13 @@ async function main(): Promise<void> {
   )
 
   const getConsultationListUseCase = new GetConsultationListUseCase(
-    consultationRepository
+    consultationRepository,
+    doctorRepository
   )
 
   const getSingleConsultationUseCase = new GetSingleConsultationUseCase(
-    consultationRepository
+    consultationRepository,
+    doctorRepository
   )
 
   const getConsultationRelatedRatiosUseCase =
@@ -112,6 +120,9 @@ async function main(): Promise<void> {
     feedbackRepository
   )
 
+  const getPatientNameAutoCompleteUseCase =
+    new GetPatientNameAutoCompleteUseCase(patientRepository)
+
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
@@ -135,6 +146,10 @@ async function main(): Promise<void> {
     getFeedbackCountAndRateUseCase
   )
 
+  const patientController = new PatientController(
+    getPatientNameAutoCompleteUseCase
+  )
+
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
 
@@ -153,16 +168,20 @@ async function main(): Promise<void> {
   const userRoutes = new UserRoutes(userController)
   const consultationRoutes = new ConsultationRoutes(consultationController)
   const feedbackRoutes = new FeedbackRoutes(feedbackController)
+  const patientRoutes = new PatientRoutes(patientController)
 
   const mainRoutes = new MainRoutes(
     userRoutes,
     consultationRoutes,
-    feedbackRoutes
+    feedbackRoutes,
+    patientRoutes
   )
 
   app.use(cors(corsOptions))
 
   app.use('/api', mainRoutes.createRouter())
+
+  app.use(errorHandler)
 
   app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`)
