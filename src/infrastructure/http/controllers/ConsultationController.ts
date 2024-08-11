@@ -8,6 +8,7 @@ import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverag
 import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
 import { GetPatientCountPerConsultationUseCase } from 'application/consultation/GetPatientCountPerConsultationUseCase'
 import { GetDifferentTreatmentConsultationUseCase } from 'application/consultation/GetDifferentTreatmentConsultationUseCase'
+import { User } from 'domain/user/User'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
@@ -67,6 +68,7 @@ export class ConsultationController implements IConsultationController {
       patientName: req.query.patientName as string,
       patientId: req.query.patientId as string,
       doctorId: req.query.doctorId as string,
+      currentUser: req.user as User,
     }
     const result = await this.getConsultationListUseCase.execute(request)
 
@@ -79,6 +81,7 @@ export class ConsultationController implements IConsultationController {
   ): Promise<Response> => {
     const request = {
       consultationId: req.params.id,
+      currentUser: req.user as User,
     }
     const result = await this.getSingleConsultationUseCase.execute(request)
 

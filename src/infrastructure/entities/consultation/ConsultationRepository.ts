@@ -40,6 +40,7 @@ export class ConsultationRepository
       age: number
     }
     doctor: {
+      id: string
       firstName: string
       lastName: string
       gender: GenderType
@@ -71,6 +72,7 @@ export class ConsultationRepository
           check_out_at: Date | null
           has_acupuncture: boolean
           has_medicine: boolean
+          doctor_id: string
           doctor_first_name: string
           doctor_last_name: string
           doctor_gender: GenderType
@@ -108,6 +110,7 @@ export class ConsultationRepository
           at.remove_needle_at AS acupuncture_treatment_remove_needle_at,
           mt.id AS medicine_treatment_id,
           mt.get_medicine_at AS medicine_treatment_get_medicine_at,
+          d.id AS doctor_id,
           d.first_name AS doctor_first_name,
           d.last_name AS doctor_last_name,
           d.gender AS doctor_gender,
@@ -150,6 +153,7 @@ export class ConsultationRepository
               age: rawConsultation[0].patient_age,
             },
             doctor: {
+              id: rawConsultation[0].doctor_id,
               firstName: rawConsultation[0].doctor_first_name,
               lastName: rawConsultation[0].doctor_last_name,
               gender: rawConsultation[0].doctor_gender,

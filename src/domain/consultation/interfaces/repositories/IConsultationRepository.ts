@@ -28,6 +28,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       age: number
     }
     doctor: {
+      id: string
       firstName: string
       lastName: string
       gender: GenderType

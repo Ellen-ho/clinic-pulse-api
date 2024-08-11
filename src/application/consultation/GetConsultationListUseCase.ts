@@ -2,10 +2,12 @@ import { GenderType } from '../../domain/common'
 import {
   OnsiteCancelReasonType,
   TreatmentType,
-} from 'domain/consultation/Consultation'
+} from '../../domain/consultation/Consultation'
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
-import { getOffset, getPagination } from 'infrastructure/utils/Pagination'
+import { getOffset, getPagination } from '../../infrastructure/utils/Pagination'
+import { User, UserRoleType } from '../../domain/user/User'
+import { DoctorRepository } from '../../infrastructure/entities/doctor/DoctorRepository'
 
 interface GetConsultationListRequest {
   startDate: string
@@ -19,6 +21,7 @@ interface GetConsultationListRequest {
   doctorId?: string
   page: number
   limit: number
+  currentUser: User
 }
 
 interface GetConsultationListResponse {
@@ -54,7 +57,8 @@ interface GetConsultationListResponse {
 
 export class GetConsultationListUseCase {
   constructor(
-    private readonly consultationRepository: IConsultationRepository
+    private readonly consultationRepository: IConsultationRepository,
+    private readonly doctorRepository: DoctorRepository
   ) {}
 
   public async execute(
@@ -70,10 +74,18 @@ export class GetConsultationListUseCase {
       patientName,
       patientId,
       doctorId,
+      currentUser,
     } = request
     const page: number = 1
     const limit: number = 20
     const offset: number = getOffset(limit, page)
+
+    // current doctor can only fetch his/her data
+    let currentDoctorId
+    if (currentUser.role === UserRoleType.DOCTOR) {
+      const doctor = await this.doctorRepository.findByUserId(currentUser.id)
+      currentDoctorId = doctor?.id
+    }
 
     const consultationList = await this.consultationRepository.findByQuery(
       limit,
@@ -86,7 +98,7 @@ export class GetConsultationListUseCase {
       totalDurationMax,
       patientName,
       patientId,
-      doctorId
+      currentDoctorId !== undefined ? currentDoctorId : doctorId
     )
 
     return {

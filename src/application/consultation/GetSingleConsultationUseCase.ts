@@ -5,11 +5,15 @@ import {
 } from 'domain/consultation/Consultation'
 
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
+import { User, UserRoleType } from 'domain/user/User'
+import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
 import { NotFoundError } from 'infrastructure/error/NotFoundError'
 
 interface GetSingleConsultationRequest {
   consultationId: string
+  currentUser: User
 }
 
 interface GetSingleConsultationResponse {
@@ -31,6 +35,7 @@ interface GetSingleConsultationResponse {
     age: number
   }
   doctor: {
+    id: string
     firstName: string
     lastName: string
     gender: GenderType
@@ -50,17 +55,25 @@ interface GetSingleConsultationResponse {
 
 export class GetSingleConsultationUseCase {
   constructor(
-    private readonly consultationRepository: IConsultationRepository
+    private readonly consultationRepository: IConsultationRepository,
+    private readonly doctorRepository: IDoctorRepository
   ) {}
 
   public async execute(
     request: GetSingleConsultationRequest
   ): Promise<GetSingleConsultationResponse> {
-    const { consultationId } = request
+    const { consultationId, currentUser } = request
 
     const existingConsultation = await this.consultationRepository.findById(
       consultationId
     )
+
+    if (currentUser.role === UserRoleType.DOCTOR) {
+      const doctor = await this.doctorRepository.findByUserId(currentUser.id)
+      if (doctor !== null && doctor.id !== existingConsultation?.doctor.id) {
+        throw new AuthorizationError('Doctors can only access their own data.')
+      }
+    }
 
     if (existingConsultation == null) {
       throw new NotFoundError('Consultation does not exist.')
