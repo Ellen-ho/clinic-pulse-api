@@ -1,0 +1,22 @@
+@hostname = http://localhost:10000
+
+@usersPath = {{hostname}}/api/users
+
+### user signin
+# @name signin
+POST {{usersPath}}/signin
+Content-Type: application/json
+
+{
+  "email": "ann@gmail.com",
+  "password": "ann"
+}
+###
+@accessToken = Bearer {{signin.response.body.token}}
+@patientsPath = {{hostname}}/api/patients
+### get patient  name auto compleete
+GET {{patientsPath}}?searchText=''
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+

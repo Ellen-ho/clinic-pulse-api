@@ -80,7 +80,6 @@ export class GetConsultationListUseCase {
     const limit: number = 20
     const offset: number = getOffset(limit, page)
 
-    // current doctor can only fetch his/her data
     let currentDoctorId
     if (currentUser.role === UserRoleType.DOCTOR) {
       const doctor = await this.doctorRepository.findByUserId(currentUser.id)
