@@ -36,6 +36,7 @@ export class FeedbackRepository
       treatmentType: TreatmentType
     }
     doctor: {
+      id: string
       firstName: string
       lastName: string
       gender: GenderType
@@ -62,6 +63,7 @@ export class FeedbackRepository
           onsite_cancel_reason: OnsiteCancelReasonType | null
           has_acupuncture: boolean
           has_medicine: boolean
+          doctor_id: string
           doctor_first_name: string
           doctor_last_name: string
           doctor_gender: GenderType
@@ -88,6 +90,7 @@ export class FeedbackRepository
             p.first_name AS patient_first_name,
             p.last_name AS patient_last_name,
             p.gender AS patient_gender,
+            d.id AS doctor_id,
             d.first_name AS doctor_first_name,
             d.last_name AS doctor_last_name,
             d.gender AS doctor_gender
@@ -125,6 +128,7 @@ export class FeedbackRepository
             ),
           },
           doctor: {
+            id: rawFeedback[0].doctor_id,
             firstName: rawFeedback[0].doctor_first_name,
             lastName: rawFeedback[0].doctor_last_name,
             gender: rawFeedback[0].doctor_gender,

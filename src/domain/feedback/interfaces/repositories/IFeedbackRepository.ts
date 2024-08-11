@@ -24,6 +24,7 @@ export interface IFeedbackRepository extends IBaseRepository<Feedback> {
       treatmentType: TreatmentType
     }
     doctor: {
+      id: string
       firstName: string
       lastName: string
       gender: GenderType

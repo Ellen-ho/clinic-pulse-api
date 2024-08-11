@@ -1,6 +1,8 @@
 import { GenderType } from 'domain/common'
+import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
 import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFeedbackRepository'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
+import { User, UserRoleType } from 'domain/user/User'
 import { getOffset, getPagination } from 'infrastructure/utils/Pagination'
 
 interface GetFeedbackListRequest {
@@ -14,6 +16,7 @@ interface GetFeedbackListRequest {
   feedbackRating?: number
   page: number
   limit: number
+  currentUser: User
 }
 
 interface GetFeedbackListResponse {
@@ -47,7 +50,10 @@ interface GetFeedbackListResponse {
 }
 
 export class GetFeedbackListUseCase {
-  constructor(private readonly feedbackRepository: IFeedbackRepository) {}
+  constructor(
+    private readonly feedbackRepository: IFeedbackRepository,
+    private readonly doctorRepository: IDoctorRepository
+  ) {}
 
   public async execute(
     request: GetFeedbackListRequest
@@ -61,10 +67,17 @@ export class GetFeedbackListUseCase {
       patientName,
       patientId,
       feedbackRating,
+      currentUser,
     } = request
     const page: number = 1
     const limit: number = 20
     const offset: number = getOffset(limit, page)
+
+    let currentDoctorId
+    if (currentUser.role === UserRoleType.DOCTOR) {
+      const doctor = await this.doctorRepository.findByUserId(currentUser.id)
+      currentDoctorId = doctor?.id
+    }
 
     const feedbackList = await this.feedbackRepository.findByQuery(
       limit,
@@ -73,7 +86,7 @@ export class GetFeedbackListUseCase {
       endDate,
       clinicId,
       timePeriod,
-      doctorId,
+      currentDoctorId !== undefined ? currentDoctorId : doctorId,
       patientName,
       patientId,
       feedbackRating

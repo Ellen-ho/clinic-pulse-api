@@ -2,6 +2,7 @@ import { GetFeedbackCountAndRateUseCase } from 'application/feedback/GetFeedback
 import { GetFeedbackListUseCase } from 'application/feedback/GetFeedbackListUseCase'
 import { GetSingleFeedbackUseCase } from 'application/feedback/GetSingleFeedbackUseCase'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
+import { User } from 'domain/user/User'
 import { Request, Response } from 'express'
 
 export interface IFeedbackController {
@@ -34,6 +35,7 @@ export class FeedbackController implements IFeedbackController {
       doctorId: req.query.doctorId as string,
       patientName: req.query.patientName as string,
       patientId: req.query.patientId as string,
+      currentUser: req.user as User,
     }
     const result = await this.getFeedbackListUseCase.execute(request)
 
@@ -46,6 +48,7 @@ export class FeedbackController implements IFeedbackController {
   ): Promise<Response> => {
     const request = {
       feedbackId: req.params.id,
+      currentUser: req.user as User,
     }
     const result = await this.getSingleFeedbackUseCase.execute(request)
 

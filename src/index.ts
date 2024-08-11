@@ -110,10 +110,14 @@ async function main(): Promise<void> {
   const getDifferentTreatmentConsultationUseCase =
     new GetDifferentTreatmentConsultationUseCase(consultationRepository)
 
-  const getFeedbackListUseCase = new GetFeedbackListUseCase(feedbackRepository)
+  const getFeedbackListUseCase = new GetFeedbackListUseCase(
+    feedbackRepository,
+    doctorRepository
+  )
 
   const getSingleFeedbackUseCase = new GetSingleFeedbackUseCase(
-    feedbackRepository
+    feedbackRepository,
+    doctorRepository
   )
 
   const getFeedbackCountAndRateUseCase = new GetFeedbackCountAndRateUseCase(
