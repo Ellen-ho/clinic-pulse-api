@@ -1,4 +1,4 @@
-import { GenderType } from 'domain/common'
+import { GenderType, Granularity } from 'domain/common'
 import {
   Consultation,
   OnsiteCancelReasonType,
@@ -10,6 +10,7 @@ import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 export interface IConsultationRepository extends IBaseRepository<Consultation> {
   save: (consultation: Consultation) => Promise<void>
   findById: (id: string) => Promise<{
+    id: string
     consultationDate: string
     consultationTimePeriod: TimePeriodType
     consultationNumber: number
@@ -27,8 +28,10 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       age: number
     }
     doctor: {
+      id: string
       firstName: string
       lastName: string
+      gender: GenderType
     }
     acupunctureTreatment: {
       id: string | null
@@ -51,8 +54,9 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     timePeriod?: TimePeriodType,
     totalDurationMin?: number,
     totalDurationMax?: number,
-    doctorId?: string,
-    patientId?: string
+    patientName?: string,
+    patientId?: string,
+    doctorId?: string
   ) => Promise<{
     data: Array<{
       id: string
@@ -120,12 +124,13 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     totalConsultationCount: number
     firstTimeConsultationCount: number
   }>
-  getAveragePatientCount: (
+  getDurationCountByGranularity: (
     startDate: string,
     endDate: string,
     clinicId?: string,
     doctorId?: string,
-    timePeriod?: TimePeriodType
+    timePeriod?: TimePeriodType,
+    granularity?: Granularity
   ) => Promise<{
     totalConsultations: number
     data: Array<{

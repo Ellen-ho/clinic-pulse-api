@@ -2,11 +2,12 @@ import { GenderType } from '../../domain/common'
 import {
   OnsiteCancelReasonType,
   TreatmentType,
-} from 'domain/consultation/Consultation'
+} from '../../domain/consultation/Consultation'
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
-import { getOffset, getPagination } from 'infrastructure/utils/Pagination'
+import { getOffset, getPagination } from '../../infrastructure/utils/Pagination'
+import { User, UserRoleType } from '../../domain/user/User'
+import { DoctorRepository } from '../../infrastructure/entities/doctor/DoctorRepository'
 
 interface GetConsultationListRequest {
   startDate: string
@@ -15,10 +16,12 @@ interface GetConsultationListRequest {
   timePeriod?: TimePeriodType
   totalDurationMin?: number
   totalDurationMax?: number
-  doctorId?: string
+  patientName?: string
   patientId?: string
+  doctorId?: string
   page: number
   limit: number
+  currentUser: User
 }
 
 interface GetConsultationListResponse {
@@ -54,7 +57,8 @@ interface GetConsultationListResponse {
 
 export class GetConsultationListUseCase {
   constructor(
-    private readonly consultationRepository: IConsultationRepository
+    private readonly consultationRepository: IConsultationRepository,
+    private readonly doctorRepository: DoctorRepository
   ) {}
 
   public async execute(
@@ -67,12 +71,20 @@ export class GetConsultationListUseCase {
       timePeriod,
       totalDurationMin,
       totalDurationMax,
-      doctorId,
+      patientName,
       patientId,
+      doctorId,
+      currentUser,
     } = request
     const page: number = 1
     const limit: number = 20
     const offset: number = getOffset(limit, page)
+
+    let currentDoctorId
+    if (currentUser.role === UserRoleType.DOCTOR) {
+      const doctor = await this.doctorRepository.findByUserId(currentUser.id)
+      currentDoctorId = doctor?.id
+    }
 
     const consultationList = await this.consultationRepository.findByQuery(
       limit,
@@ -83,13 +95,10 @@ export class GetConsultationListUseCase {
       timePeriod,
       totalDurationMin,
       totalDurationMax,
-      doctorId,
-      patientId
+      patientName,
+      patientId,
+      currentDoctorId !== undefined ? currentDoctorId : doctorId
     )
-
-    if (consultationList.totalCounts === 0) {
-      throw new NotFoundError(' No consultation exists.')
-    }
 
     return {
       data: consultationList.data,

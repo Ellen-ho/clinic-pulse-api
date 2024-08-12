@@ -23,8 +23,20 @@ import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/Ge
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
 import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
-import { GetPatientCountPerConsultationUseCase } from 'application/consultation/GetPatientCountPerConsultationUseCase'
+import { GetAverageConsultationCountUseCase } from 'application/consultation/GetAverageConsultationCountUseCase'
 import { GetDifferentTreatmentConsultationUseCase } from 'application/consultation/GetDifferentTreatmentConsultationUseCase'
+import { FeedbackRepository } from 'infrastructure/entities/feedback/FeedbackRepository'
+import { GetFeedbackListUseCase } from 'application/feedback/GetFeedbackListUseCase'
+import { FeedbackController } from 'infrastructure/http/controllers/FeedbackController'
+import { FeedbackRoutes } from 'infrastructure/http/routes/FeedbackRoutes'
+import { GetSingleFeedbackUseCase } from 'application/feedback/GetSingleFeedbackUseCase'
+import { GetFeedbackCountAndRateUseCase } from 'application/feedback/GetFeedbackCountAndRateUseCase'
+import { PatientController } from 'infrastructure/http/controllers/PatientController'
+import { PatientRepository } from 'infrastructure/entities/patient/PatientRepository'
+import { GetPatientNameAutoCompleteUseCase } from 'application/patient/getPatientNameAutoComplete'
+import { PatientRoutes } from 'infrastructure/http/routes/PatientRoutes'
+import { errorHandler } from 'infrastructure/http/middlewares/ErrorHandler'
+import { TimeSlotRepository } from 'infrastructure/entities/timeSlot/TimeSlotRepository'
 
 void main()
 
@@ -57,6 +69,9 @@ async function main(): Promise<void> {
   const userRepository = new UserRepository(dataSource)
   const doctorRepository = new DoctorRepository(dataSource)
   const consultationRepository = new ConsultationRepository(dataSource)
+  const feedbackRepository = new FeedbackRepository(dataSource)
+  const patientRepository = new PatientRepository(dataSource)
+  const timeSlotRepository = new TimeSlotRepository(dataSource)
 
   const createUserUseCase = new CreateUserUseCase(
     userRepository,
@@ -70,11 +85,13 @@ async function main(): Promise<void> {
   )
 
   const getConsultationListUseCase = new GetConsultationListUseCase(
-    consultationRepository
+    consultationRepository,
+    doctorRepository
   )
 
   const getSingleConsultationUseCase = new GetSingleConsultationUseCase(
-    consultationRepository
+    consultationRepository,
+    doctorRepository
   )
 
   const getConsultationRelatedRatiosUseCase =
@@ -89,11 +106,32 @@ async function main(): Promise<void> {
   const getFirstTimeConsultationCountAndRateUseCase =
     new GetFirstTimeConsultationCountAndRateUseCase(consultationRepository)
 
-  const getPatientCountPerConsultationUseCase =
-    new GetPatientCountPerConsultationUseCase(consultationRepository)
+  const getAverageConsultationCountUseCase =
+    new GetAverageConsultationCountUseCase(
+      consultationRepository,
+      timeSlotRepository,
+      doctorRepository
+    )
 
   const getDifferentTreatmentConsultationUseCase =
     new GetDifferentTreatmentConsultationUseCase(consultationRepository)
+
+  const getFeedbackListUseCase = new GetFeedbackListUseCase(
+    feedbackRepository,
+    doctorRepository
+  )
+
+  const getSingleFeedbackUseCase = new GetSingleFeedbackUseCase(
+    feedbackRepository,
+    doctorRepository
+  )
+
+  const getFeedbackCountAndRateUseCase = new GetFeedbackCountAndRateUseCase(
+    feedbackRepository
+  )
+
+  const getPatientNameAutoCompleteUseCase =
+    new GetPatientNameAutoCompleteUseCase(patientRepository)
 
   const userController = new UserController(
     createUserUseCase,
@@ -108,8 +146,18 @@ async function main(): Promise<void> {
     getConsultationRealTimeCountUseCase,
     getAverageWaitingTimeUseCase,
     getFirstTimeConsultationCountAndRateUseCase,
-    getPatientCountPerConsultationUseCase,
+    getAverageConsultationCountUseCase,
     getDifferentTreatmentConsultationUseCase
+  )
+
+  const feedbackController = new FeedbackController(
+    getFeedbackListUseCase,
+    getSingleFeedbackUseCase,
+    getFeedbackCountAndRateUseCase
+  )
+
+  const patientController = new PatientController(
+    getPatientNameAutoCompleteUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))
@@ -129,12 +177,21 @@ async function main(): Promise<void> {
 
   const userRoutes = new UserRoutes(userController)
   const consultationRoutes = new ConsultationRoutes(consultationController)
+  const feedbackRoutes = new FeedbackRoutes(feedbackController)
+  const patientRoutes = new PatientRoutes(patientController)
 
-  const mainRoutes = new MainRoutes(userRoutes, consultationRoutes)
+  const mainRoutes = new MainRoutes(
+    userRoutes,
+    consultationRoutes,
+    feedbackRoutes,
+    patientRoutes
+  )
 
   app.use(cors(corsOptions))
 
   app.use('/api', mainRoutes.createRouter())
+
+  app.use(errorHandler)
 
   app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`)

@@ -1,0 +1,20 @@
+import { Granularity } from 'domain/common'
+import { IBaseRepository } from 'domain/shared/IBaseRepository'
+import { TimePeriodType, TimeSlot } from 'domain/timeSlot/TimeSlot'
+
+export interface ITimeSlotRepository extends IBaseRepository<TimeSlot> {
+  getDurationCountByGranularity: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType,
+    granularity?: Granularity
+  ) => Promise<{
+    totalTimeSlots: number
+    data: Array<{
+      date: string
+      timeSlotCount: number
+    }>
+  }>
+}

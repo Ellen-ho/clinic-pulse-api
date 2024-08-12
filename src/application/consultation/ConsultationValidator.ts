@@ -1,3 +1,4 @@
+import { Granularity } from 'domain/common'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import Joi from 'joi'
 
@@ -12,6 +13,7 @@ export const getConsultationListSchema = {
     totalDurationMin: Joi.number().optional(),
     totalDurationMax: Joi.number().optional(),
     doctorId: Joi.string().optional(),
+    patientName: Joi.string().optional(),
     patientId: Joi.string().optional(),
     limit: Joi.number().required(),
     page: Joi.number().required(),
@@ -64,13 +66,16 @@ export const getFirstTimeConsultationCountAndRateSchema = {
   }),
 }
 
-export const getPatientCountPerConsultationSchema = {
+export const getAverageConsultationCountSchema = {
   query: Joi.object({
     startDate: Joi.string().required(),
     endDate: Joi.string().required(),
     clinicId: Joi.string().optional(),
     timePeriod: Joi.string()
       .valid(...Object.values(TimePeriodType))
+      .optional(),
+    granularity: Joi.string()
+      .valid(...Object.values(Granularity))
       .optional(),
     doctorId: Joi.string().optional(),
   }),

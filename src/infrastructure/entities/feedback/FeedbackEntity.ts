@@ -1,0 +1,38 @@
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm'
+import { ConsultationEntity } from '../consultation/ConsultationEntity'
+import { SelectedContent } from '../../../domain/feedback/Feedback'
+
+@Entity('feedbacks')
+export class FeedbackEntity {
+  @PrimaryGeneratedColumn('uuid')
+  public id!: string
+
+  @Column({
+    name: 'feedback_rating',
+    type: 'int',
+  })
+  public feedbackRating!: number
+
+  @Column({
+    name: 'selected_content',
+    type: 'varchar',
+    length: 255,
+  })
+  public selectedContent!: SelectedContent
+
+  @Column({ name: 'detailed_content', type: 'text', nullable: true })
+  public detailedContent!: string | null
+
+  @Column({ name: 'received_at', type: 'timestamp' })
+  public receivedAt!: Date
+
+  @OneToOne(() => ConsultationEntity, { nullable: false })
+  @JoinColumn({ name: 'consultation_id' })
+  public consultation!: ConsultationEntity
+}

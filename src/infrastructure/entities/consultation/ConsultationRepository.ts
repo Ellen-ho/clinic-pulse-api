@@ -10,8 +10,10 @@ import {
 import { DataSource } from 'typeorm'
 import { ConsultationMapper } from './ConsultationMapper'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { GenderType } from 'domain/common'
+import { GenderType, Granularity } from 'domain/common'
 import { RepositoryError } from 'infrastructure/error/RepositoryError'
+import { getDateFormat } from 'infrastructure/utils/SqlDateFormat'
+import dayjs from 'dayjs'
 
 export class ConsultationRepository
   extends BaseRepository<ConsultationEntity, Consultation>
@@ -22,6 +24,7 @@ export class ConsultationRepository
   }
 
   public async findById(id: string): Promise<{
+    id: string
     consultationDate: string
     consultationTimePeriod: TimePeriodType
     consultationNumber: number
@@ -39,8 +42,10 @@ export class ConsultationRepository
       age: number
     }
     doctor: {
+      id: string
       firstName: string
       lastName: string
+      gender: GenderType
     }
     acupunctureTreatment: {
       id: string | null
@@ -57,6 +62,7 @@ export class ConsultationRepository
     try {
       const rawConsultation = await this.getQuery<
         Array<{
+          id: string
           consultation_date: string
           consultation_time_period: TimePeriodType
           consultation_number: number
@@ -68,8 +74,10 @@ export class ConsultationRepository
           check_out_at: Date | null
           has_acupuncture: boolean
           has_medicine: boolean
+          doctor_id: string
           doctor_first_name: string
           doctor_last_name: string
+          doctor_gender: GenderType
           patient_first_name: string
           patient_last_name: string
           patient_gender: GenderType
@@ -87,6 +95,7 @@ export class ConsultationRepository
         SELECT
           TO_CHAR(c.check_in_at, 'YYYY-MM-DD') AS consultation_date,
           ts.time_period AS consultation_time_period,
+          c.id,
           c.consultation_number,
           c.onsite_cancel_at AS onsite_cancel_at,
           c.onsite_cancel_reason AS onsite_cancel_reason,
@@ -103,8 +112,10 @@ export class ConsultationRepository
           at.remove_needle_at AS acupuncture_treatment_remove_needle_at,
           mt.id AS medicine_treatment_id,
           mt.get_medicine_at AS medicine_treatment_get_medicine_at,
+          d.id AS doctor_id,
           d.first_name AS doctor_first_name,
           d.last_name AS doctor_last_name,
+          d.gender AS doctor_gender,
           p.first_name AS patient_first_name,
           p.last_name AS patient_last_name,
           p.gender AS patient_gender,
@@ -123,6 +134,7 @@ export class ConsultationRepository
       return rawConsultation.length === 0
         ? null
         : {
+            id: rawConsultation[0].id,
             consultationDate: rawConsultation[0].consultation_date,
             consultationTimePeriod: rawConsultation[0].consultation_time_period,
             consultationNumber: rawConsultation[0].consultation_number,
@@ -143,8 +155,10 @@ export class ConsultationRepository
               age: rawConsultation[0].patient_age,
             },
             doctor: {
+              id: rawConsultation[0].doctor_id,
               firstName: rawConsultation[0].doctor_first_name,
               lastName: rawConsultation[0].doctor_last_name,
+              gender: rawConsultation[0].doctor_gender,
             },
             acupunctureTreatment: rawConsultation[0].has_acupuncture
               ? {
@@ -182,6 +196,7 @@ export class ConsultationRepository
     timePeriod?: TimePeriodType,
     totalDurationMin?: number,
     totalDurationMax?: number,
+    patientName?: string,
     patientId?: string,
     doctorId?: string
   ): Promise<{
@@ -216,6 +231,11 @@ export class ConsultationRepository
         totalDurationMin !== undefined ? totalDurationMin : null
       const modifiedTotalDurationMax =
         totalDurationMax !== undefined ? totalDurationMax : null
+
+      const modifiedPatientName =
+        patientName !== undefined && patientName.trim() !== ''
+          ? patientName.trim()
+          : null
 
       const modifiedPatientId = patientId !== undefined ? patientId : null
 
@@ -267,7 +287,7 @@ export class ConsultationRepository
           FROM consultations c
           LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
           LEFT JOIN doctors d ON d.id = ts.doctor_id
-          LEFT JOIN patients p ON p.id = c.patient_id
+          LEFT JOIN patients p ON p.id = c.patient_id 
           LEFT JOIN acupuncture_treatments at ON at.id = c.acupuncture_treatment_id
           LEFT JOIN medicine_treatments mt ON mt.id = c.medicine_treatment_id
           WHERE c.check_in_at BETWEEN $1 AND $2
@@ -291,10 +311,14 @@ export class ConsultationRepository
                 ) / 60 < $6::int
               )
             )
-            AND ($7::uuid IS NULL OR c.patient_id = $7::uuid)
-            AND ($8::uuid IS NULL OR ts.doctor_id = $8::uuid)
+            AND (
+              $7::text IS NULL OR
+              p.full_name ILIKE ('%' || $7 || '%')
+            )
+            AND ($8::uuid IS NULL OR c.patient_id = $8::uuid)
+            AND ($9::uuid IS NULL OR ts.doctor_id = $9::uuid)
           ORDER BY c.check_in_at ASC
-          LIMIT $9 OFFSET $10
+          LIMIT $10 OFFSET $11
         `,
         [
           startDate,
@@ -303,6 +327,7 @@ export class ConsultationRepository
           modifiedTimePeriod,
           modifiedTotalDurationMin,
           modifiedTotalDurationMax,
+          modifiedPatientName,
           modifiedPatientId,
           modifiedDoctorId,
           limit,
@@ -315,6 +340,8 @@ export class ConsultationRepository
         SELECT COUNT(*) AS count
         FROM consultations c
         LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
+        LEFT JOIN doctors d ON d.id = ts.doctor_id
+        LEFT JOIN patients p ON p.id = c.patient_id 
         WHERE c.check_in_at BETWEEN $1 AND $2
           AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
           AND ($4::text IS NULL OR ts.time_period = $4::text)  
@@ -336,8 +363,12 @@ export class ConsultationRepository
               ) / 60 < $6::int
             )
           )
-          AND ($7::uuid IS NULL OR c.patient_id = $7::uuid)
-          AND ($8::uuid IS NULL OR ts.doctor_id = $8::uuid)
+          AND (
+            $7::text IS NULL OR
+            p.full_name ILIKE ('%' || $7 || '%')
+          )
+          AND ($8::uuid IS NULL OR c.patient_id = $8::uuid)
+          AND ($9::uuid IS NULL OR ts.doctor_id = $9::uuid)
         `,
         [
           startDate,
@@ -346,6 +377,7 @@ export class ConsultationRepository
           modifiedTimePeriod,
           modifiedTotalDurationMin,
           modifiedTotalDurationMax,
+          modifiedPatientName,
           modifiedPatientId,
           modifiedDoctorId,
         ]
@@ -541,6 +573,14 @@ export class ConsultationRepository
     averageMedicationWait: number
   }> {
     try {
+      const modifiedClinicId =
+        clinicId !== undefined && clinicId !== '' ? clinicId : null
+      const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+
+      const modifiedPatientId = patientId !== undefined ? patientId : null
+
+      const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+
       const result = await this.getQuery<
         Array<{
           averageConsultationWait: number
@@ -597,7 +637,14 @@ export class ConsultationRepository
           AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid)
           AND ($6::uuid IS NULL OR c.patient_id = $6::uuid);
         `,
-        [startDate, endDate, clinicId, timePeriod, doctorId, patientId]
+        [
+          startDate,
+          endDate,
+          modifiedClinicId,
+          modifiedTimePeriod,
+          modifiedDoctorId,
+          modifiedPatientId,
+        ]
       )
 
       const averageTimes = result[0]
@@ -646,6 +693,10 @@ export class ConsultationRepository
     firstTimeConsultationCount: number
   }> {
     try {
+      const modifiedClinicId =
+        clinicId !== undefined && clinicId !== '' ? clinicId : null
+      const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+      const modifiedDoctorId = doctorId !== undefined ? doctorId : null
       const result = await this.getQuery<
         Array<{
           totalConsultationCount: number
@@ -663,7 +714,13 @@ export class ConsultationRepository
           AND ($4::varchar IS NULL OR ts.time_period = $4::varchar)
           AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid);
       `,
-        [startDate, endDate, clinicId, timePeriod, doctorId]
+        [
+          startDate,
+          endDate,
+          modifiedClinicId,
+          modifiedTimePeriod,
+          modifiedDoctorId,
+        ]
       )
 
       const totalConsultationCount = isNaN(
@@ -690,12 +747,13 @@ export class ConsultationRepository
     }
   }
 
-  public async getAveragePatientCount(
+  public async getDurationCountByGranularity(
     startDate: string,
     endDate: string,
     clinicId?: string,
     doctorId?: string,
-    timePeriod?: TimePeriodType
+    timePeriod?: TimePeriodType,
+    granularity: Granularity = Granularity.DAY // Default to DAY if not specified
   ): Promise<{
     totalConsultations: number
     data: Array<{
@@ -704,23 +762,23 @@ export class ConsultationRepository
     }>
   }> {
     try {
-      const totalConsultationsResult = await this.getQuery<
-        Array<{
-          count: string
-        }>
-      >(
-        `SELECT COUNT(*) AS count
-        FROM consultations c
-        LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
-        WHERE c.check_in_at BETWEEN $1 AND $2
-          AND c.onsite_cancel_at IS NULL
-          AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
-          AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
-          AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)`,
-        [startDate, endDate, clinicId, doctorId, timePeriod]
-      )
+      const modifiedClinicId =
+        clinicId !== undefined && clinicId !== '' ? clinicId : null
+      const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+      const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+      const startDateTime = dayjs(startDate)
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const endDateTime = dayjs(endDate)
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
 
-      const consultations = await this.getQuery<
+      console.log(startDateTime)
+      console.log(endDateTime)
+
+      const dateFormat = getDateFormat(granularity)
+
+      const rawConsultations = await this.getQuery<
         Array<{
           date: string
           count: string
@@ -728,7 +786,7 @@ export class ConsultationRepository
       >(
         `
         SELECT 
-        TO_CHAR(c.check_in_at, 'YYYY-MM-DD') as date,
+        TO_CHAR(c.check_in_at, '${dateFormat}') AS date,
         COUNT(*) AS count
         FROM consultations c
         LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
@@ -737,28 +795,125 @@ export class ConsultationRepository
           AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
           AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
           AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)
-        GROUP BY TO_CHAR(c.check_in_at, 'YYYY-MM-DD')
+        GROUP BY TO_CHAR(c.check_in_at, '${dateFormat}')
         ORDER BY date
         `,
-        [startDate, endDate, clinicId, doctorId, timePeriod]
+        [
+          startDateTime,
+          endDateTime,
+          modifiedClinicId,
+          modifiedDoctorId,
+          modifiedTimePeriod,
+        ]
       )
 
-      const data = consultations.map((consultation) => ({
+      const totalConsultations = rawConsultations.reduce(
+        (acc, curr) => acc + parseInt(curr.count, 10),
+        0
+      )
+
+      const data = rawConsultations.map((consultation) => ({
         date: consultation.date,
         consultationCount: parseInt(consultation.count, 10),
       }))
 
       return {
-        totalConsultations: parseInt(totalConsultationsResult[0].count, 10),
+        totalConsultations,
         data,
       }
     } catch (e) {
       throw new RepositoryError(
-        'ConsultationRepository getAveragePatientCount error',
+        'ConsultationRepository getDurationCountByGranularity error',
         e as Error
       )
     }
   }
+
+  // public async getAveragePatientCount(
+  //   startDate: string,
+  //   endDate: string,
+  //   clinicId?: string,
+  //   doctorId?: string,
+  //   timePeriod?: TimePeriodType
+  // ): Promise<{
+  //   totalConsultations: number
+  //   data: Array<{
+  //     date: string
+  //     consultationCount: number
+  //   }>
+  // }> {
+  //   try {
+  //     const modifiedClinicId =
+  //       clinicId !== undefined && clinicId !== '' ? clinicId : null
+  //     const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+  //     const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+  //     const totalConsultationsResult = await this.getQuery<
+  //       Array<{
+  //         count: string
+  //       }>
+  //     >(
+  //       `SELECT COUNT(*) AS count
+  //           FROM consultations c
+  //           LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+  //        WHERE c.check_in_at BETWEEN $1 AND $2
+  //          AND c.onsite_cancel_at IS NULL
+  //          AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
+  //          AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
+  //          AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)`,
+  //       [
+  //         startDate,
+  //         endDate,
+  //         modifiedClinicId,
+  //         modifiedDoctorId,
+  //         modifiedTimePeriod,
+  //       ]
+  //     )
+
+  //     const consultations = await this.getQuery<
+  //       Array<{
+  //         date: string
+  //         count: string
+  //       }>
+  //     >(
+  //       `
+  //       SELECT
+  //         TO_CHAR(c.check_in_at, 'YYYY-MM-DD') as date,
+  //         COUNT(*) AS count
+  //       FROM consultations c
+  //       LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
+  //       WHERE c.check_in_at BETWEEN $1 AND $2
+  //         AND c.onsite_cancel_at IS NULL
+  //         AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
+  //         AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
+  //         AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)
+  //       GROUP BY TO_CHAR(c.check_in_at, 'YYYY-MM-DD')
+  //       ORDER BY date
+  //       `,
+  //       [
+  //         startDate,
+  //         endDate,
+  //         modifiedClinicId,
+  //         modifiedDoctorId,
+  //         modifiedTimePeriod,
+  //       ]
+  //     )
+
+  //     const data = consultations.map((consultation) => ({
+  //       date: consultation.date,
+  //       consultationCount: parseInt(consultation.count, 10),
+  //     }))
+
+  //     return {
+  //       totalConsultations: parseInt(totalConsultationsResult[0].count, 10),
+  //       data,
+  //     }
+  //   } catch (e) {
+  //     throw new RepositoryError(
+  //       'ConsultationRepository getAveragePatientCount error',
+  //       e as Error
+  //     )
+  //   }
+  // }
 
   public async getDifferentTreatmentConsultation(
     startDate: string,
@@ -928,10 +1083,8 @@ export class ConsultationRepository
     clinicId?: string,
     doctorId?: string,
     timePeriod?: TimePeriodType
-  ): {
-    conditionString: string
-    params: Array<string | undefined>
-  } {
+  ): { conditionString: string; params: any[] } {
+    const params = [clinicId ?? null, doctorId ?? null, timePeriod ?? null]
     const conditionString = `
       AND ($3::uuid IS NULL OR ts.clinic_id = $3)
       AND ($4::uuid IS NULL OR ts.doctor_id = $4)
@@ -939,7 +1092,7 @@ export class ConsultationRepository
     `
     return {
       conditionString,
-      params: [clinicId, doctorId, timePeriod],
+      params,
     }
   }
 

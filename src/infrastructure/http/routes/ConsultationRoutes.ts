@@ -4,12 +4,12 @@ import { authenticated } from '../middlewares/Auth'
 import { validator } from '../middlewares/Validator'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import {
+  getAverageConsultationCountSchema,
   getAverageWaitingTimeSchema,
   getConsultationListSchema,
   getConsultationRealTimeCountSchema,
   getConsultationRelatedRatiosSchema,
   getDifferentTreatmentConsultationSchema,
-  getPatientCountPerConsultationSchema,
   getSingleConsultationSchema,
 } from 'application/consultation/ConsultationValidator'
 
@@ -29,10 +29,10 @@ export class ConsultationRoutes {
         )
       )
       .get(
-        '/patient_counts',
+        '/average_counts',
         authenticated,
-        validator(getPatientCountPerConsultationSchema),
-        asyncHandler(this.consultationController.getPatientCountPerConsultation)
+        validator(getAverageConsultationCountSchema),
+        asyncHandler(this.consultationController.getAverageConsultationCount)
       )
       .get(
         '/first_time',
