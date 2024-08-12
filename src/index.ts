@@ -23,7 +23,7 @@ import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/Ge
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
 import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
-import { GetPatientCountPerConsultationUseCase } from 'application/consultation/GetPatientCountPerConsultationUseCase'
+import { GetAverageConsultationCountUseCase } from 'application/consultation/GetAverageConsultationCountUseCase'
 import { GetDifferentTreatmentConsultationUseCase } from 'application/consultation/GetDifferentTreatmentConsultationUseCase'
 import { FeedbackRepository } from 'infrastructure/entities/feedback/FeedbackRepository'
 import { GetFeedbackListUseCase } from 'application/feedback/GetFeedbackListUseCase'
@@ -36,6 +36,7 @@ import { PatientRepository } from 'infrastructure/entities/patient/PatientReposi
 import { GetPatientNameAutoCompleteUseCase } from 'application/patient/getPatientNameAutoComplete'
 import { PatientRoutes } from 'infrastructure/http/routes/PatientRoutes'
 import { errorHandler } from 'infrastructure/http/middlewares/ErrorHandler'
+import { TimeSlotRepository } from 'infrastructure/entities/timeSlot/TimeSlotRepository'
 
 void main()
 
@@ -70,6 +71,7 @@ async function main(): Promise<void> {
   const consultationRepository = new ConsultationRepository(dataSource)
   const feedbackRepository = new FeedbackRepository(dataSource)
   const patientRepository = new PatientRepository(dataSource)
+  const timeSlotRepository = new TimeSlotRepository(dataSource)
 
   const createUserUseCase = new CreateUserUseCase(
     userRepository,
@@ -104,8 +106,12 @@ async function main(): Promise<void> {
   const getFirstTimeConsultationCountAndRateUseCase =
     new GetFirstTimeConsultationCountAndRateUseCase(consultationRepository)
 
-  const getPatientCountPerConsultationUseCase =
-    new GetPatientCountPerConsultationUseCase(consultationRepository)
+  const getAverageConsultationCountUseCase =
+    new GetAverageConsultationCountUseCase(
+      consultationRepository,
+      timeSlotRepository,
+      doctorRepository
+    )
 
   const getDifferentTreatmentConsultationUseCase =
     new GetDifferentTreatmentConsultationUseCase(consultationRepository)
@@ -140,7 +146,7 @@ async function main(): Promise<void> {
     getConsultationRealTimeCountUseCase,
     getAverageWaitingTimeUseCase,
     getFirstTimeConsultationCountAndRateUseCase,
-    getPatientCountPerConsultationUseCase,
+    getAverageConsultationCountUseCase,
     getDifferentTreatmentConsultationUseCase
   )
 

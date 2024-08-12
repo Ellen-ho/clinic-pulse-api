@@ -6,9 +6,10 @@ import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/Ge
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
 import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
-import { GetPatientCountPerConsultationUseCase } from 'application/consultation/GetPatientCountPerConsultationUseCase'
+import { GetAverageConsultationCountUseCase } from 'application/consultation/GetAverageConsultationCountUseCase'
 import { GetDifferentTreatmentConsultationUseCase } from 'application/consultation/GetDifferentTreatmentConsultationUseCase'
 import { User } from 'domain/user/User'
+import { Granularity } from 'domain/common'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
@@ -26,7 +27,7 @@ export interface IConsultationController {
     req: Request,
     res: Response
   ) => Promise<Response>
-  getPatientCountPerConsultation: (
+  getAverageConsultationCount: (
     req: Request,
     res: Response
   ) => Promise<Response>
@@ -44,7 +45,7 @@ export class ConsultationController implements IConsultationController {
     private readonly getConsultationRealTimeCountUseCase: GetConsultationRealTimeCountUseCase,
     private readonly getAverageWaitingTimeUseCase: GetAverageWaitingTimeUseCase,
     private readonly getFirstTimeConsultationCountAndRateUseCase: GetFirstTimeConsultationCountAndRateUseCase,
-    private readonly getPatientCountPerConsultationUseCase: GetPatientCountPerConsultationUseCase,
+    private readonly getAverageConsultationCountUseCase: GetAverageConsultationCountUseCase,
     private readonly getDifferentTreatmentConsultationUseCase: GetDifferentTreatmentConsultationUseCase
   ) {}
 
@@ -153,7 +154,7 @@ export class ConsultationController implements IConsultationController {
     return res.status(200).json(result)
   }
 
-  public getPatientCountPerConsultation = async (
+  public getAverageConsultationCount = async (
     req: Request,
     res: Response
   ): Promise<Response> => {
@@ -163,8 +164,10 @@ export class ConsultationController implements IConsultationController {
       clinicId: req.query.clinicId as string,
       timePeriod: req.query.timePeriod as TimePeriodType,
       doctorId: req.query.doctorId as string,
+      granularity: req.query.granularity as Granularity,
+      currentUser: req.user as User,
     }
-    const result = await this.getPatientCountPerConsultationUseCase.execute(
+    const result = await this.getAverageConsultationCountUseCase.execute(
       request
     )
 

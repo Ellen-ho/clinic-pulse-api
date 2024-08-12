@@ -1,4 +1,4 @@
-import { GenderType } from 'domain/common'
+import { GenderType, Granularity } from 'domain/common'
 import {
   Consultation,
   OnsiteCancelReasonType,
@@ -124,12 +124,13 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     totalConsultationCount: number
     firstTimeConsultationCount: number
   }>
-  getAveragePatientCount: (
+  getDurationCountByGranularity: (
     startDate: string,
     endDate: string,
     clinicId?: string,
     doctorId?: string,
-    timePeriod?: TimePeriodType
+    timePeriod?: TimePeriodType,
+    granularity?: Granularity
   ) => Promise<{
     totalConsultations: number
     data: Array<{
