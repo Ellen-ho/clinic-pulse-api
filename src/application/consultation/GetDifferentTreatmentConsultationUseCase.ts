@@ -1,6 +1,8 @@
+import { Granularity } from 'domain/common'
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { User, UserRoleType } from 'domain/user/User'
 
 interface GetDifferentTreatmentConsultationRequest {
   startDate: string
@@ -8,6 +10,8 @@ interface GetDifferentTreatmentConsultationRequest {
   clinicId?: string
   doctorId?: string
   timePeriod?: TimePeriodType
+  granularity?: Granularity
+  currentUser: User
 }
 
 interface GetDifferentTreatmentConsultationResponse {
@@ -40,27 +44,54 @@ interface GetDifferentTreatmentConsultationResponse {
 
 export class GetDifferentTreatmentConsultationUseCase {
   constructor(
-    private readonly consultationRepository: IConsultationRepository
+    private readonly consultationRepository: IConsultationRepository,
+    private readonly doctorRepository: IDoctorRepository
   ) {}
 
   public async execute(
     request: GetDifferentTreatmentConsultationRequest
   ): Promise<GetDifferentTreatmentConsultationResponse> {
-    const { startDate, endDate, clinicId, doctorId, timePeriod } = request
+    const {
+      startDate,
+      endDate,
+      clinicId,
+      doctorId,
+      timePeriod,
+      granularity,
+      currentUser,
+    } = request
+
+    let currentDoctorId
+    if (currentUser.role === UserRoleType.DOCTOR) {
+      const doctor = await this.doctorRepository.findByUserId(currentUser.id)
+      currentDoctorId = doctor?.id
+    }
 
     const result =
       await this.consultationRepository.getDifferentTreatmentConsultation(
         startDate,
         endDate,
         clinicId,
-        doctorId,
-        timePeriod
+        currentDoctorId !== undefined ? currentDoctorId : doctorId,
+        timePeriod,
+        granularity
       )
 
     if (result.totalConsultations === 0) {
-      throw new NotFoundError(
-        'No consultation data matches the specified criteria.'
-      )
+      return {
+        totalConsultations: 0,
+        totalConsultationWithAcupuncture: 0,
+        totalConsultationWithMedicine: 0,
+        totalConsultationWithBothTreatment: 0,
+        totalOnlyAcupunctureCount: 0,
+        totalOnlyMedicineCount: 0,
+        totalAcupunctureRate: 0,
+        totalMedicineRate: 0,
+        totalOnlyAcupunctureRate: 0,
+        totalOnlyMedicineRate: 0,
+        totalBothTreatmentRate: 0,
+        data: [],
+      }
     }
 
     const totalAcupunctureRate = Math.round(

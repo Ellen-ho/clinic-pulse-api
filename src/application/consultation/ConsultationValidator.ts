@@ -26,11 +26,18 @@ export const getSingleConsultationSchema = {
   }),
 }
 
-export const getConsultationRelatedRatiosSchema = {
+export const getConsultationOnsiteCanceledAndBookingSchema = {
   query: Joi.object({
     startDate: Joi.string().required(),
     endDate: Joi.string().required(),
     clinicId: Joi.string().optional(),
+    timePeriod: Joi.string()
+      .valid(...Object.values(TimePeriodType))
+      .optional(),
+    granularity: Joi.string()
+      .valid(...Object.values(Granularity))
+      .optional(),
+    doctorId: Joi.string().optional(),
   }),
 }
 
@@ -48,6 +55,9 @@ export const getAverageWaitingTimeSchema = {
     clinicId: Joi.string().optional(),
     timePeriod: Joi.string()
       .valid(...Object.values(TimePeriodType))
+      .optional(),
+    granularity: Joi.string()
+      .valid(...Object.values(Granularity))
       .optional(),
     doctorId: Joi.string().optional(),
     patientId: Joi.string().optional(),
@@ -88,6 +98,9 @@ export const getDifferentTreatmentConsultationSchema = {
     clinicId: Joi.string().optional(),
     timePeriod: Joi.string()
       .valid(...Object.values(TimePeriodType))
+      .optional(),
+    granularity: Joi.string()
+      .valid(...Object.values(Granularity))
       .optional(),
     doctorId: Joi.string().optional(),
   }),

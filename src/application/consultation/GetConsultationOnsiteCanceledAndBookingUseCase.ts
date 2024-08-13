@@ -4,49 +4,47 @@ import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctor
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import { User, UserRoleType } from 'domain/user/User'
 
-interface GetAverageWaitingTimeRequest {
+interface GetConsultationOnsiteCanceledAndBookingRequest {
   startDate: string
   endDate: string
   clinicId?: string
-  timePeriod?: TimePeriodType
   doctorId?: string
-  patientId?: string
+  timePeriod?: TimePeriodType
   granularity?: Granularity
   currentUser: User
 }
 
-interface GetAverageWaitingTimeResponse {
-  totalAverageConsultationWait: number
-  totalAverageBedAssignmentWait: number
-  totalAverageAcupunctureWait: number
-  totalAverageNeedleRemovalWait: number
-  totalAverageMedicationWait: number
+interface GetConsultationOnsiteCanceledAndBookingResponse {
+  totalConsultations: number
+  consultationWithOnlineBooking: number
+  consultationWithOnsiteCancel: number
+  onlineBookingRate: number
+  onsiteCancelRate: number
   data: Array<{
     date: string
-    averageConsultationWait: number
-    averageBedAssignmentWait: number
-    averageAcupunctureWait: number
-    averageNeedleRemovalWait: number
-    averageMedicationWait: number
+    onlineBookingCount: number
+    onsiteCancelCount: number
+    consultationCount: number
+    onlineBookingRate: number
+    onsiteCancelRate: number
   }>
 }
 
-export class GetAverageWaitingTimeUseCase {
+export class GetConsultationOnsiteCanceledAndBookingUseCase {
   constructor(
     private readonly consultationRepository: IConsultationRepository,
     private readonly doctorRepository: IDoctorRepository
   ) {}
 
   public async execute(
-    request: GetAverageWaitingTimeRequest
-  ): Promise<GetAverageWaitingTimeResponse> {
+    request: GetConsultationOnsiteCanceledAndBookingRequest
+  ): Promise<GetConsultationOnsiteCanceledAndBookingResponse> {
     const {
       startDate,
       endDate,
       clinicId,
-      timePeriod,
       doctorId,
-      patientId,
+      timePeriod,
       granularity,
       currentUser,
     } = request
@@ -57,15 +55,15 @@ export class GetAverageWaitingTimeUseCase {
       currentDoctorId = doctor?.id
     }
 
-    const result = await this.consultationRepository.getAverageWaitingTime(
-      startDate,
-      endDate,
-      clinicId,
-      timePeriod,
-      currentDoctorId !== undefined ? currentDoctorId : doctorId,
-      patientId,
-      granularity
-    )
+    const result =
+      await this.consultationRepository.getDurationCanceledAndBookingByGranularity(
+        startDate,
+        endDate,
+        clinicId,
+        currentDoctorId !== undefined ? currentDoctorId : doctorId,
+        timePeriod,
+        granularity
+      )
 
     return result
   }

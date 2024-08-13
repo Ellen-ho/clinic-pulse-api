@@ -29,8 +29,8 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
-### get consultation related ratios
-GET {{consultationsPath}}/related_ratios?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+### get consultation canceled and booking
+GET {{consultationsPath}}/canceled_and_booking?granularity=DAY&startDate=2024-05-27&endDate=2024-06-02&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
@@ -42,7 +42,7 @@ Content-Type: application/json
 ###
 
 ### get average waiting time
-GET {{consultationsPath}}/related_average_waiting_time?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/average_waiting_time?granularity=DAY&startDate=2024-05-27&endDate=2024-06-02&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
@@ -60,7 +60,7 @@ Content-Type: application/json
 ###
 
 ### get different treatments 
-GET {{consultationsPath}}/different_treatments?startDate=2024-06-028&endDate=2024-07-20&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/different_treatments?granularity=WEEK&startDate=2024-08-01&endDate=2024-08-13&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###

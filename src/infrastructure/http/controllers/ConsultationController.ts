@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import { GetConsultationListUseCase } from 'application/consultation/GetConsultationListUseCase'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
-import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/GetConsultationRelatedRatiosUseCase'
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
 import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
@@ -10,11 +9,12 @@ import { GetAverageConsultationCountUseCase } from 'application/consultation/Get
 import { GetDifferentTreatmentConsultationUseCase } from 'application/consultation/GetDifferentTreatmentConsultationUseCase'
 import { User } from 'domain/user/User'
 import { Granularity } from 'domain/common'
+import { GetConsultationOnsiteCanceledAndBookingUseCase } from 'application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
   getSingleConsultation: (req: Request, res: Response) => Promise<Response>
-  getConsultationRelatedRatios: (
+  getConsultationOnsiteCanceledAndBooking: (
     req: Request,
     res: Response
   ) => Promise<Response>
@@ -41,7 +41,7 @@ export class ConsultationController implements IConsultationController {
   constructor(
     private readonly getConsultationListUseCase: GetConsultationListUseCase,
     private readonly getSingleConsultationUseCase: GetSingleConsultationUseCase,
-    private readonly getConsultationRelatedRatiosUseCase: GetConsultationRelatedRatiosUseCase,
+    private readonly getConsultationOnsiteCanceledAndBookingUseCase: GetConsultationOnsiteCanceledAndBookingUseCase,
     private readonly getConsultationRealTimeCountUseCase: GetConsultationRealTimeCountUseCase,
     private readonly getAverageWaitingTimeUseCase: GetAverageWaitingTimeUseCase,
     private readonly getFirstTimeConsultationCountAndRateUseCase: GetFirstTimeConsultationCountAndRateUseCase,
@@ -89,7 +89,7 @@ export class ConsultationController implements IConsultationController {
     return res.status(200).json(result)
   }
 
-  public getConsultationRelatedRatios = async (
+  public getConsultationOnsiteCanceledAndBooking = async (
     req: Request,
     res: Response
   ): Promise<Response> => {
@@ -97,10 +97,13 @@ export class ConsultationController implements IConsultationController {
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
       clinicId: req.query.clinicId as string,
+      timePeriod: req.query.timePeriod as TimePeriodType,
+      doctorId: req.query.doctorId as string,
+      granularity: req.query.granularity as Granularity,
+      currentUser: req.user as User,
     }
-    const result = await this.getConsultationRelatedRatiosUseCase.execute(
-      request
-    )
+    const result =
+      await this.getConsultationOnsiteCanceledAndBookingUseCase.execute(request)
 
     return res.status(200).json(result)
   }
@@ -131,6 +134,8 @@ export class ConsultationController implements IConsultationController {
       timePeriod: req.query.timePeriod as TimePeriodType,
       doctorId: req.query.doctorId as string,
       patientId: req.query.patientId as string,
+      granularity: req.query.granularity as Granularity,
+      currentUser: req.user as User,
     }
     const result = await this.getAverageWaitingTimeUseCase.execute(request)
 
@@ -184,6 +189,8 @@ export class ConsultationController implements IConsultationController {
       clinicId: req.query.clinicId as string,
       timePeriod: req.query.timePeriod as TimePeriodType,
       doctorId: req.query.doctorId as string,
+      granularity: req.query.granularity as Granularity,
+      currentUser: req.user as User,
     }
     const result = await this.getDifferentTreatmentConsultationUseCase.execute(
       request

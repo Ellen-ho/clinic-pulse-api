@@ -7,8 +7,8 @@ import {
   getAverageConsultationCountSchema,
   getAverageWaitingTimeSchema,
   getConsultationListSchema,
+  getConsultationOnsiteCanceledAndBookingSchema,
   getConsultationRealTimeCountSchema,
-  getConsultationRelatedRatiosSchema,
   getDifferentTreatmentConsultationSchema,
   getSingleConsultationSchema,
 } from 'application/consultation/ConsultationValidator'
@@ -43,16 +43,18 @@ export class ConsultationRoutes {
         )
       )
       .get(
-        '/related_average_waiting_time',
+        '/average_waiting_time',
         authenticated,
         validator(getAverageWaitingTimeSchema),
         asyncHandler(this.consultationController.getAverageWaitingTime)
       )
       .get(
-        '/related_ratios',
+        '/canceled_and_booking',
         authenticated,
-        validator(getConsultationRelatedRatiosSchema),
-        asyncHandler(this.consultationController.getConsultationRelatedRatios)
+        validator(getConsultationOnsiteCanceledAndBookingSchema),
+        asyncHandler(
+          this.consultationController.getConsultationOnsiteCanceledAndBooking
+        )
       )
       .get(
         '/real_time_count',

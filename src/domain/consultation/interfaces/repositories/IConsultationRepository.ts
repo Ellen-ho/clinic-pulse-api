@@ -80,14 +80,27 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     }>
     totalCounts: number
   }>
-  findByDateRangeAndClinic: (
+  getDurationCanceledAndBookingByGranularity: (
     startDate: string,
     endDate: string,
-    clinicId?: string
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType,
+    granularity?: Granularity
   ) => Promise<{
-    totalConsultation: number
+    totalConsultations: number
     consultationWithOnlineBooking: number
     consultationWithOnsiteCancel: number
+    onlineBookingRate: number
+    onsiteCancelRate: number
+    data: Array<{
+      date: string
+      onlineBookingCount: number
+      onsiteCancelCount: number
+      consultationCount: number
+      onlineBookingRate: number
+      onsiteCancelRate: number
+    }>
   }>
   getRealTimeCounts: (
     clinicId?: string,
@@ -106,13 +119,22 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     clinicId?: string,
     timePeriod?: TimePeriodType,
     doctorId?: string,
-    patientId?: string
+    patientId?: string,
+    granularity?: Granularity
   ) => Promise<{
-    averageConsultationWait: number
-    averageBedAssignmentWait: number
-    averageAcupunctureWait: number
-    averageNeedleRemovalWait: number
-    averageMedicationWait: number
+    totalAverageConsultationWait: number
+    totalAverageBedAssignmentWait: number
+    totalAverageAcupunctureWait: number
+    totalAverageNeedleRemovalWait: number
+    totalAverageMedicationWait: number
+    data: Array<{
+      date: string
+      averageConsultationWait: number
+      averageBedAssignmentWait: number
+      averageAcupunctureWait: number
+      averageNeedleRemovalWait: number
+      averageMedicationWait: number
+    }>
   }>
   getFirstTimeConsultationCounts: (
     startDate: string,
@@ -143,7 +165,8 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     endDate: string,
     clinicId?: string,
     doctorId?: string,
-    timePeriod?: TimePeriodType
+    timePeriod?: TimePeriodType,
+    granularity?: Granularity
   ) => Promise<{
     totalConsultations: number
     totalConsultationWithAcupuncture: number
