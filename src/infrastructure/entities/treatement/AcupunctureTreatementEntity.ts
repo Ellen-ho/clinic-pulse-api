@@ -11,7 +11,7 @@ export class AcupunctureTreatmentEntity {
   @Column({ name: 'end_at', type: 'timestamp', nullable: true })
   public endAt!: Date | null
 
-  @Column({ name: 'bed_id', type: 'varchar', unique: true, nullable: true })
+  @Column({ name: 'bed_id', type: 'varchar', nullable: true })
   public bedId!: string | null
 
   @Column({ name: 'assign_bed_at', type: 'timestamp', nullable: true })
