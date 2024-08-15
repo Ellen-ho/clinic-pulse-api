@@ -8,8 +8,8 @@ POST {{usersPath}}/signin
 Content-Type: application/json
 
 {
-  "email": "fen@gmail.com",
-  "password": "fen5"
+  "email": "111@gmail.com",
+  "password": "111"
 }
 ###
 @accessToken = Bearer {{signin.response.body.token}}
@@ -28,7 +28,7 @@ Content-Type: application/json
 ###
 
 ### get feedback rations
-GET {{feedbacksPath}}/related_ratios?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{feedbacksPath}}/related_ratios?granularity=WEEK&startDate=2024-08-01&endDate=2024-08-31&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
