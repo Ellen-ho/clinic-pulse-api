@@ -64,7 +64,6 @@ export class GetSingleFeedbackUseCase {
     if (currentUser.role === UserRoleType.DOCTOR) {
       const doctor = await this.doctorRepository.findByUserId(currentUser.id)
       if (doctor !== null && doctor.id !== existingFeedback?.doctor.id) {
-        console.log(doctor.id)
         throw new AuthorizationError('Doctors can only access their own data.')
       }
     }
