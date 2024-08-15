@@ -555,8 +555,10 @@ export class ConsultationRepository
   }
 
   public async getRealTimeCounts(
+    timeSlotId: string | Array<{ id: string }>,
     clinicId?: string,
-    consultationRoomNumber?: string
+    consultationRoomNumber?: string,
+    doctorId?: string
   ): Promise<{
     waitForConsultationCount: number
     waitForBedAssignedCount: number
@@ -567,23 +569,44 @@ export class ConsultationRepository
   }> {
     try {
       let baseQuery = `
-        SELECT status, COUNT(*) as count
-        FROM consultations
-        JOIN time_slots ON consultations.time_slot_id = time_slots.id
-        WHERE 1=1
-      `
+      SELECT status, COUNT(*) as count
+      FROM consultations
+      JOIN time_slots ON consultations.time_slot_id = time_slots.id
+      WHERE 1=1
+    `
 
-      const queryParams = []
+      const queryParams: any[] = []
+
+      if (Array.isArray(timeSlotId)) {
+        const placeholders = timeSlotId
+          .map((_, index) => `$${index + 1}`)
+          .join(', ')
+        baseQuery += ` AND time_slot_id IN (${placeholders})`
+        queryParams.push(...timeSlotId.map((slot) => slot.id))
+      } else {
+        baseQuery += ' AND time_slot_id = $1'
+        queryParams.push(timeSlotId)
+      }
+
+      let paramIndex = queryParams.length + 1
 
       if (clinicId !== undefined) {
-        baseQuery += ' AND time_slots.clinic_id = $1'
+        baseQuery += ` AND time_slots.clinic_id = $${paramIndex++}`
         queryParams.push(clinicId)
       }
 
       if (consultationRoomNumber !== undefined) {
-        baseQuery +=
-          ' AND time_slots.consultation_room_id = (SELECT id FROM consultation_rooms WHERE room_number = $2)'
+        baseQuery += `
+        AND time_slots.consultation_room_id = (
+          SELECT id FROM consultation_rooms WHERE room_number = $${paramIndex++}
+        )
+      `
         queryParams.push(consultationRoomNumber)
+      }
+
+      if (doctorId !== undefined) {
+        baseQuery += ` AND time_slots.doctor_id = $${paramIndex++}`
+        queryParams.push(doctorId)
       }
 
       baseQuery += ' GROUP BY status'
@@ -593,6 +616,7 @@ export class ConsultationRepository
       >(baseQuery, queryParams)
 
       const response = {
+        timeSlotId,
         waitForConsultationCount: 0,
         waitForBedAssignedCount: 0,
         waitForAcupunctureTreatmentCount: 0,
@@ -602,8 +626,9 @@ export class ConsultationRepository
       }
 
       results.forEach((result) => {
+        const statusTrimmed = result.status.trim()
         const count = parseInt(result.count, 10)
-        switch (result.status) {
+        switch (statusTrimmed) {
           case ConsultationStatus.WAITING_FOR_CONSULTATION:
             response.waitForConsultationCount = count
             break

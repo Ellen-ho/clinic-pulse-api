@@ -112,3 +112,11 @@ export const createConsultationSchema = {
     doctorId: Joi.string().required(),
   }),
 }
+
+export const getConsultationRealTimeSchema = {
+  query: Joi.object({
+    clinicId: Joi.string().optional(),
+    consultationRoomNumber: Joi.string().optional(),
+    doctorId: Joi.string().optional(),
+  }),
+}

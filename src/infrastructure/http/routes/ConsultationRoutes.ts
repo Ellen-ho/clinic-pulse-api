@@ -58,7 +58,7 @@ export class ConsultationRoutes {
         )
       )
       .get(
-        '/real_time_count',
+        '/real_time_counts',
         authenticated,
         validator(getConsultationRealTimeCountSchema),
         asyncHandler(this.consultationController.getConsultationRealTimeCount)

@@ -102,8 +102,10 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     }>
   }>
   getRealTimeCounts: (
+    timeSlotId: string | Array<{ id: string }>,
     clinicId?: string,
-    consultationRoomNumber?: string
+    consultationRoomNumber?: string,
+    doctorId?: string
   ) => Promise<{
     waitForConsultationCount: number
     waitForBedAssignedCount: number

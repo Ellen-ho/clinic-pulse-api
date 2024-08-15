@@ -118,6 +118,8 @@ export class ConsultationController implements IConsultationController {
     const request = {
       clinicId: req.query.clinicId as string,
       consultaionRoomNumber: req.query.consultaionRoomNumber as string,
+      doctorId: req.query.doctorId as string,
+      currentUser: req.user as User,
     }
     const result = await this.getConsultationRealTimeCountUseCase.execute(
       request
