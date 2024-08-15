@@ -4,6 +4,7 @@ import { authenticated } from '../middlewares/Auth'
 import { validator } from '../middlewares/Validator'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import {
+  createConsultationSchema,
   getAverageConsultationCountSchema,
   getAverageWaitingTimeSchema,
   getConsultationListSchema,
@@ -73,6 +74,12 @@ export class ConsultationRoutes {
         authenticated,
         validator(getConsultationListSchema),
         asyncHandler(this.consultationController.getConsultationList)
+      )
+      .post(
+        '/',
+        authenticated,
+        validator(createConsultationSchema),
+        asyncHandler(this.consultationController.createConsultation)
       )
   }
 
