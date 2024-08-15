@@ -37,6 +37,20 @@ import { PatientRoutes } from 'infrastructure/http/routes/PatientRoutes'
 import { errorHandler } from 'infrastructure/http/middlewares/ErrorHandler'
 import { TimeSlotRepository } from 'infrastructure/entities/timeSlot/TimeSlotRepository'
 import { GetConsultationOnsiteCanceledAndBookingUseCase } from 'application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
+import { CreateConsultationUseCase } from 'application/consultation/CreateConsultationUseCase'
+import { GetAllDoctorsUseCase } from 'application/doctor/GetAllDoctorsUseCase'
+import { DoctorController } from 'infrastructure/http/controllers/DoctorController'
+import { DoctorRoutes } from 'infrastructure/http/routes/DoctorRoutes'
+import { CreateAcupunctureTreatmentUseCase } from 'application/treatment/CreateAcupunctureTreatmentUseCase'
+import { AcupunctureTreatmentController } from 'infrastructure/http/controllers/AcupunctureTreatmentController'
+import { CreateMedicineTreatmentUseCase } from 'application/treatment/CreateMedicineTreatmentUseCase'
+import { AcupunctureTreatmentRepository } from 'infrastructure/entities/treatment/AcupunctureTreatmentRepository'
+import { MedicineTreatmentRepository } from 'infrastructure/entities/treatment/MedicineTreatmentRepository'
+import { MedicineTreatmentController } from 'infrastructure/http/controllers/MedicineTreatmentController'
+import { AcupunctureRoutes } from 'infrastructure/http/routes/AcupunctureRoutes'
+import { MedicineRoutes } from 'infrastructure/http/routes/MedicineRoutes'
+import { UpdateConsultationToAcupunctureUseCase } from 'application/consultation/UpdateConsultationToAcupunctureUseCase'
+import { UpdateConsultationToMedicineUseCase } from 'application/consultation/UpdateConsultationToMedicineUseCase'
 
 void main()
 
@@ -66,13 +80,21 @@ async function main(): Promise<void> {
   const uuidService = new UuidService()
   const hashGenerator = new BcryptHashGenerator()
 
+  // Repository
   const userRepository = new UserRepository(dataSource)
   const doctorRepository = new DoctorRepository(dataSource)
   const consultationRepository = new ConsultationRepository(dataSource)
   const feedbackRepository = new FeedbackRepository(dataSource)
   const patientRepository = new PatientRepository(dataSource)
   const timeSlotRepository = new TimeSlotRepository(dataSource)
+  const acupunctureTreatmentRepository = new AcupunctureTreatmentRepository(
+    dataSource
+  )
+  const medicineTreatmentRepository = new MedicineTreatmentRepository(
+    dataSource
+  )
 
+  // Domain
   const createUserUseCase = new CreateUserUseCase(
     userRepository,
     uuidService,
@@ -83,6 +105,8 @@ async function main(): Promise<void> {
     doctorRepository,
     uuidService
   )
+
+  const getAllDoctorsUseCase = new GetAllDoctorsUseCase(doctorRepository)
 
   const getConsultationListUseCase = new GetConsultationListUseCase(
     consultationRepository,
@@ -134,12 +158,37 @@ async function main(): Promise<void> {
   )
 
   const getFeedbackCountAndRateUseCase = new GetFeedbackCountAndRateUseCase(
-    feedbackRepository
+    feedbackRepository,
+    doctorRepository
   )
 
   const getPatientNameAutoCompleteUseCase =
     new GetPatientNameAutoCompleteUseCase(patientRepository)
 
+  const createConsultationUseCase = new CreateConsultationUseCase(
+    consultationRepository,
+    timeSlotRepository,
+    uuidService
+  )
+
+  const createAcupunctureTreatmentUseCase =
+    new CreateAcupunctureTreatmentUseCase(
+      acupunctureTreatmentRepository,
+      uuidService
+    )
+
+  const createMedicineTreatmentUseCase = new CreateMedicineTreatmentUseCase(
+    medicineTreatmentRepository,
+    uuidService
+  )
+
+  const updateConsultationToAcupunctureUseCase =
+    new UpdateConsultationToAcupunctureUseCase(consultationRepository)
+
+  const updateConsultationToMedicineUseCase =
+    new UpdateConsultationToMedicineUseCase(consultationRepository)
+
+  // Controller
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
@@ -154,7 +203,8 @@ async function main(): Promise<void> {
     getAverageWaitingTimeUseCase,
     getFirstTimeConsultationCountAndRateUseCase,
     getAverageConsultationCountUseCase,
-    getDifferentTreatmentConsultationUseCase
+    getDifferentTreatmentConsultationUseCase,
+    createConsultationUseCase
   )
 
   const feedbackController = new FeedbackController(
@@ -165,6 +215,18 @@ async function main(): Promise<void> {
 
   const patientController = new PatientController(
     getPatientNameAutoCompleteUseCase
+  )
+
+  const doctorController = new DoctorController(getAllDoctorsUseCase)
+
+  const acupunctureTreatmentController = new AcupunctureTreatmentController(
+    createAcupunctureTreatmentUseCase,
+    updateConsultationToAcupunctureUseCase
+  )
+
+  const medicineTreatmentController = new MedicineTreatmentController(
+    createMedicineTreatmentUseCase,
+    updateConsultationToMedicineUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))
@@ -182,16 +244,25 @@ async function main(): Promise<void> {
   new PassportConfig(userRepository)
   app.use(passport.session())
 
+  // Routes
   const userRoutes = new UserRoutes(userController)
   const consultationRoutes = new ConsultationRoutes(consultationController)
   const feedbackRoutes = new FeedbackRoutes(feedbackController)
   const patientRoutes = new PatientRoutes(patientController)
+  const doctorRoutes = new DoctorRoutes(doctorController)
+  const acupunctureRoutes = new AcupunctureRoutes(
+    acupunctureTreatmentController
+  )
+  const medicineRoutes = new MedicineRoutes(medicineTreatmentController)
 
   const mainRoutes = new MainRoutes(
     userRoutes,
     consultationRoutes,
     feedbackRoutes,
-    patientRoutes
+    patientRoutes,
+    doctorRoutes,
+    acupunctureRoutes,
+    medicineRoutes
   )
 
   app.use(cors(corsOptions))
