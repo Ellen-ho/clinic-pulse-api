@@ -6,6 +6,7 @@ import {
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
 import { ITimeSlotRepository } from 'domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
 import { IUuidService } from '../../domain/utils/IUuidService'
+import { formatToUTC8 } from 'infrastructure/utils/DateFormatToUTC'
 
 interface CreateConsultationRequest {
   patientId: string
@@ -53,7 +54,7 @@ export class CreateConsultationUseCase {
       status,
       source,
       consultationNumber,
-      checkInAt,
+      checkInAt: formatToUTC8(new Date()),
       startAt: null,
       endAt: null,
       onsiteCancelAt: null,
