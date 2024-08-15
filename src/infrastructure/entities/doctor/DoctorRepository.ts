@@ -32,4 +32,24 @@ export class DoctorRepository
       )
     }
   }
+
+  public async findByAll(): Promise<Array<{ id: string; fullName: string }>> {
+    try {
+      const result = await this.getQuery<
+        Array<{ id: string; full_name: string }>
+      >(
+        `SELECT
+                id,
+                CONCAT(last_name, first_name) AS full_name
+            FROM
+                doctors`
+      )
+      return result.map((doc) => ({
+        id: doc.id,
+        fullName: doc.full_name,
+      }))
+    } catch (e) {
+      throw new RepositoryError('DoctorRepository findByAll error', e as Error)
+    }
+  }
 }
