@@ -1,4 +1,4 @@
-import { GenderType } from 'domain/common'
+import { GenderType, Granularity } from 'domain/common'
 import {
   OnsiteCancelReasonType,
   TreatmentType,
@@ -74,13 +74,32 @@ export interface IFeedbackRepository extends IBaseRepository<Feedback> {
     clinicId?: string,
     timePeriod?: TimePeriodType,
     doctorId?: string,
-    patientId?: string
+    granularity?: Granularity
   ) => Promise<{
-    totalFeedbackCounts: number
-    oneStarFeedBackCount: number
+    totalFeedbacks: number
+    oneStarFeedbackCount: number
     twoStarFeedbackCount: number
     threeStarFeedbackCount: number
     fourStarFeedbackCount: number
     fiveStarFeedbackCount: number
+    oneStarFeedbackRate: number
+    twoStarFeedbackRate: number
+    threeStarFeedbackRate: number
+    fourStarFeedbackRate: number
+    fiveStarFeedbackRate: number
+    data: Array<{
+      date: string
+      feedbackCount: number
+      oneStarFeedbackCount: number
+      twoStarFeedbackCount: number
+      threeStarFeedbackCount: number
+      fourStarFeedbackCount: number
+      fiveStarFeedbackCount: number
+      oneStarFeedbackRate: number
+      twoStarFeedbackRate: number
+      threeStarFeedbackRate: number
+      fourStarFeedbackRate: number
+      fiveStarFeedbackRate: number
+    }>
   }>
 }

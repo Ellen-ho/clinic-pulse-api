@@ -6,11 +6,13 @@ import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFe
 import { RepositoryError } from 'infrastructure/error/RepositoryError'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import { Feedback, SelectedContent } from 'domain/feedback/Feedback'
-import { GenderType } from 'domain/common'
+import { GenderType, Granularity } from 'domain/common'
 import {
   OnsiteCancelReasonType,
   TreatmentType,
 } from 'domain/consultation/Consultation'
+import { getDateFormat } from 'infrastructure/utils/SqlDateFormat'
+import dayjs from 'dayjs'
 
 export class FeedbackRepository
   extends BaseRepository<FeedbackEntity, Feedback>
@@ -330,27 +332,54 @@ export class FeedbackRepository
     clinicId?: string,
     timePeriod?: TimePeriodType,
     doctorId?: string,
-    patientId?: string
+    granularity: Granularity = Granularity.DAY
   ): Promise<{
-    totalFeedbackCounts: number
-    oneStarFeedBackCount: number
+    totalFeedbacks: number
+    oneStarFeedbackCount: number
     twoStarFeedbackCount: number
     threeStarFeedbackCount: number
     fourStarFeedbackCount: number
     fiveStarFeedbackCount: number
+    oneStarFeedbackRate: number
+    twoStarFeedbackRate: number
+    threeStarFeedbackRate: number
+    fourStarFeedbackRate: number
+    fiveStarFeedbackRate: number
+    data: Array<{
+      date: string
+      feedbackCount: number
+      oneStarFeedbackCount: number
+      twoStarFeedbackCount: number
+      threeStarFeedbackCount: number
+      fourStarFeedbackCount: number
+      fiveStarFeedbackCount: number
+      oneStarFeedbackRate: number
+      twoStarFeedbackRate: number
+      threeStarFeedbackRate: number
+      fourStarFeedbackRate: number
+      fiveStarFeedbackRate: number
+    }>
   }> {
     try {
+      const startDateTime = dayjs(startDate)
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const endDateTime = dayjs(endDate)
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+
       const modifiedClinicId =
         clinicId !== undefined && clinicId !== '' ? clinicId : null
       const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
 
-      const modifiedPatientId = patientId !== undefined ? patientId : null
-
       const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+
+      const dateFormat = getDateFormat(granularity)
 
       const result = await this.getQuery<
         Array<{
-          totalfeedbackcounts: string
+          date: string
+          feedbackcount: string
           onestarfeedbackcount: string
           twostarfeedbackcount: string
           threestarfeedbackcount: string
@@ -359,42 +388,113 @@ export class FeedbackRepository
         }>
       >(
         `SELECT 
-          COUNT(*) AS totalfeedbackcounts,
-          COUNT(CASE WHEN f.feedback_rating = 1 THEN 1 END) AS onestarfeedbackcount,
-          COUNT(CASE WHEN f.feedback_rating = 2 THEN 1 END) AS twostarfeedbackcount,
-          COUNT(CASE WHEN f.feedback_rating = 3 THEN 1 END) AS threestarfeedbackcount,
-          COUNT(CASE WHEN f.feedback_rating = 4 THEN 1 END) AS fourstarfeedbackcount,
-          COUNT(CASE WHEN f.feedback_rating = 5 THEN 1 END) AS fivestarfeedbackcount
-          FROM 
-              feedbacks f
-          JOIN 
-              consultations c ON f.consultation_id = c.id
-          JOIN 
-              time_slots ts ON c.time_slot_id = ts.id
-          WHERE 
-              f.received_at BETWEEN $1 AND $2
-              AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
-              AND ($4::text IS NULL OR ts.time_period = $4::text)
-              AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid)
-              AND ($6::uuid IS NULL OR c.patient_id = $6::uuid);
-        `,
+        TO_CHAR(f.received_at, '${dateFormat}') AS date,
+        COUNT(*) AS feedbackcount,
+        COUNT(CASE WHEN f.feedback_rating = 1 THEN 1 END) AS onestarfeedbackcount,
+        COUNT(CASE WHEN f.feedback_rating = 2 THEN 1 END) AS twostarfeedbackcount,
+        COUNT(CASE WHEN f.feedback_rating = 3 THEN 1 END) AS threestarfeedbackcount,
+        COUNT(CASE WHEN f.feedback_rating = 4 THEN 1 END) AS fourstarfeedbackcount,
+        COUNT(CASE WHEN f.feedback_rating = 5 THEN 1 END) AS fivestarfeedbackcount
+        FROM feedbacks f
+        JOIN consultations c ON f.consultation_id = c.id
+        JOIN time_slots ts ON c.time_slot_id = ts.id
+        WHERE f.received_at BETWEEN $1 AND $2
+          AND ($3::uuid IS NULL OR ts.clinic_id = $3)
+          AND ($4::text IS NULL OR ts.time_period = $4)
+          AND ($5::uuid IS NULL OR ts.doctor_id = $5)
+        GROUP BY TO_CHAR(f.received_at, '${dateFormat}')
+        ORDER BY date;
+      `,
         [
-          startDate,
-          endDate,
+          startDateTime,
+          endDateTime,
           modifiedClinicId,
           modifiedTimePeriod,
           modifiedDoctorId,
-          modifiedPatientId,
         ]
       )
 
+      const totalFeedbackCounts = result.reduce(
+        (sum, row) => sum + parseInt(row.feedbackcount, 10),
+        0
+      )
+      const totalOneStarFeedbackCount = result.reduce(
+        (sum, row) => sum + parseInt(row.onestarfeedbackcount, 10),
+        0
+      )
+      const totalTwoStarFeedbackCount = result.reduce(
+        (sum, row) => sum + parseInt(row.twostarfeedbackcount, 10),
+        0
+      )
+      const totalThreeStarFeedbackCount = result.reduce(
+        (sum, row) => sum + parseInt(row.threestarfeedbackcount, 10),
+        0
+      )
+      const totalFourStarFeedbackCount = result.reduce(
+        (sum, row) => sum + parseInt(row.fourstarfeedbackcount, 10),
+        0
+      )
+      const totalFiveStarFeedbackCount = result.reduce(
+        (sum, row) => sum + parseInt(row.fivestarfeedbackcount, 10),
+        0
+      )
+
       return {
-        totalFeedbackCounts: parseInt(result[0].totalfeedbackcounts, 10),
-        oneStarFeedBackCount: parseInt(result[0].onestarfeedbackcount, 10),
-        twoStarFeedbackCount: parseInt(result[0].twostarfeedbackcount, 10),
-        threeStarFeedbackCount: parseInt(result[0].threestarfeedbackcount, 10),
-        fourStarFeedbackCount: parseInt(result[0].fourstarfeedbackcount, 10),
-        fiveStarFeedbackCount: parseInt(result[0].fivestarfeedbackcount, 10),
+        totalFeedbacks: totalFeedbackCounts,
+        oneStarFeedbackCount: totalOneStarFeedbackCount,
+        twoStarFeedbackCount: totalTwoStarFeedbackCount,
+        threeStarFeedbackCount: totalThreeStarFeedbackCount,
+        fourStarFeedbackCount: totalFourStarFeedbackCount,
+        fiveStarFeedbackCount: totalFiveStarFeedbackCount,
+        oneStarFeedbackRate: Math.round(
+          (totalOneStarFeedbackCount / totalFeedbackCounts) * 100
+        ),
+        twoStarFeedbackRate: Math.round(
+          (totalTwoStarFeedbackCount / totalFeedbackCounts) * 100
+        ),
+        threeStarFeedbackRate: Math.round(
+          (totalThreeStarFeedbackCount / totalFeedbackCounts) * 100
+        ),
+        fourStarFeedbackRate: Math.round(
+          (totalFourStarFeedbackCount / totalFeedbackCounts) * 100
+        ),
+        fiveStarFeedbackRate: Math.round(
+          (totalFiveStarFeedbackCount / totalFeedbackCounts) * 100
+        ),
+        data: result.map((row) => ({
+          date: row.date,
+          feedbackCount: parseInt(row.feedbackcount, 10),
+          oneStarFeedbackCount: parseInt(row.onestarfeedbackcount, 10),
+          twoStarFeedbackCount: parseInt(row.twostarfeedbackcount, 10),
+          threeStarFeedbackCount: parseInt(row.threestarfeedbackcount, 10),
+          fourStarFeedbackCount: parseInt(row.fourstarfeedbackcount, 10),
+          fiveStarFeedbackCount: parseInt(row.fivestarfeedbackcount, 10),
+          oneStarFeedbackRate: Math.round(
+            (parseInt(row.onestarfeedbackcount, 10) /
+              parseInt(row.feedbackcount, 10)) *
+              100
+          ),
+          twoStarFeedbackRate: Math.round(
+            (parseInt(row.twostarfeedbackcount, 10) /
+              parseInt(row.feedbackcount, 10)) *
+              100
+          ),
+          threeStarFeedbackRate: Math.round(
+            (parseInt(row.threestarfeedbackcount, 10) /
+              parseInt(row.feedbackcount, 10)) *
+              100
+          ),
+          fourStarFeedbackRate: Math.round(
+            (parseInt(row.fourstarfeedbackcount, 10) /
+              parseInt(row.feedbackcount, 10)) *
+              100
+          ),
+          fiveStarFeedbackRate: Math.round(
+            (parseInt(row.fivestarfeedbackcount, 10) /
+              parseInt(row.feedbackcount, 10)) *
+              100
+          ),
+        })),
       }
     } catch (e) {
       throw new RepositoryError(

@@ -1,3 +1,4 @@
+import { Granularity } from 'domain/common'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import Joi from 'joi'
 
@@ -33,6 +34,8 @@ export const getFeedbackCountAndRateSchema = {
       .valid(...Object.values(TimePeriodType))
       .optional(),
     doctorId: Joi.string().optional(),
-    patientId: Joi.string().optional(),
+    granularity: Joi.string()
+      .valid(...Object.values(Granularity))
+      .optional(),
   }),
 }
