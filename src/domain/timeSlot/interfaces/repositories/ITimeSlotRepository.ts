@@ -21,4 +21,14 @@ export interface ITimeSlotRepository extends IBaseRepository<TimeSlot> {
     doctorId: string,
     checkInAt: Date
   ) => Promise<{ timeSlotId: string }>
+  findCurrentTimeSlotForDoctor: (
+    doctorId: string,
+    currentTime: Date
+  ) => Promise<string | null>
+  findMatchingTimeSlotForAdmin: (
+    currentTime: Date,
+    clinicId?: string,
+    consultationRoomNumber?: string,
+    doctorId?: string
+  ) => Promise<Array<{ id: string }>>
 }

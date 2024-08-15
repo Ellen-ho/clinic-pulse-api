@@ -125,7 +125,11 @@ async function main(): Promise<void> {
     )
 
   const getConsultationRealTimeCountUseCase =
-    new GetConsultationRealTimeCountUseCase(consultationRepository)
+    new GetConsultationRealTimeCountUseCase(
+      consultationRepository,
+      doctorRepository,
+      timeSlotRepository
+    )
 
   const getAverageWaitingTimeUseCase = new GetAverageWaitingTimeUseCase(
     consultationRepository,
