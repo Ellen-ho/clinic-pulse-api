@@ -64,3 +64,14 @@ GET {{consultationsPath}}/different_treatments?granularity=WEEK&startDate=2024-0
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
+
+### create sconsultation
+POST {{consultationsPath}}/
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "patientId":"4123a4e7-ae3e-4ccc-9912-99a50c7bdcb2",
+  "doctorId": "bb8f4d80-b457-4d6f-8bfa-1f0d5e55143c"
+}
+###

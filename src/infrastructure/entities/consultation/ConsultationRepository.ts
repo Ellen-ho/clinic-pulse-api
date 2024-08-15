@@ -616,6 +616,9 @@ export class ConsultationRepository
           case ConsultationStatus.WAITING_FOR_NEEDLE_REMOVAL:
             response.waitForNeedleRemovedCount = count
             break
+          case ConsultationStatus.WAITING_FOR_GET_MEDICINE:
+            response.waitForMedicineCount = count
+            break
           case ConsultationStatus.CHECK_OUT:
             response.completedCount = count
             break
@@ -906,7 +909,7 @@ export class ConsultationRepository
     clinicId?: string,
     doctorId?: string,
     timePeriod?: TimePeriodType,
-    granularity: Granularity = Granularity.DAY // Default to DAY if not specified
+    granularity: Granularity = Granularity.DAY
   ): Promise<{
     totalConsultations: number
     data: Array<{
@@ -1145,9 +1148,65 @@ export class ConsultationRepository
           onlyMedicineCount: Number(day.onlymedicinecount),
         })),
       }
-    } catch (error) {
-      console.error('Error fetching consultation data:', error)
-      throw error
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository getDifferentTreatmentConsultation error',
+        e as Error
+      )
+    }
+  }
+
+  public async isFirstTimeVisit(patientId: string): Promise<boolean> {
+    const rawQuery = `
+      SELECT COUNT(*) AS count
+      FROM consultations
+      WHERE patient_id = $1;
+    `
+    const result = await this.getQuery<Array<{ count: number }>>(rawQuery, [
+      patientId,
+    ])
+    return result[0].count === 0
+  }
+
+  public async getLatestOddConsultationNumber(
+    timeSlotId: string
+  ): Promise<number> {
+    try {
+      const rawQuery = `
+        SELECT MAX(consultation_number) AS max_odd_number
+        FROM consultations
+        WHERE time_slot_id = $1 AND consultation_number % 2 <> 0;
+      `
+
+      const result = await this.getQuery<
+        Array<{ max_odd_number: number | null }>
+      >(rawQuery, [timeSlotId])
+
+      if (result.length === 0 || result[0].max_odd_number === null) {
+        return 1
+      }
+
+      return result[0].max_odd_number
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository getLatestOddConsultationNumber error',
+        e as Error
+      )
+    }
+  }
+
+  public async getById(id: string): Promise<Consultation | null> {
+    try {
+      const entity = await this.getRepo().findOne({
+        where: { id },
+        relations: ['acupunctureTreatment', 'medicineTreatment'],
+      })
+      return entity != null ? this.getMapper().toDomainModel(entity) : null
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultAppointmentEntity getById error',
+        e as Error
+      )
     }
   }
 

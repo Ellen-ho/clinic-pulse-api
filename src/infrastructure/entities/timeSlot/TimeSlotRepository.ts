@@ -93,4 +93,39 @@ export class TimeSlotRepository
       )
     }
   }
+
+  public async findMatchingTimeSlot(
+    doctorId: string,
+    checkInAt: Date
+  ): Promise<{ timeSlotId: string }> {
+    try {
+      const utc8Date = new Date(checkInAt.getTime() + 8 * 60 * 60 * 1000)
+      const checkInDate = utc8Date.toISOString().slice(0, 10)
+      const checkInTime = utc8Date.toISOString().slice(11, 16)
+
+      const result = await this.getQuery<
+        Array<{
+          time_slot_id: string
+        }>
+      >(
+        `
+          SELECT id AS time_slot_id
+          FROM time_slots
+          WHERE doctor_id = $1
+            AND CAST(start_at AS date) = $2
+            AND CAST(start_at AS time) <= $3
+            AND CAST(end_at AS time) >= $3
+          LIMIT 1;
+        `,
+        [doctorId, checkInDate, checkInTime]
+      )
+
+      return { timeSlotId: result[0].time_slot_id }
+    } catch (e) {
+      throw new RepositoryError(
+        'TimeSlotRepository findMatchingTimeSlot error',
+        e as Error
+      )
+    }
+  }
 }

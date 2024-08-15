@@ -17,4 +17,8 @@ export interface ITimeSlotRepository extends IBaseRepository<TimeSlot> {
       timeSlotCount: number
     }>
   }>
+  findMatchingTimeSlot: (
+    doctorId: string,
+    checkInAt: Date
+  ) => Promise<{ timeSlotId: string }>
 }

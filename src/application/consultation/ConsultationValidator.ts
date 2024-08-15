@@ -105,3 +105,10 @@ export const getDifferentTreatmentConsultationSchema = {
     doctorId: Joi.string().optional(),
   }),
 }
+
+export const createConsultationSchema = {
+  body: Joi.object({
+    patientId: Joi.string().required(),
+    doctorId: Joi.string().required(),
+  }),
+}

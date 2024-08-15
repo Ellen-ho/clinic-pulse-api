@@ -24,6 +24,7 @@ export enum ConsultationSource {
 }
 
 export enum ConsultationStatus {
+  IN_CONSULTATION = 'IN_CONSULTATION',
   WAITING_FOR_CONSULTATION = 'WAITING_FOR_CONSULTATION',
   WAITING_FOR_BED_ASSIGNMENT = 'WAITING_FOR_BED_ASSIGNMENT',
   WAITING_FOR_ACUPUNCTURE_TREATMENT = 'WAITING_FOR_ACUPUNCTURE_TREATMENT',
@@ -45,6 +46,26 @@ export enum OnsiteCancelReasonType {
   SERVICE_DISSATISFACTION = 'SERVICE_DISSATISFACTION',
   PERSONAL_EMERGENCY = 'PERSONAL_EMERGENCY',
   NO_PARKING_SPACES = 'NO_PARKING_SPACES',
+}
+
+interface IConsultaionUpdateStartAt {
+  [key: string]: any
+  status: ConsultationStatus
+  startAt: Date | null
+}
+
+interface IConsultaionUpdateToAcupuncture {
+  [key: string]: any
+  status: ConsultationStatus
+  endAt: Date | null
+  acupunctureTreatment: AcupunctureTreatment
+}
+
+interface IConsultaionUpdateToMedicine {
+  [key: string]: any
+  status: ConsultationStatus
+  endAt: Date | null
+  medicineTreatment: MedicineTreatment
 }
 
 export class Consultation {
@@ -108,5 +129,22 @@ export class Consultation {
 
   public get timeSlotId(): string {
     return this.props.timeSlotId
+  }
+
+  public updateStartAt(data: IConsultaionUpdateStartAt): void {
+    this.props.status = data.status
+    this.props.startAt = data.startAt
+  }
+
+  public updateToAcupuncture(data: IConsultaionUpdateToAcupuncture): void {
+    this.props.status = data.status
+    this.props.endAt = data.endAt
+    this.props.acupunctureTreatment = data.acupunctureTreatment
+  }
+
+  public updateToMedicine(data: IConsultaionUpdateToMedicine): void {
+    this.props.status = data.status
+    this.props.endAt = data.endAt
+    this.props.medicineTreatment = data.medicineTreatment
   }
 }

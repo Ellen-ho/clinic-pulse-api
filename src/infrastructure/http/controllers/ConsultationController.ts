@@ -10,6 +10,7 @@ import { GetDifferentTreatmentConsultationUseCase } from 'application/consultati
 import { User } from 'domain/user/User'
 import { Granularity } from 'domain/common'
 import { GetConsultationOnsiteCanceledAndBookingUseCase } from 'application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
+import { CreateConsultationUseCase } from 'application/consultation/CreateConsultationUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
@@ -35,6 +36,7 @@ export interface IConsultationController {
     req: Request,
     res: Response
   ) => Promise<Response>
+  createConsultation: (req: Request, res: Response) => Promise<Response>
 }
 
 export class ConsultationController implements IConsultationController {
@@ -46,7 +48,8 @@ export class ConsultationController implements IConsultationController {
     private readonly getAverageWaitingTimeUseCase: GetAverageWaitingTimeUseCase,
     private readonly getFirstTimeConsultationCountAndRateUseCase: GetFirstTimeConsultationCountAndRateUseCase,
     private readonly getAverageConsultationCountUseCase: GetAverageConsultationCountUseCase,
-    private readonly getDifferentTreatmentConsultationUseCase: GetDifferentTreatmentConsultationUseCase
+    private readonly getDifferentTreatmentConsultationUseCase: GetDifferentTreatmentConsultationUseCase,
+    private readonly createConsultationUseCase: CreateConsultationUseCase
   ) {}
 
   public getConsultationList = async (
@@ -197,5 +200,14 @@ export class ConsultationController implements IConsultationController {
     )
 
     return res.status(200).json(result)
+  }
+
+  public createConsultation = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = { ...req.body }
+    const consultation = await this.createConsultationUseCase.execute(request)
+    return res.status(200).json(consultation)
   }
 }

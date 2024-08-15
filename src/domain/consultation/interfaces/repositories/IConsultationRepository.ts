@@ -8,7 +8,6 @@ import { IBaseRepository } from 'domain/shared/IBaseRepository'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 
 export interface IConsultationRepository extends IBaseRepository<Consultation> {
-  save: (consultation: Consultation) => Promise<void>
   findById: (id: string) => Promise<{
     id: string
     consultationDate: string
@@ -184,4 +183,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       onlyMedicineCount: number
     }>
   }>
+  isFirstTimeVisit: (patientId: string) => Promise<boolean>
+  getLatestOddConsultationNumber: (timeSlotId: string) => Promise<number>
+  getById: (id: string) => Promise<Consultation | null>
 }
