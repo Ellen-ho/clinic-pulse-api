@@ -9,6 +9,7 @@ export interface IConsultationProps {
   checkInAt: Date
   startAt: Date | null
   endAt: Date | null
+  checkOutAt: Date | null
   onsiteCancelAt: Date | null
   onsiteCancelReason: OnsiteCancelReasonType | null
   isFirstTimeVisit: boolean
@@ -51,21 +52,32 @@ export enum OnsiteCancelReasonType {
 interface IConsultaionUpdateStartAt {
   [key: string]: any
   status: ConsultationStatus
-  startAt: Date | null
+  startAt: Date
 }
 
 interface IConsultaionUpdateToAcupuncture {
   [key: string]: any
   status: ConsultationStatus
-  endAt: Date | null
+  endAt: Date
   acupunctureTreatment: AcupunctureTreatment
 }
 
 interface IConsultaionUpdateToMedicine {
   [key: string]: any
   status: ConsultationStatus
-  endAt: Date | null
+  endAt: Date
   medicineTreatment: MedicineTreatment
+}
+
+interface IConsultaionUpdateCheckOutAt {
+  [key: string]: any
+  status: ConsultationStatus
+  checkOutAt: Date
+}
+
+interface IConsultaionUpdateStatus {
+  [key: string]: any
+  status: ConsultationStatus
 }
 
 export class Consultation {
@@ -146,5 +158,14 @@ export class Consultation {
     this.props.status = data.status
     this.props.endAt = data.endAt
     this.props.medicineTreatment = data.medicineTreatment
+  }
+
+  public updateToCheckOutAt(data: IConsultaionUpdateCheckOutAt): void {
+    this.props.status = data.status
+    this.props.checkOutAt = data.checkOutAt
+  }
+
+  public updateStatus(data: IConsultaionUpdateStatus): void {
+    this.props.status = data.status
   }
 }
