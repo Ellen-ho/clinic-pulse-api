@@ -11,6 +11,7 @@ import { User } from 'domain/user/User'
 import { Granularity } from 'domain/common'
 import { GetConsultationOnsiteCanceledAndBookingUseCase } from 'application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
 import { CreateConsultationUseCase } from 'application/consultation/CreateConsultationUseCase'
+import { UpdateConsultationCheckOutAtUseCase } from 'application/consultation/UpdateConsultationCheckOutAtUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
@@ -37,6 +38,10 @@ export interface IConsultationController {
     res: Response
   ) => Promise<Response>
   createConsultation: (req: Request, res: Response) => Promise<Response>
+  updateConsultationCheckOutAt: (
+    req: Request,
+    res: Response
+  ) => Promise<Response>
 }
 
 export class ConsultationController implements IConsultationController {
@@ -49,7 +54,8 @@ export class ConsultationController implements IConsultationController {
     private readonly getFirstTimeConsultationCountAndRateUseCase: GetFirstTimeConsultationCountAndRateUseCase,
     private readonly getAverageConsultationCountUseCase: GetAverageConsultationCountUseCase,
     private readonly getDifferentTreatmentConsultationUseCase: GetDifferentTreatmentConsultationUseCase,
-    private readonly createConsultationUseCase: CreateConsultationUseCase
+    private readonly createConsultationUseCase: CreateConsultationUseCase,
+    private readonly updateConsultationCheckOutAtUseCase: UpdateConsultationCheckOutAtUseCase
   ) {}
 
   public getConsultationList = async (
@@ -211,5 +217,16 @@ export class ConsultationController implements IConsultationController {
     const request = { ...req.body }
     const consultation = await this.createConsultationUseCase.execute(request)
     return res.status(200).json(consultation)
+  }
+
+  public updateConsultationCheckOutAt = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const consultationRequest = {
+      id: '6a7815ff-6d51-4351-b765-28b68ce61843',
+    }
+    await this.updateConsultationCheckOutAtUseCase.execute(consultationRequest)
+    return res.status(200).json()
   }
 }
