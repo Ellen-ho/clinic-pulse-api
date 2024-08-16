@@ -8,6 +8,24 @@ export interface IAcupunctureTreatmentProps {
   needleCounts: number | null
 }
 
+interface IAcupunctureTreatmentAssignBedUpdate {
+  [key: string]: any
+  assignBedAt: Date
+  bedId: string
+}
+
+interface IAcupunctureTreatmentStartAtUpdate {
+  [key: string]: any
+  startAt: Date
+  endAt: Date
+  needleCounts: number
+}
+
+interface IAcupunctureTreatmentRemoveNeedleAtUpdate {
+  [key: string]: any
+  removeNeedleAt: Date
+}
+
 export class AcupunctureTreatment {
   constructor(private readonly props: IAcupunctureTreatmentProps) {}
 
@@ -37,5 +55,26 @@ export class AcupunctureTreatment {
 
   public get needleCounts(): number | null {
     return this.props.needleCounts
+  }
+
+  public updateAcupunctureTreatmentAssignBed(
+    data: IAcupunctureTreatmentAssignBedUpdate
+  ): void {
+    this.props.assignBedAt = data.assignBedAt
+    this.props.bedId = data.bedId
+  }
+
+  public updateAcupunctureTreatmentStartAt(
+    data: IAcupunctureTreatmentStartAtUpdate
+  ): void {
+    this.props.startAt = data.startAt
+    this.props.endAt = data.endAt
+    this.props.needleCounts = data.needleCounts
+  }
+
+  public updateAcupunctureTreatmentRemoveNeedleAt(
+    data: IAcupunctureTreatmentRemoveNeedleAtUpdate
+  ): void {
+    this.props.removeNeedleAt = data.removeNeedleAt
   }
 }
