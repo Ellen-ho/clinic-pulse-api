@@ -12,6 +12,7 @@ import { Granularity } from 'domain/common'
 import { GetConsultationOnsiteCanceledAndBookingUseCase } from 'application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
 import { CreateConsultationUseCase } from 'application/consultation/CreateConsultationUseCase'
 import { UpdateConsultationCheckOutAtUseCase } from 'application/consultation/UpdateConsultationCheckOutAtUseCase'
+import { UpdateConsultationStartAtUseCase } from 'application/consultation/UpdateConsultationStartAtUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
@@ -38,6 +39,7 @@ export interface IConsultationController {
     res: Response
   ) => Promise<Response>
   createConsultation: (req: Request, res: Response) => Promise<Response>
+  updateConsultationStartAt: (req: Request, res: Response) => Promise<Response>
   updateConsultationCheckOutAt: (
     req: Request,
     res: Response
@@ -55,7 +57,8 @@ export class ConsultationController implements IConsultationController {
     private readonly getAverageConsultationCountUseCase: GetAverageConsultationCountUseCase,
     private readonly getDifferentTreatmentConsultationUseCase: GetDifferentTreatmentConsultationUseCase,
     private readonly createConsultationUseCase: CreateConsultationUseCase,
-    private readonly updateConsultationCheckOutAtUseCase: UpdateConsultationCheckOutAtUseCase
+    private readonly updateConsultationCheckOutAtUseCase: UpdateConsultationCheckOutAtUseCase,
+    private readonly updateConsultationStartAtUseCase: UpdateConsultationStartAtUseCase
   ) {}
 
   public getConsultationList = async (
@@ -228,5 +231,16 @@ export class ConsultationController implements IConsultationController {
     }
     await this.updateConsultationCheckOutAtUseCase.execute(consultationRequest)
     return res.status(200).json()
+  }
+
+  public updateConsultationStartAt = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      id: req.params.id,
+    }
+    const result = await this.updateConsultationStartAtUseCase.execute(request)
+    return res.status(200).json(result)
   }
 }

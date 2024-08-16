@@ -75,6 +75,11 @@ export class ConsultationRoutes {
         validator(getConsultationListSchema),
         asyncHandler(this.consultationController.getConsultationList)
       )
+      .patch(
+        '/:id',
+        authenticated,
+        asyncHandler(this.consultationController.updateConsultationStartAt)
+      )
       .post(
         '/',
         authenticated,

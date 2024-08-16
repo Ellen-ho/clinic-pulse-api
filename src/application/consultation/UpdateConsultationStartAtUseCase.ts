@@ -1,6 +1,7 @@
 import { ConsultationStatus } from 'domain/consultation/Consultation'
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
 import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { formatToUTC8 } from 'infrastructure/utils/DateFormatToUTC'
 
 interface UpdateConsultationStartAtRequest {
   id: string
@@ -29,7 +30,11 @@ export class UpdateConsultationStartAtUseCase {
     }
 
     const updatedStatus = ConsultationStatus.IN_CONSULTATION
-    const updatedStartAt = new Date()
+    const updatedStartAt = formatToUTC8(new Date())
+    console.table({
+      toLocaleTimeString: updatedStartAt.toLocaleTimeString,
+      toISOString: updatedStartAt.toISOString(),
+    })
 
     existingConsultation.updateStartAt({
       status: updatedStatus,

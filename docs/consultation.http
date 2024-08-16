@@ -23,7 +23,7 @@ Content-Type: application/json
 ###
 
 ### get single consultation 
-@consultationId = 56f8f1ae-4071-4606-b9b8-a6f807481b6f
+@consultationId = e1b92d4d-b73b-4592-bd68-a42fc6472cc5
 GET {{consultationsPath}}/{{consultationId}}
 Authorization: {{accessToken}}
 Content-Type: application/json
@@ -65,13 +65,21 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
-### create sconsultation
+### create consultation
 POST {{consultationsPath}}/
 Authorization: {{accessToken}}
 Content-Type: application/json
 
 {
-  "patientId":"4123a4e7-ae3e-4ccc-9912-99a50c7bdcb2",
-  "doctorId": "bb8f4d80-b457-4d6f-8bfa-1f0d5e55143c"
+  "patientId":"da3ab31e-fa43-4162-aaf1-71ab66a8f3e6",
+  "doctorId": "008ce240-3f25-4e2a-a3e2-d62f5e20fe71"
 }
+###
+
+### update consultation startAt
+@id = c3f04914-86fe-42dc-b6b0-3dd039e5fba3
+PATCH {{consultationsPath}}/{{id}}
+Authorization: {{accessToken}}
+Content-Type: application/json
+
 ###
