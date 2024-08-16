@@ -58,6 +58,11 @@ import { UpdateAcupunctureTreatmentRemoveNeedleAtUseCase } from 'application/tre
 import { UpdateConsultationToWaitAcupunctureUseCase } from 'application/consultation/UpdateConsultationToWaitAcupunctureUseCase'
 import { UpdateConsultationToWaitRemoveNeedleUseCase } from 'application/consultation/UpdateConsultationToWaitRemoveNeedleUseCase'
 import { UpdateMedicineTreatmentUseCase } from 'application/treatment/UpdateMedicineTreatmentUseCase'
+import { CommonController } from 'infrastructure/http/controllers/CommonController'
+import { GetDoctorsAndClinicsUseCase } from 'application/common/GetDoctorsAndClinicsUseCase'
+import { ClinicRepository } from 'infrastructure/entities/clinic/ClinicRepository'
+import { CommonRoutes } from 'infrastructure/http/routes/CommonRoutes'
+import { UpdateConsultationStartAtUseCase } from 'application/consultation/UpdateConsultationStartAtUseCase'
 
 void main()
 
@@ -100,6 +105,7 @@ async function main(): Promise<void> {
   const medicineTreatmentRepository = new MedicineTreatmentRepository(
     dataSource
   )
+  const clinicRepository = new ClinicRepository(dataSource)
 
   // Domain
   const createUserUseCase = new CreateUserUseCase(
@@ -182,6 +188,10 @@ async function main(): Promise<void> {
     uuidService
   )
 
+  const updateConsultationStartAtUseCase = new UpdateConsultationStartAtUseCase(
+    consultationRepository
+  )
+
   const createAcupunctureTreatmentUseCase =
     new CreateAcupunctureTreatmentUseCase(
       acupunctureTreatmentRepository,
@@ -225,7 +235,14 @@ async function main(): Promise<void> {
     medicineTreatmentRepository
   )
 
+  const getDoctorsAndClinicsUseCase = new GetDoctorsAndClinicsUseCase(
+    doctorRepository,
+    clinicRepository
+  )
+
   // Controller
+  const commonController = new CommonController(getDoctorsAndClinicsUseCase)
+
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
@@ -242,7 +259,8 @@ async function main(): Promise<void> {
     getAverageConsultationCountUseCase,
     getDifferentTreatmentConsultationUseCase,
     createConsultationUseCase,
-    updateConsultationCheckOutAtUseCase
+    updateConsultationCheckOutAtUseCase,
+    updateConsultationStartAtUseCase
   )
 
   const feedbackController = new FeedbackController(
@@ -299,6 +317,7 @@ async function main(): Promise<void> {
     acupunctureTreatmentController
   )
   const medicineRoutes = new MedicineRoutes(medicineTreatmentController)
+  const commonRoutes = new CommonRoutes(commonController)
 
   const mainRoutes = new MainRoutes(
     userRoutes,
@@ -307,7 +326,8 @@ async function main(): Promise<void> {
     patientRoutes,
     doctorRoutes,
     acupunctureRoutes,
-    medicineRoutes
+    medicineRoutes,
+    commonRoutes
   )
 
   app.use(cors(corsOptions))
