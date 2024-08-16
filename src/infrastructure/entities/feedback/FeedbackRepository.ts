@@ -117,7 +117,7 @@ export class FeedbackRepository
           receivedAt: rawFeedback[0].received_at,
           feedbackRating: rawFeedback[0].feedback_rating,
           selectedContent: rawFeedback[0].selected_content,
-          detailedContent: rawFeedback[0].selected_content,
+          detailedContent: rawFeedback[0].detailed_content,
           consultation: {
             id: rawFeedback[0].consultation_id,
             consultationDate: rawFeedback[0].consultation_date,
