@@ -3,7 +3,7 @@ import { RoomNumberType } from '../../src/domain/consultationRoom/ConsultationRo
 export const CLINICS = [
   {
     id: '16458ab0-4bb6-4141-9bf0-6d7398942d9b',
-    name: 'Taichung',
+    name: '台中院區',
     address: {
       city: 'Anytown',
       line1: '1234 Maple Street',
@@ -16,7 +16,7 @@ export const CLINICS = [
   },
   {
     id: '690d0ea3-9f8d-4143-b160-0661a003bf08',
-    name: 'Taipei',
+    name: '台北院區',
     address: {
       city: 'Taipei',
       line1: 'No. 100, Section 2, Zhongxiao East Road',
@@ -29,7 +29,7 @@ export const CLINICS = [
   },
   {
     id: 'bf51c88e-9587-479e-994a-d15ec484c333',
-    name: 'Kaohsiung',
+    name: '高雄院區',
     address: {
       city: 'Kaohsiung',
       line1: 'No. 789, Yancheng District',
