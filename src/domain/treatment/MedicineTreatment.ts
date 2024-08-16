@@ -3,6 +3,11 @@ export interface IMedicineTreatmentProps {
   getMedicineAt: Date | null
 }
 
+interface IMedicineTreatmentUpdate {
+  [key: string]: any
+  getMedicineAt: Date
+}
+
 export class MedicineTreatment {
   constructor(private readonly props: IMedicineTreatmentProps) {}
 
@@ -12,5 +17,9 @@ export class MedicineTreatment {
 
   public get getMedicineAt(): Date | null {
     return this.props.getMedicineAt
+  }
+
+  public updateMedicineTreatment(data: IMedicineTreatmentUpdate): void {
+    this.props.getMedicineAt = data.getMedicineAt
   }
 }
