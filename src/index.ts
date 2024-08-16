@@ -51,6 +51,13 @@ import { AcupunctureRoutes } from 'infrastructure/http/routes/AcupunctureRoutes'
 import { MedicineRoutes } from 'infrastructure/http/routes/MedicineRoutes'
 import { UpdateConsultationToAcupunctureUseCase } from 'application/consultation/UpdateConsultationToAcupunctureUseCase'
 import { UpdateConsultationToMedicineUseCase } from 'application/consultation/UpdateConsultationToMedicineUseCase'
+import { UpdateConsultationCheckOutAtUseCase } from 'application/consultation/UpdateConsultationCheckOutAtUseCase'
+import { UpdateAcupunctureTreatmentAssignBedUseCase } from 'application/treatment/UpdateAcupunctureTreatmentAssignBedUseCase'
+import { UpdateAcupunctureTreatmentStartAtUseCase } from 'application/treatment/UpdateAcupunctureTreatmentStartAtUseCase'
+import { UpdateAcupunctureTreatmentRemoveNeedleAtUseCase } from 'application/treatment/UpdateAcupunctureTreatmentRemoveNeedleAtUseCase'
+import { UpdateConsultationToWaitAcupunctureUseCase } from 'application/consultation/UpdateConsultationToWaitAcupunctureUseCase'
+import { UpdateConsultationToWaitRemoveNeedleUseCase } from 'application/consultation/UpdateConsultationToWaitRemoveNeedleUseCase'
+import { UpdateMedicineTreatmentUseCase } from 'application/treatment/UpdateMedicineTreatmentUseCase'
 
 void main()
 
@@ -192,6 +199,32 @@ async function main(): Promise<void> {
   const updateConsultationToMedicineUseCase =
     new UpdateConsultationToMedicineUseCase(consultationRepository)
 
+  const updateConsultationCheckOutAtUseCase =
+    new UpdateConsultationCheckOutAtUseCase(consultationRepository)
+
+  const updateAcupunctureTreatmentAssignBedUseCase =
+    new UpdateAcupunctureTreatmentAssignBedUseCase(
+      acupunctureTreatmentRepository
+    )
+
+  const updateAcupunctureTreatmentStartAtUseCase =
+    new UpdateAcupunctureTreatmentStartAtUseCase(acupunctureTreatmentRepository)
+
+  const updateAcupunctureTreatmentRemoveNeedleAtUseCase =
+    new UpdateAcupunctureTreatmentRemoveNeedleAtUseCase(
+      acupunctureTreatmentRepository
+    )
+
+  const updateConsultationToWaitAcupunctureUseCase =
+    new UpdateConsultationToWaitAcupunctureUseCase(consultationRepository)
+
+  const updateConsultationToWaitRemoveNeedleUseCase =
+    new UpdateConsultationToWaitRemoveNeedleUseCase(consultationRepository)
+
+  const updateMedicineTreatmentUseCase = new UpdateMedicineTreatmentUseCase(
+    medicineTreatmentRepository
+  )
+
   // Controller
   const userController = new UserController(
     createUserUseCase,
@@ -208,7 +241,8 @@ async function main(): Promise<void> {
     getFirstTimeConsultationCountAndRateUseCase,
     getAverageConsultationCountUseCase,
     getDifferentTreatmentConsultationUseCase,
-    createConsultationUseCase
+    createConsultationUseCase,
+    updateConsultationCheckOutAtUseCase
   )
 
   const feedbackController = new FeedbackController(
@@ -225,12 +259,19 @@ async function main(): Promise<void> {
 
   const acupunctureTreatmentController = new AcupunctureTreatmentController(
     createAcupunctureTreatmentUseCase,
-    updateConsultationToAcupunctureUseCase
+    updateConsultationToAcupunctureUseCase,
+    updateAcupunctureTreatmentAssignBedUseCase,
+    updateAcupunctureTreatmentStartAtUseCase,
+    updateAcupunctureTreatmentRemoveNeedleAtUseCase,
+    updateConsultationToWaitAcupunctureUseCase,
+    updateConsultationToWaitRemoveNeedleUseCase
   )
 
   const medicineTreatmentController = new MedicineTreatmentController(
     createMedicineTreatmentUseCase,
-    updateConsultationToMedicineUseCase
+    updateConsultationToMedicineUseCase,
+    updateMedicineTreatmentUseCase,
+    updateConsultationCheckOutAtUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))
