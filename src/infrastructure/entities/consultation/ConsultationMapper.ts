@@ -16,6 +16,7 @@ export class ConsultationMapper
       checkInAt: entity.checkInAt,
       startAt: entity.startAt,
       endAt: entity.endAt,
+      checkOutAt: entity.checkOutAt,
       onsiteCancelAt: entity.onsiteCancelAt,
       onsiteCancelReason: entity.onsiteCancelReason,
       isFirstTimeVisit: entity.isFirstTimeVisit,
