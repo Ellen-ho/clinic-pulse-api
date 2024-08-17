@@ -1,13 +1,11 @@
 import { DataSource, Repository } from 'typeorm'
 import { Seeder, SeederFactoryManager } from 'typeorm-extension'
 import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
 import { TimeSlotEntity } from '../src/infrastructure/entities/timeSlot/TimeSlotEntity'
 import { DOCTORS } from './constant/users'
 import { ROOMS } from './constant/clinics'
 import { TimePeriodType } from '../src/domain/timeSlot/TimeSlot'
-
-dayjs.extend(utc)
+import { TARGET_MONTH } from './constant/setting'
 
 export default class TimeSlotSeeder implements Seeder {
   public async run(
@@ -15,10 +13,18 @@ export default class TimeSlotSeeder implements Seeder {
     factoryManager: SeederFactoryManager
   ): Promise<any> {
     const timeSlotRepository = dataSource.getRepository(TimeSlotEntity)
-    await generateTimeSlotsForMonth({
-      month: '2024-01',
-      timeSlotRepository,
-    })
+
+    /**
+     * SETTING
+     */
+    const months = TARGET_MONTH // Array of year-month strings
+
+    for (const month of months) {
+      await generateTimeSlotsForMonth({
+        month,
+        timeSlotRepository,
+      })
+    }
   }
 }
 
@@ -31,7 +37,7 @@ async function generateTimeSlotsForMonth({
   month,
   timeSlotRepository,
 }: GenerateTimeSlotsForMonthParams) {
-  const targetMonth = dayjs.utc(`${month}-01`)
+  const targetMonth = dayjs(`${month}-01`)
   const daysInMonth = targetMonth.daysInMonth()
   const timePeriods = [
     {
