@@ -184,7 +184,6 @@ async function main(): Promise<void> {
 
   const createConsultationUseCase = new CreateConsultationUseCase(
     consultationRepository,
-    timeSlotRepository,
     uuidService
   )
 
