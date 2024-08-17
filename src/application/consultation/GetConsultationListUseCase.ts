@@ -75,9 +75,9 @@ export class GetConsultationListUseCase {
       patientId,
       doctorId,
       currentUser,
+      page,
+      limit,
     } = request
-    const page: number = 1
-    const limit: number = 20
     const offset: number = getOffset(limit, page)
 
     let currentDoctorId
