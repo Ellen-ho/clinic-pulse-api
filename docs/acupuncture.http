@@ -21,3 +21,10 @@ POST {{acupuncturesPath}}/
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
+
+### update acupuncture assign bed
+@acupuntureId = 4d122970-8e74-49fe-8263-5b823562d02b
+PATCH {{acupuncturesPath}}/{{acupuntureId}}
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
