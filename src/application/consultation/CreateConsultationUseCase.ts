@@ -4,13 +4,12 @@ import {
   ConsultationStatus,
 } from 'domain/consultation/Consultation'
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
-import { ITimeSlotRepository } from 'domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
 import { IUuidService } from '../../domain/utils/IUuidService'
-import { formatToUTC8 } from 'infrastructure/utils/DateFormatToUTC'
 
 interface CreateConsultationRequest {
   patientId: string
-  doctorId: string
+  // doctorId: string
+  timeSlotId: string
 }
 
 interface CreateConsultationResponse {
@@ -20,28 +19,26 @@ interface CreateConsultationResponse {
 export class CreateConsultationUseCase {
   constructor(
     private readonly consultationRepository: IConsultationRepository,
-    private readonly timeSlotRepository: ITimeSlotRepository,
     private readonly uuidService: IUuidService
   ) {}
 
   public async execute(
     request: CreateConsultationRequest
   ): Promise<CreateConsultationResponse> {
-    const checkInAt = new Date()
-    const { patientId, doctorId } = request
+    const { patientId, timeSlotId } = request
 
     const isFirstTimeVisit = await this.consultationRepository.isFirstTimeVisit(
       patientId
     )
 
-    const timeSlotId = await this.timeSlotRepository.findMatchingTimeSlot(
-      doctorId,
-      checkInAt
-    )
+    // const timeSlotId = await this.timeSlotRepository.findMatchingTimeSlot(
+    //   doctorId,
+    //   checkInAt
+    // )
 
     const latestNumber =
       await this.consultationRepository.getLatestOddConsultationNumber(
-        timeSlotId.timeSlotId
+        timeSlotId
       )
 
     const consultationNumber = latestNumber + 2
@@ -54,16 +51,17 @@ export class CreateConsultationUseCase {
       status,
       source,
       consultationNumber,
-      checkInAt: formatToUTC8(new Date()),
+      checkInAt: new Date(),
       startAt: null,
       endAt: null,
+      checkOutAt: null,
       onsiteCancelAt: null,
       onsiteCancelReason: null,
       isFirstTimeVisit,
       acupunctureTreatment: null,
       medicineTreatment: null,
       patientId,
-      timeSlotId: timeSlotId.timeSlotId,
+      timeSlotId,
     })
 
     await this.consultationRepository.save(newConsultation)

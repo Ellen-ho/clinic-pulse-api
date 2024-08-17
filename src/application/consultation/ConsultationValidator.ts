@@ -109,7 +109,8 @@ export const getDifferentTreatmentConsultationSchema = {
 export const createConsultationSchema = {
   body: Joi.object({
     patientId: Joi.string().required(),
-    doctorId: Joi.string().required(),
+    // doctorId: Joi.string().required(),
+    timeSlotId: Joi.string().required(),
   }),
 }
 
