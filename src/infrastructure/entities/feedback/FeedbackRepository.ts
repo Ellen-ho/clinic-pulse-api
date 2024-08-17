@@ -178,6 +178,7 @@ export class FeedbackRepository
       clinicId: string
       clinicName: string
       consultationTimePeriod: TimePeriodType
+      consultationId: string
     }>
     totalCounts: number
   }> {
@@ -210,6 +211,7 @@ export class FeedbackRepository
           clinic_id: string
           clinic_name: string
           consultation_time_period: TimePeriodType
+          consultation_id: string
         }>
       >(
         `
@@ -226,7 +228,8 @@ export class FeedbackRepository
                 p.gender AS patient_gender,
                 cl.id AS clinic_id,
                 cl.name AS clinic_name,
-                ts.time_period AS consultation_time_period
+                ts.time_period AS consultation_time_period,
+                c.id AS consultation_id
                 FROM
                 feedbacks f
                 JOIN consultations c ON f.consultation_id = c.id
@@ -312,6 +315,7 @@ export class FeedbackRepository
         clinicId: rawFeedback.clinic_id,
         clinicName: rawFeedback.clinic_name,
         consultationTimePeriod: rawFeedback.consultation_time_period,
+        consultationId: rawFeedback.consultation_id,
       }))
 
       return {

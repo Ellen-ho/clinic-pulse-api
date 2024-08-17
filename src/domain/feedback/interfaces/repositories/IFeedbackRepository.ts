@@ -65,6 +65,7 @@ export interface IFeedbackRepository extends IBaseRepository<Feedback> {
       clinicId: string
       clinicName: string
       consultationTimePeriod: TimePeriodType
+      consultationId: string
     }>
     totalCounts: number
   }>
