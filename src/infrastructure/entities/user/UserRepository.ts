@@ -30,7 +30,6 @@ export class UserRepository
       const entity = await this.getRepo().findOne({
         where: { email },
       })
-      console.table({ entity })
       return entity != null ? this.getMapper().toDomainModel(entity) : null
     } catch (e) {
       throw new RepositoryError('UserRepository findByEmail error', e as Error)
