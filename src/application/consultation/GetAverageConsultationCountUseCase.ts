@@ -1,10 +1,10 @@
-import { Granularity } from 'domain/common'
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { ITimeSlotRepository } from 'domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
-import { User, UserRoleType } from 'domain/user/User'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { Granularity } from '../../domain/common'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
+import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
+import { ITimeSlotRepository } from '../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
+import { User, UserRoleType } from '../../domain/user/User'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface GetAverageConsultationCountRequest {
   startDate: string

@@ -1,6 +1,6 @@
-import { AcupunctureTreatment } from 'domain/treatment/AcupunctureTreatment'
-import { IAcupunctureTreatmentRepository } from 'domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
-import { IUuidService } from 'domain/utils/IUuidService'
+import { AcupunctureTreatment } from '../../domain/treatment/AcupunctureTreatment'
+import { IAcupunctureTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
+import { IUuidService } from '../../domain/utils/IUuidService'
 
 interface CreateAcupunctureTreatmentResponse {
   acupunctureTreatment: AcupunctureTreatment

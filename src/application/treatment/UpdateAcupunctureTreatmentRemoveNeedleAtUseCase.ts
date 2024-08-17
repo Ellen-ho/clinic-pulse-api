@@ -1,9 +1,9 @@
-import { IAcupunctureTreatmentRepository } from "domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository";
-import { NotFoundError } from "infrastructure/error/NotFoundError";
-import { formatToUTC8 } from "infrastructure/utils/DateFormatToUTC";
+import { IAcupunctureTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
+import { formatToUTC8 } from '../../infrastructure/utils/DateFormatToUTC'
 
 interface UpdateAcupunctureTreatmentRemoveNeedleAtRequest {
-  id: string;
+  id: string
 }
 
 export class UpdateAcupunctureTreatmentRemoveNeedleAtUseCase {
@@ -14,23 +14,21 @@ export class UpdateAcupunctureTreatmentRemoveNeedleAtUseCase {
   public async execute(
     request: UpdateAcupunctureTreatmentRemoveNeedleAtRequest
   ): Promise<void> {
-    const id = "6a7815ff-6d51-4351-b765-28b68ce61843";
+    const id = '6a7815ff-6d51-4351-b765-28b68ce61843'
 
     const existingAcupunctureTreatment =
-      await this.acupunctureTreatmentRepository.getById(id);
+      await this.acupunctureTreatmentRepository.getById(id)
 
     if (existingAcupunctureTreatment == null) {
-      throw new NotFoundError("This acupuncture treatment does not exist.");
+      throw new NotFoundError('This acupuncture treatment does not exist.')
     }
 
-    const updatedAcupunctureRemoveNeedleAt = formatToUTC8(new Date());
+    const updatedAcupunctureRemoveNeedleAt = formatToUTC8(new Date())
 
     existingAcupunctureTreatment.updateAcupunctureTreatmentRemoveNeedleAt({
       removeNeedleAt: updatedAcupunctureRemoveNeedleAt,
-    });
+    })
 
-    await this.acupunctureTreatmentRepository.save(
-      existingAcupunctureTreatment
-    );
+    await this.acupunctureTreatmentRepository.save(existingAcupunctureTreatment)
   }
 }

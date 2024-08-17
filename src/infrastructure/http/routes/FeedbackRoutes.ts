@@ -7,7 +7,7 @@ import {
   getFeedbackCountAndRateSchema,
   getFeedbackListSchema,
   getSingleFeedbackSchema,
-} from 'application/feedback/FeedbackValidator'
+} from '../../../application/feedback/FeedbackValidator'
 
 export class FeedbackRoutes {
   private readonly routes: Router

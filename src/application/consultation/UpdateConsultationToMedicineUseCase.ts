@@ -1,7 +1,7 @@
-import { ConsultationStatus } from 'domain/consultation/Consultation'
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
-import { MedicineTreatment } from 'domain/treatment/MedicineTreatment'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { ConsultationStatus } from '../../domain/consultation/Consultation'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
+import { MedicineTreatment } from '../../domain/treatment/MedicineTreatment'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface UpdateConsultationToMedicineRequest {
   id: string

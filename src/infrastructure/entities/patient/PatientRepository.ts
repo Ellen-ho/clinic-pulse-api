@@ -1,10 +1,10 @@
-import { BaseRepository } from 'infrastructure/database/BaseRepository'
+import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
 import { PatientEntity } from './PatientEntity'
-import { Patient } from 'domain/patient/Patient'
+import { Patient } from '../../../domain/patient/Patient'
 import { DataSource } from 'typeorm'
 import { PatientMapper } from './PatientMapper'
-import { IPatientRepository } from 'domain/patient/interfaces/repositories/IPatientRepository'
-import { RepositoryError } from 'infrastructure/error/RepositoryError'
+import { IPatientRepository } from '../../../domain/patient/interfaces/repositories/IPatientRepository'
+import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 
 export class PatientRepository
   extends BaseRepository<PatientEntity, Patient>

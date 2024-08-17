@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { UpdateConsultationToMedicineUseCase } from 'application/consultation/UpdateConsultationToMedicineUseCase'
-import { CreateMedicineTreatmentUseCase } from 'application/treatment/CreateMedicineTreatmentUseCase'
-import { UpdateMedicineTreatmentUseCase } from 'application/treatment/UpdateMedicineTreatmentUseCase'
-import { UpdateConsultationCheckOutAtUseCase } from 'application/consultation/UpdateConsultationCheckOutAtUseCase'
+import { UpdateConsultationToMedicineUseCase } from '../../../application/consultation/UpdateConsultationToMedicineUseCase'
+import { CreateMedicineTreatmentUseCase } from '../../../application/treatment/CreateMedicineTreatmentUseCase'
+import { UpdateMedicineTreatmentUseCase } from '../../../application/treatment/UpdateMedicineTreatmentUseCase'
+import { UpdateConsultationCheckOutAtUseCase } from '../../../application/consultation/UpdateConsultationCheckOutAtUseCase'
 
 export interface IMedicineTreatmentController {
   createMedicineTreatment: (req: Request, res: Response) => Promise<Response>

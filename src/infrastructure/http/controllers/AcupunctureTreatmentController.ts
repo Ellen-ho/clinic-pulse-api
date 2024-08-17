@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
-import { UpdateConsultationToAcupunctureUseCase } from 'application/consultation/UpdateConsultationToAcupunctureUseCase'
-import { CreateAcupunctureTreatmentUseCase } from 'application/treatment/CreateAcupunctureTreatmentUseCase'
-import { UpdateAcupunctureTreatmentAssignBedUseCase } from 'application/treatment/UpdateAcupunctureTreatmentAssignBedUseCase'
-import { UpdateAcupunctureTreatmentStartAtUseCase } from 'application/treatment/UpdateAcupunctureTreatmentStartAtUseCase'
-import { UpdateConsultationToWaitAcupunctureUseCase } from 'application/consultation/UpdateConsultationToWaitAcupunctureUseCase'
-import { UpdateAcupunctureTreatmentRemoveNeedleAtUseCase } from 'application/treatment/UpdateAcupunctureTreatmentRemoveNeedleAtUseCase'
-import { UpdateConsultationToWaitRemoveNeedleUseCase } from 'application/consultation/UpdateConsultationToWaitRemoveNeedleUseCase'
+import { UpdateConsultationToAcupunctureUseCase } from '../../../application/consultation/UpdateConsultationToAcupunctureUseCase'
+import { CreateAcupunctureTreatmentUseCase } from '../../../application/treatment/CreateAcupunctureTreatmentUseCase'
+import { UpdateAcupunctureTreatmentAssignBedUseCase } from '../../../application/treatment/UpdateAcupunctureTreatmentAssignBedUseCase'
+import { UpdateAcupunctureTreatmentStartAtUseCase } from '../../../application/treatment/UpdateAcupunctureTreatmentStartAtUseCase'
+import { UpdateConsultationToWaitAcupunctureUseCase } from '../../../application/consultation/UpdateConsultationToWaitAcupunctureUseCase'
+import { UpdateAcupunctureTreatmentRemoveNeedleAtUseCase } from '../../../application/treatment/UpdateAcupunctureTreatmentRemoveNeedleAtUseCase'
+import { UpdateConsultationToWaitRemoveNeedleUseCase } from '../../../application/consultation/UpdateConsultationToWaitRemoveNeedleUseCase'
 
 export interface IAcupunctureTreatmentController {
   createAcupunctureTreatment: (req: Request, res: Response) => Promise<Response>

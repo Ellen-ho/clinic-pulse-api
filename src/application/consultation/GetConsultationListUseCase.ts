@@ -3,7 +3,7 @@ import {
   OnsiteCancelReasonType,
   TreatmentType,
 } from '../../domain/consultation/Consultation'
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
 import { getOffset, getPagination } from '../../infrastructure/utils/Pagination'
 import { User, UserRoleType } from '../../domain/user/User'

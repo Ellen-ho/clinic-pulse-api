@@ -1,12 +1,12 @@
-import { BaseRepository } from 'infrastructure/database/BaseRepository'
+import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
 import { TimeSlotEntity } from './TimeSlotEntity'
-import { TimePeriodType, TimeSlot } from 'domain/timeSlot/TimeSlot'
+import { TimePeriodType, TimeSlot } from '../../../domain/timeSlot/TimeSlot'
 import { DataSource } from 'typeorm'
 import { TimeSlotMapper } from './TimeSlotMapper'
-import { Granularity } from 'domain/common'
-import { getDateFormat } from 'infrastructure/utils/SqlDateFormat'
-import { ITimeSlotRepository } from 'domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
-import { RepositoryError } from 'infrastructure/error/RepositoryError'
+import { Granularity } from '../../../domain/common'
+import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
+import { ITimeSlotRepository } from '../../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
+import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import dayjs from 'dayjs'
 
 export class TimeSlotRepository

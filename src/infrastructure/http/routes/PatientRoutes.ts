@@ -3,7 +3,7 @@ import { IPatientController } from '../controllers/PatientController'
 import { authenticated } from '../middlewares/Auth'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import { validator } from '../middlewares/Validator'
-import { getPatientNameAutoCompleteSchema } from 'application/patient/PatientValidator'
+import { getPatientNameAutoCompleteSchema } from '../../../application/patient/PatientValidator'
 
 export class PatientRoutes {
   private readonly routes: Router

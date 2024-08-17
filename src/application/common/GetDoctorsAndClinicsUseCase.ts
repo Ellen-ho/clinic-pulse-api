@@ -1,5 +1,5 @@
-import { IClinicRepository } from 'domain/clinic/interfaces/repositories/IClinicRepository'
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
+import { IClinicRepository } from '../../domain/clinic/interfaces/repositories/IClinicRepository'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
 
 interface GetDoctorsAndClinicsResponse {
   doctors: Array<{

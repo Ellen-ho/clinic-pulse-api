@@ -1,6 +1,6 @@
-import { IMedicineTreatmentRepository } from 'domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
-import { formatToUTC8 } from 'infrastructure/utils/DateFormatToUTC'
+import { IMedicineTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
+import { formatToUTC8 } from '../../infrastructure/utils/DateFormatToUTC'
 
 interface UpdateMedicineTreatmentRequest {
   id: string

@@ -1,6 +1,6 @@
-import { Granularity } from 'domain/common'
-import { IBaseRepository } from 'domain/shared/IBaseRepository'
-import { TimePeriodType, TimeSlot } from 'domain/timeSlot/TimeSlot'
+import { Granularity } from '../../../../domain/common'
+import { IBaseRepository } from '../../../../domain/shared/IBaseRepository'
+import { TimePeriodType, TimeSlot } from '../../../../domain/timeSlot/TimeSlot'
 
 export interface ITimeSlotRepository extends IBaseRepository<TimeSlot> {
   getDurationCountByGranularity: (

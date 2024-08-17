@@ -1,6 +1,6 @@
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
+import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface GetFirstTimeConsultationCountAndRateRequest {
   startDate: string

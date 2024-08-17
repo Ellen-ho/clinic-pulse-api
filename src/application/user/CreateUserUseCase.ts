@@ -1,8 +1,8 @@
-import { User, UserRoleType } from 'domain/user/User'
-import { IUserRepository } from 'domain/user/interfaces/repositories/IUserRepository'
-import { IHashGenerator } from 'domain/utils/IHashGenerator'
-import { IUuidService } from 'domain/utils/IUuidService'
-import { ValidationError } from 'infrastructure/error/ValidationError'
+import { User, UserRoleType } from '../../domain/user/User'
+import { IUserRepository } from '../../domain/user/interfaces/repositories/IUserRepository'
+import { IHashGenerator } from '../../domain/utils/IHashGenerator'
+import { IUuidService } from '../../domain/utils/IUuidService'
+import { ValidationError } from '../../infrastructure/error/ValidationError'
 
 interface CreateUserRequest {
   email: string

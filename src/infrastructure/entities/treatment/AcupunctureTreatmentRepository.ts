@@ -4,7 +4,7 @@ import { AcupunctureTreatment } from '../../../domain/treatment/AcupunctureTreat
 import { IAcupunctureTreatmentRepository } from '../../../domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
 import { DataSource } from 'typeorm'
 import { AcupunctureTreatmentMapper } from './AcupunctureTreatmentMapper'
-import { RepositoryError } from 'infrastructure/error/RepositoryError'
+import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 
 export class AcupunctureTreatmentRepository
   extends BaseRepository<AcupunctureTreatmentEntity, AcupunctureTreatment>

@@ -1,10 +1,10 @@
-import { MedicineTreatment } from 'domain/treatment/MedicineTreatment'
+import { MedicineTreatment } from '../../../domain/treatment/MedicineTreatment'
 import { DataSource } from 'typeorm'
 import { MedicineTreatmentMapper } from './MedicineTreatmentMapper'
-import { BaseRepository } from 'infrastructure/database/BaseRepository'
-import { IMedicineTreatmentRepository } from 'domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
+import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
+import { IMedicineTreatmentRepository } from '../../../domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
 import { MedicineTreatmentEntity } from './MedicineTreatmentEntity'
-import { RepositoryError } from 'infrastructure/error/RepositoryError'
+import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 
 export class MedicineTreatmentRepository
   extends BaseRepository<MedicineTreatmentEntity, MedicineTreatment>

@@ -1,5 +1,5 @@
-import { IEntityMapper } from 'domain/shared/IEntityMapper'
-import { AcupunctureTreatment } from 'domain/treatment/AcupunctureTreatment'
+import { IEntityMapper } from '../../../domain/shared/IEntityMapper'
+import { AcupunctureTreatment } from '../../../domain/treatment/AcupunctureTreatment'
 import { AcupunctureTreatmentEntity } from './AcupunctureTreatmentEntity'
 
 export class AcupunctureTreatmentMapper

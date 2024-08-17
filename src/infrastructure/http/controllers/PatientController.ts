@@ -1,4 +1,4 @@
-import { GetPatientNameAutoCompleteUseCase } from 'application/patient/getPatientNameAutoComplete'
+import { GetPatientNameAutoCompleteUseCase } from '../../../application/patient/getPatientNameAutoComplete'
 import { Request, Response } from 'express'
 
 export interface IPatientController {

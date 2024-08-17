@@ -1,5 +1,5 @@
 import { Clinic } from '../../../domain/clinic/Clinic'
-import { IEntityMapper } from 'domain/shared/IEntityMapper'
+import { IEntityMapper } from '../../../domain/shared/IEntityMapper'
 import { ClinicEntity } from './ClinicEntity'
 
 export class ClinicMapper implements IEntityMapper<ClinicEntity, Clinic> {

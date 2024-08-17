@@ -2,8 +2,8 @@ import { Request, Response } from 'express'
 import { CreateUserUseCase } from '../../../application/user/CreateUserUseCase'
 import { User, UserRoleType } from '../../../domain/user/User'
 import jwt from 'jsonwebtoken'
-import { CreateDoctorUseCase } from 'application/doctor/CreateDoctorUseCase'
-import { DoctorRepository } from 'infrastructure/entities/doctor/DoctorRepository'
+import { CreateDoctorUseCase } from '../../../application/doctor/CreateDoctorUseCase'
+import { DoctorRepository } from '../../../infrastructure/entities/doctor/DoctorRepository'
 
 export interface IUserController {
   signin: (req: Request, res: Response) => Promise<Response>

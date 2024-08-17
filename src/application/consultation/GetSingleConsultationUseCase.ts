@@ -1,15 +1,15 @@
-import { GenderType } from 'domain/clinic/Clinic'
+import { GenderType } from '../../domain/clinic/Clinic'
 import {
   OnsiteCancelReasonType,
   TreatmentType,
-} from 'domain/consultation/Consultation'
+} from '../../domain/consultation/Consultation'
 
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { User, UserRoleType } from 'domain/user/User'
-import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
+import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
+import { User, UserRoleType } from '../../domain/user/User'
+import { AuthorizationError } from '../../infrastructure/error/AuthorizationError'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface GetSingleConsultationRequest {
   consultationId: string

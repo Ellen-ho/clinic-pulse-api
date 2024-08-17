@@ -1,7 +1,7 @@
 import { GenderType } from '../../domain/common'
-import { Doctor } from 'domain/doctor/Doctor'
-import { User } from 'domain/user/User'
-import { IUuidService } from 'domain/utils/IUuidService'
+import { Doctor } from '../../domain/doctor/Doctor'
+import { User } from '../../domain/user/User'
+import { IUuidService } from '../../domain/utils/IUuidService'
 import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
 
 interface CreateDoctorRequest {

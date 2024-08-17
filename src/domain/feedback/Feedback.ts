@@ -1,4 +1,4 @@
-import { Consultation } from 'domain/consultation/Consultation'
+import { Consultation } from '../../domain/consultation/Consultation'
 
 export interface IFeedbackProps {
   id: string

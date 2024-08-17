@@ -1,6 +1,6 @@
-import { IEntityMapper } from 'domain/shared/IEntityMapper'
+import { IEntityMapper } from '../../../domain/shared/IEntityMapper'
 import { ConsultationEntity } from './ConsultationEntity'
-import { Consultation } from 'domain/consultation/Consultation'
+import { Consultation } from '../../../domain/consultation/Consultation'
 import { AcupunctureTreatmentMapper } from '../treatment/AcupunctureTreatmentMapper'
 import { MedicineTreatmentMapper } from '../treatment/MedicineTreatmentMapper'
 

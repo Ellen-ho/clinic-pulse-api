@@ -1,10 +1,10 @@
-import { IUserRepository } from 'domain/user/interfaces/repositories/IUserRepository'
+import { IUserRepository } from '../../domain/user/interfaces/repositories/IUserRepository'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy, ExtractJwt } from 'passport-jwt'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
 import passport from 'passport'
-import { AuthenticationError } from 'infrastructure/error/AuthenticationError'
+import { AuthenticationError } from '../../infrastructure/error/AuthenticationError'
 
 dotenv.config()
 

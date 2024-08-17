@@ -1,9 +1,9 @@
-import { IAcupunctureTreatmentRepository } from "domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository";
-import { NotFoundError } from "infrastructure/error/NotFoundError";
-import { formatToUTC8 } from "infrastructure/utils/DateFormatToUTC";
+import { IAcupunctureTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
+import { formatToUTC8 } from '../../infrastructure/utils/DateFormatToUTC'
 
 interface UpdateAcupunctureTreatmentAssignBedRequest {
-  id: string;
+  id: string
 }
 
 export class UpdateAcupunctureTreatmentAssignBedUseCase {
@@ -14,25 +14,23 @@ export class UpdateAcupunctureTreatmentAssignBedUseCase {
   public async execute(
     request: UpdateAcupunctureTreatmentAssignBedRequest
   ): Promise<void> {
-    const id = "6a7815ff-6d51-4351-b765-28b68ce61843";
+    const id = '6a7815ff-6d51-4351-b765-28b68ce61843'
 
     const existingAcupunctureTreatment =
-      await this.acupunctureTreatmentRepository.getById(id);
+      await this.acupunctureTreatmentRepository.getById(id)
 
     if (existingAcupunctureTreatment == null) {
-      throw new NotFoundError("This acupuncture treatment does not exist.");
+      throw new NotFoundError('This acupuncture treatment does not exist.')
     }
 
-    const updatedAcupunctureAssignBed = formatToUTC8(new Date());
-    const bedId = "6a7815ff-6d51-4351-b765-28b68ce61843";
+    const updatedAcupunctureAssignBed = formatToUTC8(new Date())
+    const bedId = '6a7815ff-6d51-4351-b765-28b68ce61843'
 
     existingAcupunctureTreatment.updateAcupunctureTreatmentAssignBed({
       assignBedAt: updatedAcupunctureAssignBed,
       bedId,
-    });
+    })
 
-    await this.acupunctureTreatmentRepository.save(
-      existingAcupunctureTreatment
-    );
+    await this.acupunctureTreatmentRepository.save(existingAcupunctureTreatment)
   }
 }

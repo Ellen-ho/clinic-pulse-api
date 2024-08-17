@@ -1,17 +1,17 @@
-import { BaseRepository } from 'infrastructure/database/BaseRepository'
+import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
 import { FeedbackEntity } from './FeedbackEntity'
 import { DataSource } from 'typeorm'
 import { FeedbackMapper } from './FeedbackMapper'
-import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFeedbackRepository'
-import { RepositoryError } from 'infrastructure/error/RepositoryError'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { Feedback, SelectedContent } from 'domain/feedback/Feedback'
-import { GenderType, Granularity } from 'domain/common'
+import { IFeedbackRepository } from '../../../domain/feedback/interfaces/repositories/IFeedbackRepository'
+import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
+import { TimePeriodType } from '../../../domain/timeSlot/TimeSlot'
+import { Feedback, SelectedContent } from '../../../domain/feedback/Feedback'
+import { GenderType, Granularity } from '../../../domain/common'
 import {
   OnsiteCancelReasonType,
   TreatmentType,
-} from 'domain/consultation/Consultation'
-import { getDateFormat } from 'infrastructure/utils/SqlDateFormat'
+} from '../../../domain/consultation/Consultation'
+import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 import dayjs from 'dayjs'
 
 export class FeedbackRepository

@@ -1,8 +1,8 @@
-import { Granularity } from 'domain/common'
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
-import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFeedbackRepository'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { User, UserRoleType } from 'domain/user/User'
+import { Granularity } from '../../domain/common'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
+import { IFeedbackRepository } from '../../domain/feedback/interfaces/repositories/IFeedbackRepository'
+import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
+import { User, UserRoleType } from '../../domain/user/User'
 
 interface GetFeedbackCountAndRateRequest {
   startDate: string

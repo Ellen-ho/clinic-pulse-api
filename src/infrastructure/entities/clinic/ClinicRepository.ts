@@ -1,10 +1,10 @@
-import { Clinic } from 'domain/clinic/Clinic'
-import { BaseRepository } from 'infrastructure/database/BaseRepository'
+import { Clinic } from '../../../domain/clinic/Clinic'
+import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
 import { ClinicEntity } from './ClinicEntity'
 import { DataSource } from 'typeorm'
 import { ClinicMapper } from './ClinicMapper'
-import { RepositoryError } from 'infrastructure/error/RepositoryError'
-import { IClinicRepository } from 'domain/clinic/interfaces/repositories/IClinicRepository'
+import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
+import { IClinicRepository } from '../../../domain/clinic/interfaces/repositories/IClinicRepository'
 
 export class ClinicRepository
   extends BaseRepository<ClinicEntity, Clinic>

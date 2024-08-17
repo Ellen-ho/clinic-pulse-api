@@ -1,4 +1,4 @@
-import getOrmConfig from 'infrastructure/config/ormconfig'
+import getOrmConfig from '../../infrastructure/config/ormconfig'
 import { DataSource, EntityTarget, ObjectLiteral, Repository } from 'typeorm'
 
 export class PostgresDatabase {

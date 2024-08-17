@@ -1,4 +1,4 @@
-import { IEntityMapper } from 'domain/shared/IEntityMapper'
+import { IEntityMapper } from '../../../domain/shared/IEntityMapper'
 import { ConsultationRoomEntity } from './ConsultationRoomEntity'
 import { ConsultationRoom } from '../../../domain/consultationRoom/ConsultationRoom'
 

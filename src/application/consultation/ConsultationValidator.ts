@@ -1,5 +1,5 @@
-import { Granularity } from 'domain/common'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
+import { Granularity } from '../../domain/common'
+import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
 import Joi from 'joi'
 
 export const getConsultationListSchema = {

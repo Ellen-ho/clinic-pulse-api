@@ -12,7 +12,7 @@ import {
   getConsultationRealTimeCountSchema,
   getDifferentTreatmentConsultationSchema,
   getSingleConsultationSchema,
-} from 'application/consultation/ConsultationValidator'
+} from '../../../application/consultation/ConsultationValidator'
 
 export class ConsultationRoutes {
   private readonly routes: Router

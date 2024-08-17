@@ -1,6 +1,6 @@
-import { IMedicineTreatmentRepository } from 'domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
-import { MedicineTreatment } from 'domain/treatment/MedicineTreatment'
-import { IUuidService } from 'domain/utils/IUuidService'
+import { IMedicineTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
+import { MedicineTreatment } from '../../domain/treatment/MedicineTreatment'
+import { IUuidService } from '../../domain/utils/IUuidService'
 
 interface CreateMedicineTreatmentResponse {
   medicineTreatment: MedicineTreatment

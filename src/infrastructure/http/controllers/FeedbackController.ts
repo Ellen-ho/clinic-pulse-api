@@ -1,9 +1,9 @@
-import { GetFeedbackCountAndRateUseCase } from 'application/feedback/GetFeedbackCountAndRateUseCase'
-import { GetFeedbackListUseCase } from 'application/feedback/GetFeedbackListUseCase'
-import { GetSingleFeedbackUseCase } from 'application/feedback/GetSingleFeedbackUseCase'
-import { Granularity } from 'domain/common'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { User } from 'domain/user/User'
+import { GetFeedbackCountAndRateUseCase } from '../../../application/feedback/GetFeedbackCountAndRateUseCase'
+import { GetFeedbackListUseCase } from '../../../application/feedback/GetFeedbackListUseCase'
+import { GetSingleFeedbackUseCase } from '../../../application/feedback/GetSingleFeedbackUseCase'
+import { Granularity } from '../../../domain/common'
+import { TimePeriodType } from '../../../domain/timeSlot/TimeSlot'
+import { User } from '../../../domain/user/User'
 import { Request, Response } from 'express'
 
 export interface IFeedbackController {

@@ -1,4 +1,4 @@
-import { GetDoctorsAndClinicsUseCase } from 'application/common/GetDoctorsAndClinicsUseCase'
+import { GetDoctorsAndClinicsUseCase } from '../../../application/common/GetDoctorsAndClinicsUseCase'
 import { Request, Response } from 'express'
 export interface ICommonController {
   getDoctorsAndClinics: (req: Request, res: Response) => Promise<Response>

@@ -1,5 +1,5 @@
-import { IBaseRepository } from 'domain/shared/IBaseRepository'
-import { AcupunctureTreatment } from 'domain/treatment/AcupunctureTreatment'
+import { IBaseRepository } from '../../../../domain/shared/IBaseRepository'
+import { AcupunctureTreatment } from '../../../../domain/treatment/AcupunctureTreatment'
 
 export interface IAcupunctureTreatmentRepository
   extends IBaseRepository<AcupunctureTreatment> {

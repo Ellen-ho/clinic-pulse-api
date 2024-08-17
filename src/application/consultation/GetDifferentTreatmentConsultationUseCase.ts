@@ -1,8 +1,8 @@
-import { Granularity } from 'domain/common'
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { User, UserRoleType } from 'domain/user/User'
+import { Granularity } from '../../domain/common'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
+import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
+import { User, UserRoleType } from '../../domain/user/User'
 
 interface GetDifferentTreatmentConsultationRequest {
   startDate: string

@@ -4,7 +4,7 @@ import { validator } from '../middlewares/Validator'
 import {
   signInUserSchema,
   signUpUserSchema,
-} from 'application/user/UserValidator'
+} from '../../../application/user/UserValidator'
 import { authenticator } from '../middlewares/Auth'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 

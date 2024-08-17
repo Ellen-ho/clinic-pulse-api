@@ -1,4 +1,4 @@
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
 
 interface GetAllDoctorsResponse {
   doctors: Array<{

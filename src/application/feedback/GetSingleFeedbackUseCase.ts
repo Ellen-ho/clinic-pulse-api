@@ -1,15 +1,15 @@
-import { GenderType } from 'domain/common'
+import { GenderType } from '../../domain/common'
 import {
   OnsiteCancelReasonType,
   TreatmentType,
-} from 'domain/consultation/Consultation'
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
-import { SelectedContent } from 'domain/feedback/Feedback'
-import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFeedbackRepository'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { User, UserRoleType } from 'domain/user/User'
-import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+} from '../../domain/consultation/Consultation'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
+import { SelectedContent } from '../../domain/feedback/Feedback'
+import { IFeedbackRepository } from '../../domain/feedback/interfaces/repositories/IFeedbackRepository'
+import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
+import { User, UserRoleType } from '../../domain/user/User'
+import { AuthorizationError } from '../../infrastructure/error/AuthorizationError'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface GetSingleFeedbackRequest {
   feedbackId: string

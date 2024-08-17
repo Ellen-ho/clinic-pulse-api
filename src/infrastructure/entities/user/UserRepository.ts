@@ -1,10 +1,10 @@
-import { BaseRepository } from 'infrastructure/database/BaseRepository'
+import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
 import { UserEntity } from './UserEntity'
 import { DataSource } from 'typeorm'
 import { User } from '../../../domain/user/User'
 import { UserMapper } from './UserMapper'
-import { RepositoryError } from 'infrastructure/error/RepositoryError'
-import { IUserRepository } from 'domain/user/interfaces/repositories/IUserRepository'
+import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
+import { IUserRepository } from '../../../domain/user/interfaces/repositories/IUserRepository'
 
 export class UserRepository
   extends BaseRepository<UserEntity, User>

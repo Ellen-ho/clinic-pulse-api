@@ -1,18 +1,18 @@
-import { BaseRepository } from 'infrastructure/database/BaseRepository'
+import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
 import { ConsultationEntity } from './ConsultationEntity'
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IConsultationRepository } from '../../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import {
   Consultation,
   ConsultationStatus,
   OnsiteCancelReasonType,
   TreatmentType,
-} from 'domain/consultation/Consultation'
+} from '../../../domain/consultation/Consultation'
 import { DataSource } from 'typeorm'
 import { ConsultationMapper } from './ConsultationMapper'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { GenderType, Granularity } from 'domain/common'
-import { RepositoryError } from 'infrastructure/error/RepositoryError'
-import { getDateFormat } from 'infrastructure/utils/SqlDateFormat'
+import { TimePeriodType } from '../../../domain/timeSlot/TimeSlot'
+import { GenderType, Granularity } from '../../../domain/common'
+import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
+import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 import dayjs from 'dayjs'
 
 export class ConsultationRepository

@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt'
-import { IHashGenerator } from 'domain/utils/IHashGenerator'
+import { IHashGenerator } from '../../domain/utils/IHashGenerator'
 
 export class BcryptHashGenerator implements IHashGenerator {
   private readonly SALT_ROUNDS: number

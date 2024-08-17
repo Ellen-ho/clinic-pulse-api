@@ -1,6 +1,6 @@
-import { MedicineTreatment } from 'domain/treatment/MedicineTreatment'
+import { MedicineTreatment } from '../../../domain/treatment/MedicineTreatment'
 import { MedicineTreatmentEntity } from './MedicineTreatmentEntity'
-import { IEntityMapper } from 'domain/shared/IEntityMapper'
+import { IEntityMapper } from '../../../domain/shared/IEntityMapper'
 
 export class MedicineTreatmentMapper
   implements IEntityMapper<MedicineTreatmentEntity, MedicineTreatment>

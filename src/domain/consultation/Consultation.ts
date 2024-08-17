@@ -1,5 +1,5 @@
-import { AcupunctureTreatment } from 'domain/treatment/AcupunctureTreatment'
-import { MedicineTreatment } from 'domain/treatment/MedicineTreatment'
+import { AcupunctureTreatment } from '../../domain/treatment/AcupunctureTreatment'
+import { MedicineTreatment } from '../../domain/treatment/MedicineTreatment'
 
 export interface IConsultationProps {
   id: string

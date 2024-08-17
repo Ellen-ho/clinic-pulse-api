@@ -1,4 +1,4 @@
-import { IPatientRepository } from 'domain/patient/interfaces/repositories/IPatientRepository'
+import { IPatientRepository } from '../../domain/patient/interfaces/repositories/IPatientRepository'
 
 interface GetPatientNameAutoCompleteRequest {
   searchText: string

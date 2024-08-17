@@ -2,8 +2,8 @@ import {
   Consultation,
   ConsultationSource,
   ConsultationStatus,
-} from 'domain/consultation/Consultation'
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
+} from '../../domain/consultation/Consultation'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { IUuidService } from '../../domain/utils/IUuidService'
 
 interface CreateConsultationRequest {

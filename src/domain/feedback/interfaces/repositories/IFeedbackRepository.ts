@@ -1,11 +1,11 @@
-import { GenderType, Granularity } from 'domain/common'
+import { GenderType, Granularity } from '../../../../domain/common'
 import {
   OnsiteCancelReasonType,
   TreatmentType,
-} from 'domain/consultation/Consultation'
-import { Feedback, SelectedContent } from 'domain/feedback/Feedback'
-import { IBaseRepository } from 'domain/shared/IBaseRepository'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
+} from '../../../../domain/consultation/Consultation'
+import { Feedback, SelectedContent } from '../../../../domain/feedback/Feedback'
+import { IBaseRepository } from '../../../../domain/shared/IBaseRepository'
+import { TimePeriodType } from '../../../../domain/timeSlot/TimeSlot'
 
 export interface IFeedbackRepository extends IBaseRepository<Feedback> {
   findById: (id: string) => Promise<{

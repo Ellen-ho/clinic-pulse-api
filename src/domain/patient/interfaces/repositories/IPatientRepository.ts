@@ -1,5 +1,5 @@
-import { Patient } from 'domain/patient/Patient'
-import { IBaseRepository } from 'domain/shared/IBaseRepository'
+import { Patient } from '../../../../domain/patient/Patient'
+import { IBaseRepository } from '../../../../domain/shared/IBaseRepository'
 
 export interface IPatientRepository extends IBaseRepository<Patient> {
   findByName: (
