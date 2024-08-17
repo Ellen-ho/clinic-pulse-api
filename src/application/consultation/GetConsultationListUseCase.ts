@@ -27,7 +27,7 @@ interface GetConsultationListRequest {
 interface GetConsultationListResponse {
   data: Array<{
     id: string
-    isOnsiteCanceled: boolean | null
+    isOnsiteCanceled: boolean
     onsiteCancelReason: OnsiteCancelReasonType | null
     consultationNumber: number
     consultationDate: string

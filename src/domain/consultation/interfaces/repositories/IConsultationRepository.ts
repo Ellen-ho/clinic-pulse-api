@@ -59,7 +59,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
   ) => Promise<{
     data: Array<{
       id: string
-      isOnsiteCanceled: boolean | null
+      isOnsiteCanceled: boolean
       onsiteCancelReason: OnsiteCancelReasonType | null
       consultationNumber: number
       consultationDate: string
