@@ -30,10 +30,6 @@ export class UpdateConsultationStartAtUseCase {
 
     const updatedStatus = ConsultationStatus.IN_CONSULTATION
     const updatedStartAt = new Date()
-    console.table({
-      toLocaleTimeString: updatedStartAt.toLocaleTimeString,
-      toISOString: updatedStartAt.toISOString(),
-    })
 
     existingConsultation.updateStartAt({
       status: updatedStatus,

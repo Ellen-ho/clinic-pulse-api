@@ -1,8 +1,10 @@
 import 'reflect-metadata'
 import { DataSource, DataSourceOptions } from 'typeorm'
 import { runSeeders, SeederOptions } from 'typeorm-extension'
-import MainSeeder from './main.seeder'
 import TimeSlotSeeder from './timeSlot.seeder'
+import ConsultationNormalFirstSeeder from './consultation.normal.first.seeder'
+import ConsultationNormalNotFirstSeeder from './consultation.normal.not.first.seeder'
+import UserSeeder from './user.seeder'
 
 void (async () => {
   const options: DataSourceOptions & SeederOptions = {
@@ -13,7 +15,13 @@ void (async () => {
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DB_NAME,
     synchronize: false,
-    seeds: [MainSeeder, TimeSlotSeeder],
+    // note: do not change the order
+    seeds: [
+      UserSeeder,
+      // TimeSlotSeeder,
+      // ConsultationNormalFirstSeeder,
+      ConsultationNormalNotFirstSeeder,
+    ],
     entities: ['./src/infrastructure/entities/**/*Entity.ts'],
     migrations: ['./migrations/*.ts'],
     migrationsTableName: 'migrations',
