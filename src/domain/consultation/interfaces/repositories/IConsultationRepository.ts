@@ -8,7 +8,6 @@ import { IBaseRepository } from 'domain/shared/IBaseRepository'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 
 export interface IConsultationRepository extends IBaseRepository<Consultation> {
-  save: (consultation: Consultation) => Promise<void>
   findById: (id: string) => Promise<{
     id: string
     consultationDate: string
@@ -60,7 +59,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
   ) => Promise<{
     data: Array<{
       id: string
-      isOnsiteCanceled: boolean | null
+      isOnsiteCanceled: boolean
       onsiteCancelReason: OnsiteCancelReasonType | null
       consultationNumber: number
       consultationDate: string
@@ -80,18 +79,33 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     }>
     totalCounts: number
   }>
-  findByDateRangeAndClinic: (
+  getDurationCanceledAndBookingByGranularity: (
     startDate: string,
     endDate: string,
-    clinicId?: string
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType,
+    granularity?: Granularity
   ) => Promise<{
-    totalConsultation: number
+    totalConsultations: number
     consultationWithOnlineBooking: number
     consultationWithOnsiteCancel: number
+    onlineBookingRate: number
+    onsiteCancelRate: number
+    data: Array<{
+      date: string
+      onlineBookingCount: number
+      onsiteCancelCount: number
+      consultationCount: number
+      onlineBookingRate: number
+      onsiteCancelRate: number
+    }>
   }>
   getRealTimeCounts: (
+    timeSlotId: string | Array<{ id: string }>,
     clinicId?: string,
-    consultationRoomNumber?: string
+    consultationRoomNumber?: string,
+    doctorId?: string
   ) => Promise<{
     waitForConsultationCount: number
     waitForBedAssignedCount: number
@@ -106,13 +120,22 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     clinicId?: string,
     timePeriod?: TimePeriodType,
     doctorId?: string,
-    patientId?: string
+    patientId?: string,
+    granularity?: Granularity
   ) => Promise<{
-    averageConsultationWait: number
-    averageBedAssignmentWait: number
-    averageAcupunctureWait: number
-    averageNeedleRemovalWait: number
-    averageMedicationWait: number
+    totalAverageConsultationWait: number
+    totalAverageBedAssignmentWait: number
+    totalAverageAcupunctureWait: number
+    totalAverageNeedleRemovalWait: number
+    totalAverageMedicationWait: number
+    data: Array<{
+      date: string
+      averageConsultationWait: number
+      averageBedAssignmentWait: number
+      averageAcupunctureWait: number
+      averageNeedleRemovalWait: number
+      averageMedicationWait: number
+    }>
   }>
   getFirstTimeConsultationCounts: (
     startDate: string,
@@ -143,7 +166,8 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     endDate: string,
     clinicId?: string,
     doctorId?: string,
-    timePeriod?: TimePeriodType
+    timePeriod?: TimePeriodType,
+    granularity?: Granularity
   ) => Promise<{
     totalConsultations: number
     totalConsultationWithAcupuncture: number
@@ -161,4 +185,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       onlyMedicineCount: number
     }>
   }>
+  isFirstTimeVisit: (patientId: string) => Promise<boolean>
+  getLatestOddConsultationNumber: (timeSlotId: string) => Promise<number>
+  getById: (id: string) => Promise<Consultation | null>
 }

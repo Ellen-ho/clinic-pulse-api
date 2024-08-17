@@ -16,8 +16,8 @@ import {
 import { TimeSlotEntity } from '../timeSlot/TimeSlotEntity'
 
 import { PatientEntity } from '../patient/PatientEntity'
-import { AcupunctureTreatmentEntity } from '../treatement/AcupunctureTreatementEntity'
-import { MedicineTreatmentEntity } from '../treatement/MedicineTreatmentEntity'
+import { AcupunctureTreatmentEntity } from '../treatment/AcupunctureTreatmentEntity'
+import { MedicineTreatmentEntity } from '../treatment/MedicineTreatmentEntity'
 
 @Entity('consultations')
 export class ConsultationEntity {

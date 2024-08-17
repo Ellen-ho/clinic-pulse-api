@@ -93,4 +93,152 @@ export class TimeSlotRepository
       )
     }
   }
+
+  // public async findMatchingTimeSlot(
+  //   doctorId: string,
+  //   checkInAt: Date
+  // ): Promise<{ timeSlotId: string }> {
+  //   try {
+  //     const formattedCheckInAt = dayjs(checkInAt).format('YYYY-MM-DD HH:mm:ss')
+  //     const checkInDate = formattedCheckInAt.slice(0, 10)
+  //     const checkInTime = formattedCheckInAt.slice(11, 16)
+
+  //     const result = await this.getQuery<
+  //       Array<{
+  //         time_slot_id: string
+  //       }>
+  //     >(
+  //       `
+  //         SELECT id AS time_slot_id
+  //         FROM time_slots
+  //         WHERE doctor_id = $1
+  //           AND CAST(start_at AS date) = $2
+  //           AND CAST(start_at AS time) <= $3
+  //           AND CAST(end_at AS time) >= $3
+  //         LIMIT 1;
+  //       `,
+  //       [doctorId, checkInDate, checkInTime]
+  //     )
+
+  //     return { timeSlotId: result[0].time_slot_id }
+  //   } catch (e) {
+  //     throw new RepositoryError(
+  //       'TimeSlotRepository findMatchingTimeSlot error',
+  //       e as Error
+  //     )
+  //   }
+  // }
+
+  public async findMatchingTimeSlot(
+    doctorId: string,
+    checkInAt: Date
+  ): Promise<{ timeSlotId: string }> {
+    try {
+      const result = await this.getQuery<Array<{ time_slot_id: string }>>(
+        `
+          SELECT id AS time_slot_id
+          FROM time_slots
+          WHERE doctor_id = $1
+            AND DATE(start_at) = DATE($2)
+            AND TIME($2) BETWEEN TIME(start_at) AND TIME(end_at)
+          LIMIT 1;
+        `,
+        [doctorId, checkInAt]
+      )
+
+      if (result.length === 0) {
+        throw new RepositoryError(
+          'No matching time slot found for the given doctor and check-in time.'
+        )
+      }
+
+      return { timeSlotId: result[0].time_slot_id }
+    } catch (e) {
+      throw new RepositoryError(
+        'TimeSlotRepository findMatchingTimeSlot error',
+        e as Error
+      )
+    }
+  }
+
+  public async findCurrentTimeSlotForDoctor(
+    doctorId: string,
+    currentTime: Date
+  ): Promise<string | null> {
+    try {
+      const result = await this.getQuery<Array<{ id: string }>>(
+        `
+        SELECT id
+        FROM time_slots
+        WHERE doctor_id = $1
+          AND start_at <= $2
+          AND end_at + interval '1 hour' >= $2
+        LIMIT 1
+        `,
+        [doctorId, currentTime]
+      )
+
+      if (result.length === 0) {
+        return null
+      }
+
+      return result[0].id
+    } catch (e) {
+      throw new RepositoryError(
+        'TimeSlotRepository findCurrentTimeSlotForDoctor error',
+        e as Error
+      )
+    }
+  }
+
+  public async findMatchingTimeSlotForAdmin(
+    currentTime: Date,
+    clinicId?: string,
+    consultationRoomNumber?: string,
+    doctorId?: string
+  ): Promise<Array<{ id: string }>> {
+    try {
+      // const utc8Time = formatToUTC8(currentTime)
+
+      let query = `
+      SELECT id
+      FROM time_slots
+      WHERE start_at <= $1
+        AND end_at + interval '1 hour' >= $1
+       `
+
+      const queryParams: any[] = [currentTime]
+
+      if (clinicId !== undefined) {
+        query += ' AND clinic_id = $2'
+        queryParams.push(clinicId)
+      }
+
+      if (consultationRoomNumber !== undefined) {
+        query += `
+          AND consultation_room_id = (
+            SELECT id FROM consultation_rooms WHERE room_number = $3
+          )
+        `
+        queryParams.push(consultationRoomNumber)
+      }
+
+      if (doctorId !== undefined) {
+        query += ' AND doctor_id = $4'
+        queryParams.push(doctorId)
+      }
+
+      const result = await this.getQuery<Array<{ id: string }>>(
+        query,
+        queryParams
+      )
+
+      return result.map((row) => ({ id: row.id }))
+    } catch (e) {
+      throw new RepositoryError(
+        'TimeSlotRepository findMatchingTimeSlotForAdmin error',
+        e as Error
+      )
+    }
+  }
 }

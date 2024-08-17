@@ -1,6 +1,8 @@
+import { Granularity } from 'domain/common'
+import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
 import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFeedbackRepository'
 import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { User, UserRoleType } from 'domain/user/User'
 
 interface GetFeedbackCountAndRateRequest {
   startDate: string
@@ -8,77 +10,89 @@ interface GetFeedbackCountAndRateRequest {
   clinicId?: string
   timePeriod?: TimePeriodType
   doctorId?: string
-  patientId?: string
+  granularity?: Granularity
+  currentUser: User
 }
 
 interface GetFeedbackCountAndRateResponse {
   totalFeedbacks: number
-  oneStarFeedBackCount: number
+  oneStarFeedbackCount: number
   twoStarFeedbackCount: number
   threeStarFeedbackCount: number
   fourStarFeedbackCount: number
   fiveStarFeedbackCount: number
-  oneStarFeedBackRate: number
+  oneStarFeedbackRate: number
   twoStarFeedbackRate: number
   threeStarFeedbackRate: number
   fourStarFeedbackRate: number
   fiveStarFeedbackRate: number
+  data: Array<{
+    date: string
+    feedbackCount: number
+    oneStarFeedbackCount: number
+    twoStarFeedbackCount: number
+    threeStarFeedbackCount: number
+    fourStarFeedbackCount: number
+    fiveStarFeedbackCount: number
+    oneStarFeedbackRate: number
+    twoStarFeedbackRate: number
+    threeStarFeedbackRate: number
+    fourStarFeedbackRate: number
+    fiveStarFeedbackRate: number
+  }>
 }
 
 export class GetFeedbackCountAndRateUseCase {
-  constructor(private readonly feedbackRepository: IFeedbackRepository) {}
+  constructor(
+    private readonly feedbackRepository: IFeedbackRepository,
+    private readonly doctorRepository: IDoctorRepository
+  ) {}
 
   public async execute(
     request: GetFeedbackCountAndRateRequest
   ): Promise<GetFeedbackCountAndRateResponse> {
-    const { startDate, endDate, clinicId, timePeriod, doctorId, patientId } =
-      request
+    const {
+      startDate,
+      endDate,
+      clinicId,
+      timePeriod,
+      doctorId,
+      granularity,
+      currentUser,
+    } = request
+
+    let currentDoctorId
+    if (currentUser.role === UserRoleType.DOCTOR) {
+      const doctor = await this.doctorRepository.findByUserId(currentUser.id)
+      currentDoctorId = doctor?.id
+    }
 
     const result = await this.feedbackRepository.getStarFeedback(
       startDate,
       endDate,
       clinicId,
       timePeriod,
-      doctorId,
-      patientId
+      currentDoctorId !== undefined ? currentDoctorId : doctorId,
+      granularity
     )
 
-    if (result.totalFeedbackCounts === 0) {
-      throw new NotFoundError(' No feedback exists.')
+    if (result.totalFeedbacks === 0) {
+      return {
+        totalFeedbacks: 0,
+        oneStarFeedbackCount: 0,
+        twoStarFeedbackCount: 0,
+        threeStarFeedbackCount: 0,
+        fourStarFeedbackCount: 0,
+        fiveStarFeedbackCount: 0,
+        oneStarFeedbackRate: 0,
+        twoStarFeedbackRate: 0,
+        threeStarFeedbackRate: 0,
+        fourStarFeedbackRate: 0,
+        fiveStarFeedbackRate: 0,
+        data: [],
+      }
     }
 
-    const oneStarFeedBackRate = Math.round(
-      (result.oneStarFeedBackCount / result.totalFeedbackCounts) * 100
-    )
-
-    const twoStarFeedbackRate = Math.round(
-      (result.twoStarFeedbackCount / result.totalFeedbackCounts) * 100
-    )
-
-    const threeStarFeedbackRate = Math.round(
-      (result.threeStarFeedbackCount / result.totalFeedbackCounts) * 100
-    )
-
-    const fourStarFeedbackRate = Math.round(
-      (result.fourStarFeedbackCount / result.totalFeedbackCounts) * 100
-    )
-
-    const fiveStarFeedbackRate = Math.round(
-      (result.fiveStarFeedbackCount / result.totalFeedbackCounts) * 100
-    )
-
-    return {
-      totalFeedbacks: result.totalFeedbackCounts,
-      oneStarFeedBackCount: result.oneStarFeedBackCount,
-      twoStarFeedbackCount: result.twoStarFeedbackCount,
-      threeStarFeedbackCount: result.threeStarFeedbackCount,
-      fourStarFeedbackCount: result.fourStarFeedbackCount,
-      fiveStarFeedbackCount: result.fiveStarFeedbackCount,
-      oneStarFeedBackRate,
-      twoStarFeedbackRate,
-      threeStarFeedbackRate,
-      fourStarFeedbackRate,
-      fiveStarFeedbackRate,
-    }
+    return result
   }
 }

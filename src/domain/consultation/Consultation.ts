@@ -9,6 +9,7 @@ export interface IConsultationProps {
   checkInAt: Date
   startAt: Date | null
   endAt: Date | null
+  checkOutAt: Date | null
   onsiteCancelAt: Date | null
   onsiteCancelReason: OnsiteCancelReasonType | null
   isFirstTimeVisit: boolean
@@ -24,12 +25,14 @@ export enum ConsultationSource {
 }
 
 export enum ConsultationStatus {
+  IN_CONSULTATION = 'IN_CONSULTATION',
   WAITING_FOR_CONSULTATION = 'WAITING_FOR_CONSULTATION',
   WAITING_FOR_BED_ASSIGNMENT = 'WAITING_FOR_BED_ASSIGNMENT',
   WAITING_FOR_ACUPUNCTURE_TREATMENT = 'WAITING_FOR_ACUPUNCTURE_TREATMENT',
   WAITING_FOR_NEEDLE_REMOVAL = 'WAITING_FOR_NEEDLE_REMOVAL',
+  WAITING_FOR_GET_MEDICINE = 'WAITING_FOR_GET_MEDICINE',
   ONSITE_CANCEL = 'ONSITE_CANCEL',
-  CONSULTATION_COMPLETED = 'CONSULTATION_COMPLETED',
+  CHECK_OUT = 'CHECK_OUT',
 }
 
 export enum TreatmentType {
@@ -44,6 +47,37 @@ export enum OnsiteCancelReasonType {
   SERVICE_DISSATISFACTION = 'SERVICE_DISSATISFACTION',
   PERSONAL_EMERGENCY = 'PERSONAL_EMERGENCY',
   NO_PARKING_SPACES = 'NO_PARKING_SPACES',
+}
+
+interface IConsultaionUpdateStartAt {
+  [key: string]: any
+  status: ConsultationStatus
+  startAt: Date
+}
+
+interface IConsultaionUpdateToAcupuncture {
+  [key: string]: any
+  status: ConsultationStatus
+  endAt: Date
+  acupunctureTreatment: AcupunctureTreatment
+}
+
+interface IConsultaionUpdateToMedicine {
+  [key: string]: any
+  status: ConsultationStatus
+  endAt: Date
+  medicineTreatment: MedicineTreatment
+}
+
+interface IConsultaionUpdateCheckOutAt {
+  [key: string]: any
+  status: ConsultationStatus
+  checkOutAt: Date
+}
+
+interface IConsultaionUpdateStatus {
+  [key: string]: any
+  status: ConsultationStatus
 }
 
 export class Consultation {
@@ -107,5 +141,31 @@ export class Consultation {
 
   public get timeSlotId(): string {
     return this.props.timeSlotId
+  }
+
+  public updateStartAt(data: IConsultaionUpdateStartAt): void {
+    this.props.status = data.status
+    this.props.startAt = data.startAt
+  }
+
+  public updateToAcupuncture(data: IConsultaionUpdateToAcupuncture): void {
+    this.props.status = data.status
+    this.props.endAt = data.endAt
+    this.props.acupunctureTreatment = data.acupunctureTreatment
+  }
+
+  public updateToMedicine(data: IConsultaionUpdateToMedicine): void {
+    this.props.status = data.status
+    this.props.endAt = data.endAt
+    this.props.medicineTreatment = data.medicineTreatment
+  }
+
+  public updateToCheckOutAt(data: IConsultaionUpdateCheckOutAt): void {
+    this.props.status = data.status
+    this.props.checkOutAt = data.checkOutAt
+  }
+
+  public updateStatus(data: IConsultaionUpdateStatus): void {
+    this.props.status = data.status
   }
 }

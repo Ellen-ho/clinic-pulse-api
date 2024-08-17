@@ -19,7 +19,6 @@ import { GetConsultationListUseCase } from 'application/consultation/GetConsulta
 import { ConsultationController } from 'infrastructure/http/controllers/ConsultationController'
 import { ConsultationRoutes } from 'infrastructure/http/routes/ConsultationRoutes'
 import { GetSingleConsultationUseCase } from 'application/consultation/GetSingleConsultationUseCase'
-import { GetConsultationRelatedRatiosUseCase } from 'application/consultation/GetConsultationRelatedRatiosUseCase'
 import { GetConsultationRealTimeCountUseCase } from 'application/consultation/GetConsultatoinRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from 'application/consultation/GetAverageWaitingTimeUseCase'
 import { GetFirstTimeConsultationCountAndRateUseCase } from 'application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
@@ -37,6 +36,33 @@ import { GetPatientNameAutoCompleteUseCase } from 'application/patient/getPatien
 import { PatientRoutes } from 'infrastructure/http/routes/PatientRoutes'
 import { errorHandler } from 'infrastructure/http/middlewares/ErrorHandler'
 import { TimeSlotRepository } from 'infrastructure/entities/timeSlot/TimeSlotRepository'
+import { GetConsultationOnsiteCanceledAndBookingUseCase } from 'application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
+import { CreateConsultationUseCase } from 'application/consultation/CreateConsultationUseCase'
+import { GetAllDoctorsUseCase } from 'application/doctor/GetAllDoctorsUseCase'
+import { DoctorController } from 'infrastructure/http/controllers/DoctorController'
+import { DoctorRoutes } from 'infrastructure/http/routes/DoctorRoutes'
+import { CreateAcupunctureTreatmentUseCase } from 'application/treatment/CreateAcupunctureTreatmentUseCase'
+import { AcupunctureTreatmentController } from 'infrastructure/http/controllers/AcupunctureTreatmentController'
+import { CreateMedicineTreatmentUseCase } from 'application/treatment/CreateMedicineTreatmentUseCase'
+import { AcupunctureTreatmentRepository } from 'infrastructure/entities/treatment/AcupunctureTreatmentRepository'
+import { MedicineTreatmentRepository } from 'infrastructure/entities/treatment/MedicineTreatmentRepository'
+import { MedicineTreatmentController } from 'infrastructure/http/controllers/MedicineTreatmentController'
+import { AcupunctureRoutes } from 'infrastructure/http/routes/AcupunctureRoutes'
+import { MedicineRoutes } from 'infrastructure/http/routes/MedicineRoutes'
+import { UpdateConsultationToAcupunctureUseCase } from 'application/consultation/UpdateConsultationToAcupunctureUseCase'
+import { UpdateConsultationToMedicineUseCase } from 'application/consultation/UpdateConsultationToMedicineUseCase'
+import { UpdateConsultationCheckOutAtUseCase } from 'application/consultation/UpdateConsultationCheckOutAtUseCase'
+import { UpdateAcupunctureTreatmentAssignBedUseCase } from 'application/treatment/UpdateAcupunctureTreatmentAssignBedUseCase'
+import { UpdateAcupunctureTreatmentStartAtUseCase } from 'application/treatment/UpdateAcupunctureTreatmentStartAtUseCase'
+import { UpdateAcupunctureTreatmentRemoveNeedleAtUseCase } from 'application/treatment/UpdateAcupunctureTreatmentRemoveNeedleAtUseCase'
+import { UpdateConsultationToWaitAcupunctureUseCase } from 'application/consultation/UpdateConsultationToWaitAcupunctureUseCase'
+import { UpdateConsultationToWaitRemoveNeedleUseCase } from 'application/consultation/UpdateConsultationToWaitRemoveNeedleUseCase'
+import { UpdateMedicineTreatmentUseCase } from 'application/treatment/UpdateMedicineTreatmentUseCase'
+import { CommonController } from 'infrastructure/http/controllers/CommonController'
+import { GetDoctorsAndClinicsUseCase } from 'application/common/GetDoctorsAndClinicsUseCase'
+import { ClinicRepository } from 'infrastructure/entities/clinic/ClinicRepository'
+import { CommonRoutes } from 'infrastructure/http/routes/CommonRoutes'
+import { UpdateConsultationStartAtUseCase } from 'application/consultation/UpdateConsultationStartAtUseCase'
 
 void main()
 
@@ -66,13 +92,22 @@ async function main(): Promise<void> {
   const uuidService = new UuidService()
   const hashGenerator = new BcryptHashGenerator()
 
+  // Repository
   const userRepository = new UserRepository(dataSource)
   const doctorRepository = new DoctorRepository(dataSource)
   const consultationRepository = new ConsultationRepository(dataSource)
   const feedbackRepository = new FeedbackRepository(dataSource)
   const patientRepository = new PatientRepository(dataSource)
   const timeSlotRepository = new TimeSlotRepository(dataSource)
+  const acupunctureTreatmentRepository = new AcupunctureTreatmentRepository(
+    dataSource
+  )
+  const medicineTreatmentRepository = new MedicineTreatmentRepository(
+    dataSource
+  )
+  const clinicRepository = new ClinicRepository(dataSource)
 
+  // Domain
   const createUserUseCase = new CreateUserUseCase(
     userRepository,
     uuidService,
@@ -84,6 +119,8 @@ async function main(): Promise<void> {
     uuidService
   )
 
+  const getAllDoctorsUseCase = new GetAllDoctorsUseCase(doctorRepository)
+
   const getConsultationListUseCase = new GetConsultationListUseCase(
     consultationRepository,
     doctorRepository
@@ -94,14 +131,22 @@ async function main(): Promise<void> {
     doctorRepository
   )
 
-  const getConsultationRelatedRatiosUseCase =
-    new GetConsultationRelatedRatiosUseCase(consultationRepository)
+  const getConsultationOnsiteCanceledAndBookingUseCase =
+    new GetConsultationOnsiteCanceledAndBookingUseCase(
+      consultationRepository,
+      doctorRepository
+    )
 
   const getConsultationRealTimeCountUseCase =
-    new GetConsultationRealTimeCountUseCase(consultationRepository)
+    new GetConsultationRealTimeCountUseCase(
+      consultationRepository,
+      doctorRepository,
+      timeSlotRepository
+    )
 
   const getAverageWaitingTimeUseCase = new GetAverageWaitingTimeUseCase(
-    consultationRepository
+    consultationRepository,
+    doctorRepository
   )
   const getFirstTimeConsultationCountAndRateUseCase =
     new GetFirstTimeConsultationCountAndRateUseCase(consultationRepository)
@@ -114,7 +159,10 @@ async function main(): Promise<void> {
     )
 
   const getDifferentTreatmentConsultationUseCase =
-    new GetDifferentTreatmentConsultationUseCase(consultationRepository)
+    new GetDifferentTreatmentConsultationUseCase(
+      consultationRepository,
+      doctorRepository
+    )
 
   const getFeedbackListUseCase = new GetFeedbackListUseCase(
     feedbackRepository,
@@ -127,11 +175,72 @@ async function main(): Promise<void> {
   )
 
   const getFeedbackCountAndRateUseCase = new GetFeedbackCountAndRateUseCase(
-    feedbackRepository
+    feedbackRepository,
+    doctorRepository
   )
 
   const getPatientNameAutoCompleteUseCase =
     new GetPatientNameAutoCompleteUseCase(patientRepository)
+
+  const createConsultationUseCase = new CreateConsultationUseCase(
+    consultationRepository,
+    uuidService
+  )
+
+  const updateConsultationStartAtUseCase = new UpdateConsultationStartAtUseCase(
+    consultationRepository
+  )
+
+  const createAcupunctureTreatmentUseCase =
+    new CreateAcupunctureTreatmentUseCase(
+      acupunctureTreatmentRepository,
+      uuidService
+    )
+
+  const createMedicineTreatmentUseCase = new CreateMedicineTreatmentUseCase(
+    medicineTreatmentRepository,
+    uuidService
+  )
+
+  const updateConsultationToAcupunctureUseCase =
+    new UpdateConsultationToAcupunctureUseCase(consultationRepository)
+
+  const updateConsultationToMedicineUseCase =
+    new UpdateConsultationToMedicineUseCase(consultationRepository)
+
+  const updateConsultationCheckOutAtUseCase =
+    new UpdateConsultationCheckOutAtUseCase(consultationRepository)
+
+  const updateAcupunctureTreatmentAssignBedUseCase =
+    new UpdateAcupunctureTreatmentAssignBedUseCase(
+      acupunctureTreatmentRepository
+    )
+
+  const updateAcupunctureTreatmentStartAtUseCase =
+    new UpdateAcupunctureTreatmentStartAtUseCase(acupunctureTreatmentRepository)
+
+  const updateAcupunctureTreatmentRemoveNeedleAtUseCase =
+    new UpdateAcupunctureTreatmentRemoveNeedleAtUseCase(
+      acupunctureTreatmentRepository
+    )
+
+  const updateConsultationToWaitAcupunctureUseCase =
+    new UpdateConsultationToWaitAcupunctureUseCase(consultationRepository)
+
+  const updateConsultationToWaitRemoveNeedleUseCase =
+    new UpdateConsultationToWaitRemoveNeedleUseCase(consultationRepository)
+
+  const updateMedicineTreatmentUseCase = new UpdateMedicineTreatmentUseCase(
+    medicineTreatmentRepository
+  )
+
+  const getDoctorsAndClinicsUseCase = new GetDoctorsAndClinicsUseCase(
+    doctorRepository,
+    clinicRepository
+  )
+
+  // Controller
+  const commonController = new CommonController(getDoctorsAndClinicsUseCase)
 
   const userController = new UserController(
     createUserUseCase,
@@ -142,12 +251,15 @@ async function main(): Promise<void> {
   const consultationController = new ConsultationController(
     getConsultationListUseCase,
     getSingleConsultationUseCase,
-    getConsultationRelatedRatiosUseCase,
+    getConsultationOnsiteCanceledAndBookingUseCase,
     getConsultationRealTimeCountUseCase,
     getAverageWaitingTimeUseCase,
     getFirstTimeConsultationCountAndRateUseCase,
     getAverageConsultationCountUseCase,
-    getDifferentTreatmentConsultationUseCase
+    getDifferentTreatmentConsultationUseCase,
+    createConsultationUseCase,
+    updateConsultationCheckOutAtUseCase,
+    updateConsultationStartAtUseCase
   )
 
   const feedbackController = new FeedbackController(
@@ -158,6 +270,25 @@ async function main(): Promise<void> {
 
   const patientController = new PatientController(
     getPatientNameAutoCompleteUseCase
+  )
+
+  const doctorController = new DoctorController(getAllDoctorsUseCase)
+
+  const acupunctureTreatmentController = new AcupunctureTreatmentController(
+    createAcupunctureTreatmentUseCase,
+    updateConsultationToAcupunctureUseCase,
+    updateAcupunctureTreatmentAssignBedUseCase,
+    updateAcupunctureTreatmentStartAtUseCase,
+    updateAcupunctureTreatmentRemoveNeedleAtUseCase,
+    updateConsultationToWaitAcupunctureUseCase,
+    updateConsultationToWaitRemoveNeedleUseCase
+  )
+
+  const medicineTreatmentController = new MedicineTreatmentController(
+    createMedicineTreatmentUseCase,
+    updateConsultationToMedicineUseCase,
+    updateMedicineTreatmentUseCase,
+    updateConsultationCheckOutAtUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))
@@ -175,16 +306,27 @@ async function main(): Promise<void> {
   new PassportConfig(userRepository)
   app.use(passport.session())
 
+  // Routes
   const userRoutes = new UserRoutes(userController)
   const consultationRoutes = new ConsultationRoutes(consultationController)
   const feedbackRoutes = new FeedbackRoutes(feedbackController)
   const patientRoutes = new PatientRoutes(patientController)
+  const doctorRoutes = new DoctorRoutes(doctorController)
+  const acupunctureRoutes = new AcupunctureRoutes(
+    acupunctureTreatmentController
+  )
+  const medicineRoutes = new MedicineRoutes(medicineTreatmentController)
+  const commonRoutes = new CommonRoutes(commonController)
 
   const mainRoutes = new MainRoutes(
     userRoutes,
     consultationRoutes,
     feedbackRoutes,
-    patientRoutes
+    patientRoutes,
+    doctorRoutes,
+    acupunctureRoutes,
+    medicineRoutes,
+    commonRoutes
   )
 
   app.use(cors(corsOptions))

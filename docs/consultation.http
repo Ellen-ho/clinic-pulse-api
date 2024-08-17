@@ -23,26 +23,26 @@ Content-Type: application/json
 ###
 
 ### get single consultation 
-@consultationId = 56f8f1ae-4071-4606-b9b8-a6f807481b6f
+@consultationId = e1b92d4d-b73b-4592-bd68-a42fc6472cc5
 GET {{consultationsPath}}/{{consultationId}}
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
-### get consultation related ratios
-GET {{consultationsPath}}/related_ratios?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+### get consultation canceled and booking
+GET {{consultationsPath}}/canceled_and_booking?granularity=DAY&startDate=2024-05-27&endDate=2024-06-02&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
 ### get consultation real time count
-GET {{consultationsPath}}/real_time_count?clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b&consultationRoomNumber=ROOM_ONE
+GET {{consultationsPath}}/real_time_counts?clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b&consultationRoomNumber=ffeaea79-b30f-4f62-87b4-acee6c747d18s
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
 ### get average waiting time
-GET {{consultationsPath}}/related_average_waiting_time?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/average_waiting_time?granularity=DAY&startDate=2024-05-27&endDate=2024-06-02&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
@@ -60,7 +60,26 @@ Content-Type: application/json
 ###
 
 ### get different treatments 
-GET {{consultationsPath}}/different_treatments?startDate=2024-06-028&endDate=2024-07-20&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/different_treatments?granularity=WEEK&startDate=2024-08-01&endDate=2024-08-13&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
+###
+
+### create consultation
+POST {{consultationsPath}}/
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "patientId":"da3ab31e-fa43-4162-aaf1-71ab66a8f3e6",
+  "timeSlotId": "02ec4442-dc2f-4ee4-aa9c-1cfb1d662589"
+}
+###
+
+### update consultation startAt
+@id = 4d122970-8e74-49fe-8263-5b823562d02b
+PATCH {{consultationsPath}}/{{id}}
+Authorization: {{accessToken}}
+Content-Type: application/json
+
 ###

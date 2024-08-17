@@ -6,14 +6,14 @@ POST {{usersPath}}
 Content-Type: application/json
 
 {
-  "email": "fen@gmail.com",
-  "password": "fen5",
-  "firstName": "怡芬",
-  "lastName": "林",
+  "email": "yi@gmail.com",
+  "password": "yi5",
+  "firstName": "婉儀",
+  "lastName": "鍾",
   "role": "DOCTOR",
-  "onboardDate": "2022-01-03 00:00:00",
+  "onboardDate": "2022-03-03 00:00:00",
   "gender": "FEMALE",
-  "birthDate": "1990-01-02 00:00:00"
+  "birthDate": "1988-01-02 00:00:00"
 }
 ###
 

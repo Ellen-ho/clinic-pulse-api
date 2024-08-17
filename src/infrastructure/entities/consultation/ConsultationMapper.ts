@@ -1,8 +1,8 @@
 import { IEntityMapper } from 'domain/shared/IEntityMapper'
 import { ConsultationEntity } from './ConsultationEntity'
 import { Consultation } from 'domain/consultation/Consultation'
-import { AcupunctureTreatmentMapper } from '../treatement/AcupunctureTreatmentMapper'
-import { MedicineTreatmentMapper } from '../treatement/MedicineTreatmentMapper'
+import { AcupunctureTreatmentMapper } from '../treatment/AcupunctureTreatmentMapper'
+import { MedicineTreatmentMapper } from '../treatment/MedicineTreatmentMapper'
 
 export class ConsultationMapper
   implements IEntityMapper<ConsultationEntity, Consultation>
@@ -16,6 +16,7 @@ export class ConsultationMapper
       checkInAt: entity.checkInAt,
       startAt: entity.startAt,
       endAt: entity.endAt,
+      checkOutAt: entity.checkOutAt,
       onsiteCancelAt: entity.onsiteCancelAt,
       onsiteCancelReason: entity.onsiteCancelReason,
       isFirstTimeVisit: entity.isFirstTimeVisit,

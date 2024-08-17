@@ -1,6 +1,6 @@
 import { IEntityMapper } from 'domain/shared/IEntityMapper'
 import { AcupunctureTreatment } from 'domain/treatment/AcupunctureTreatment'
-import { AcupunctureTreatmentEntity } from './AcupunctureTreatementEntity'
+import { AcupunctureTreatmentEntity } from './AcupunctureTreatmentEntity'
 
 export class AcupunctureTreatmentMapper
   implements IEntityMapper<AcupunctureTreatmentEntity, AcupunctureTreatment>

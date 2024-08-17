@@ -4,11 +4,12 @@ import { authenticated } from '../middlewares/Auth'
 import { validator } from '../middlewares/Validator'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import {
+  createConsultationSchema,
   getAverageConsultationCountSchema,
   getAverageWaitingTimeSchema,
   getConsultationListSchema,
+  getConsultationOnsiteCanceledAndBookingSchema,
   getConsultationRealTimeCountSchema,
-  getConsultationRelatedRatiosSchema,
   getDifferentTreatmentConsultationSchema,
   getSingleConsultationSchema,
 } from 'application/consultation/ConsultationValidator'
@@ -43,19 +44,21 @@ export class ConsultationRoutes {
         )
       )
       .get(
-        '/related_average_waiting_time',
+        '/average_waiting_time',
         authenticated,
         validator(getAverageWaitingTimeSchema),
         asyncHandler(this.consultationController.getAverageWaitingTime)
       )
       .get(
-        '/related_ratios',
+        '/canceled_and_booking',
         authenticated,
-        validator(getConsultationRelatedRatiosSchema),
-        asyncHandler(this.consultationController.getConsultationRelatedRatios)
+        validator(getConsultationOnsiteCanceledAndBookingSchema),
+        asyncHandler(
+          this.consultationController.getConsultationOnsiteCanceledAndBooking
+        )
       )
       .get(
-        '/real_time_count',
+        '/real_time_counts',
         authenticated,
         validator(getConsultationRealTimeCountSchema),
         asyncHandler(this.consultationController.getConsultationRealTimeCount)
@@ -71,6 +74,17 @@ export class ConsultationRoutes {
         authenticated,
         validator(getConsultationListSchema),
         asyncHandler(this.consultationController.getConsultationList)
+      )
+      .patch(
+        '/:id',
+        authenticated,
+        asyncHandler(this.consultationController.updateConsultationStartAt)
+      )
+      .post(
+        '/',
+        authenticated,
+        validator(createConsultationSchema),
+        asyncHandler(this.consultationController.createConsultation)
       )
   }
 
