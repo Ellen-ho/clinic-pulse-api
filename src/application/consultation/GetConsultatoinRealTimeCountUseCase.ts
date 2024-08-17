@@ -6,7 +6,6 @@ import { User, UserRoleType } from 'domain/user/User'
 interface GetConsultationRealTimeCountRequest {
   clinicId?: string
   consultationRoomNumber?: string
-  doctorId?: string
   currentUser: User
 }
 
@@ -30,7 +29,7 @@ export class GetConsultationRealTimeCountUseCase {
   public async execute(
     request: GetConsultationRealTimeCountRequest
   ): Promise<GetConsultationRealTimeCountResponse | null> {
-    const { clinicId, consultationRoomNumber, doctorId, currentUser } = request
+    const { clinicId, consultationRoomNumber, currentUser } = request
 
     let currentDoctorId
 
@@ -80,7 +79,7 @@ export class GetConsultationRealTimeCountUseCase {
           currentTime,
           clinicId,
           consultationRoomNumber,
-          doctorId
+          undefined
         )
 
       if (timeSlotIds.length === 0) {
@@ -100,7 +99,7 @@ export class GetConsultationRealTimeCountUseCase {
           timeSlotIds,
           clinicId,
           consultationRoomNumber,
-          doctorId
+          undefined
         )
 
       return {
