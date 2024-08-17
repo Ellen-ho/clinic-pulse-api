@@ -25,7 +25,7 @@ export class UpdateConsultationToMedicineUseCase {
       throw new NotFoundError('This consultation does not exist.')
     }
 
-    const updatedStatus = ConsultationStatus.IN_CONSULTATION
+    const updatedStatus = ConsultationStatus.WAITING_FOR_GET_MEDICINE
     const updatedStartAt = new Date()
 
     existingConsultation.updateToMedicine({
