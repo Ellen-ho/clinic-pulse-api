@@ -80,7 +80,7 @@ async function main(): Promise<void> {
   }
 
   const corsOptions = {
-    origin: process.env.CORS_ORIGIN,
+    origin: '*',
     credentials: true,
   }
 
@@ -333,9 +333,14 @@ async function main(): Promise<void> {
 
   app.use('/api', mainRoutes.createRouter())
 
+  app.get('/', (req, res) => {
+    // for AWS LBS check
+    res.status(200).send('Application is running')
+  })
+
   app.use(errorHandler)
 
   app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`)
+    console.log(`Server is running at ${port}, CORS: ${corsOptions.origin}`)
   })
 }
