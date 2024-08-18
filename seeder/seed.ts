@@ -17,10 +17,10 @@ void (async () => {
     synchronize: false,
     // note: do not change the order
     seeds: [
-      UserSeeder,
+      // UserSeeder,
       // TimeSlotSeeder,
-      // ConsultationNormalFirstSeeder,
-      ConsultationNormalNotFirstSeeder,
+      ConsultationNormalFirstSeeder,
+      // ConsultationNormalNotFirstSeeder,
     ],
     entities: ['./src/infrastructure/entities/**/*Entity.ts'],
     migrations: ['./migrations/*.ts'],

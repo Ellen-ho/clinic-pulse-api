@@ -13,6 +13,9 @@ import { MedicineTreatmentEntity } from '../src/infrastructure/entities/treatmen
 import { generateRandomChineseName, getRandomBirthDate } from './utils'
 import dayjs from 'dayjs'
 import { TARGET_MONTH } from './constant/setting'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 // Add normal first visit consultations
 export default class ConsultationNormalFirstSeeder implements Seeder {

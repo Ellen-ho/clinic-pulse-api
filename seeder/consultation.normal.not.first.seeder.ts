@@ -12,6 +12,9 @@ import { AcupunctureTreatmentEntity } from '../src/infrastructure/entities/treat
 import { MedicineTreatmentEntity } from '../src/infrastructure/entities/treatment/MedicineTreatmentEntity'
 import dayjs from 'dayjs'
 import { TARGET_MONTH } from './constant/setting'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 export default class ConsultationNormalNotFirstSeeder implements Seeder {
   public async run(

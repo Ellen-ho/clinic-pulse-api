@@ -6,6 +6,9 @@ import { DOCTORS } from './constant/users'
 import { ROOMS } from './constant/clinics'
 import { TimePeriodType } from '../src/domain/timeSlot/TimeSlot'
 import { TARGET_MONTH } from './constant/setting'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 export default class TimeSlotSeeder implements Seeder {
   public async run(
