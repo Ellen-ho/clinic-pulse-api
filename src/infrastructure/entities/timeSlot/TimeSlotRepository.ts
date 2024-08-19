@@ -8,6 +8,7 @@ import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 import { ITimeSlotRepository } from '../../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
 import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import dayjs from 'dayjs'
+import { convertToUTC8 } from '../../../infrastructure/utils/DateFormatToUTC'
 
 export class TimeSlotRepository
   extends BaseRepository<TimeSlotEntity, TimeSlot>
@@ -165,6 +166,7 @@ export class TimeSlotRepository
     doctorId: string,
     currentTime: Date
   ): Promise<string | null> {
+    const utc8Time = convertToUTC8(currentTime)
     try {
       const result = await this.getQuery<Array<{ id: string }>>(
         `
@@ -175,7 +177,7 @@ export class TimeSlotRepository
           AND end_at + interval '1 hour' >= $2
         LIMIT 1
         `,
-        [doctorId, currentTime]
+        [doctorId, utc8Time]
       )
 
       if (result.length === 0) {
@@ -198,7 +200,7 @@ export class TimeSlotRepository
     doctorId?: string
   ): Promise<Array<{ id: string }>> {
     try {
-      // const utc8Time = formatToUTC8(currentTime)
+      const utc8Time = convertToUTC8(currentTime)
 
       let query = `
       SELECT id
@@ -207,7 +209,7 @@ export class TimeSlotRepository
         AND end_at + interval '1 hour' >= $1
        `
 
-      const queryParams: any[] = [currentTime]
+      const queryParams: any[] = [utc8Time]
 
       if (clinicId !== undefined) {
         query += ' AND clinic_id = $2'

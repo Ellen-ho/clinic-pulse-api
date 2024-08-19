@@ -10,6 +10,6 @@ export function formatToUTC8(date: Date): Date {
   return utc8Date
 }
 
-export function convertToUTC(date: Date): Date {
-  return dayjs(date).subtract(8, 'hour').toDate()
+export function convertToUTC8(date: Date): Date {
+  return dayjs(date).add(8, 'hour').toDate()
 }
