@@ -13,6 +13,8 @@ import { GetConsultationOnsiteCanceledAndBookingUseCase } from '../../../applica
 import { CreateConsultationUseCase } from '../../../application/consultation/CreateConsultationUseCase'
 import { UpdateConsultationCheckOutAtUseCase } from '../../../application/consultation/UpdateConsultationCheckOutAtUseCase'
 import { UpdateConsultationStartAtUseCase } from '../../../application/consultation/UpdateConsultationStartAtUseCase'
+import { UpdateConsultationOnsiteCancelAtUseCase } from 'application/consultation/UpdateConsultationOnsiteCancelAtUseCase'
+import { OnsiteCancelReasonType } from 'domain/consultation/Consultation'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
@@ -44,6 +46,10 @@ export interface IConsultationController {
     req: Request,
     res: Response
   ) => Promise<Response>
+  updateConsultationOnsiteCancelAt: (
+    req: Request,
+    res: Response
+  ) => Promise<Response>
 }
 
 export class ConsultationController implements IConsultationController {
@@ -58,7 +64,8 @@ export class ConsultationController implements IConsultationController {
     private readonly getDifferentTreatmentConsultationUseCase: GetDifferentTreatmentConsultationUseCase,
     private readonly createConsultationUseCase: CreateConsultationUseCase,
     private readonly updateConsultationCheckOutAtUseCase: UpdateConsultationCheckOutAtUseCase,
-    private readonly updateConsultationStartAtUseCase: UpdateConsultationStartAtUseCase
+    private readonly updateConsultationStartAtUseCase: UpdateConsultationStartAtUseCase,
+    private readonly updateConsultationOnsiteCancelAtUseCase: UpdateConsultationOnsiteCancelAtUseCase
   ) {}
 
   public getConsultationList = async (
@@ -242,5 +249,28 @@ export class ConsultationController implements IConsultationController {
     }
     const result = await this.updateConsultationStartAtUseCase.execute(request)
     return res.status(200).json(result)
+  }
+
+  public updateConsultation = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      id: req.params.id,
+    }
+    const result = await this.updateConsultationStartAtUseCase.execute(request)
+    return res.status(200).json(result)
+  }
+
+  public updateConsultationOnsiteCancelAt = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      consultationId: req.params.id,
+      onsiteCancelReason: OnsiteCancelReasonType.LONG_WAITING_TIME,
+    }
+    await this.updateConsultationOnsiteCancelAtUseCase.execute(request)
+    return res.status(200).json()
   }
 }

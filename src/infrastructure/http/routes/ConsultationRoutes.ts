@@ -76,9 +76,16 @@ export class ConsultationRoutes {
         asyncHandler(this.consultationController.getConsultationList)
       )
       .patch(
-        '/:id',
+        '/:id/start_at',
         authenticated,
         asyncHandler(this.consultationController.updateConsultationStartAt)
+      )
+      .patch(
+        '/:id/onsite_cancel_at',
+        authenticated,
+        asyncHandler(
+          this.consultationController.updateConsultationOnsiteCancelAt
+        )
       )
       .post(
         '/',
