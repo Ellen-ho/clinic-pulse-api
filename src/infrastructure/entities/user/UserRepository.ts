@@ -1,7 +1,7 @@
 import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
 import { UserEntity } from './UserEntity'
 import { DataSource } from 'typeorm'
-import { User } from '../../../domain/user/User'
+import { User, UserRoleType } from '../../../domain/user/User'
 import { UserMapper } from './UserMapper'
 import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import { IUserRepository } from '../../../domain/user/interfaces/repositories/IUserRepository'
@@ -33,6 +33,30 @@ export class UserRepository
       return entity != null ? this.getMapper().toDomainModel(entity) : null
     } catch (e) {
       throw new RepositoryError('UserRepository findByEmail error', e as Error)
+    }
+  }
+
+  public async findAdmin(): Promise<User | null> {
+    try {
+      const query = `
+        SELECT * 
+        FROM users 
+        WHERE role = $1
+        LIMIT 1
+      `
+      const result = await this.getQuery<UserEntity[]>(query, [
+        UserRoleType.ADMIN,
+      ])
+
+      if (result.length > 0) {
+        const userEntity = result[0]
+        const userDomainModel = this.getMapper().toDomainModel(userEntity)
+        return userDomainModel
+      } else {
+        return null
+      }
+    } catch (e) {
+      throw new RepositoryError('UserRepository findAdmin error', e as Error)
     }
   }
 }
