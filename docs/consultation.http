@@ -85,7 +85,7 @@ Content-Type: application/json
 ###
 
 ### update consultation onsite cancel at
-@cId = e1112864-9066-4997-8a09-18260a5e27fe
+@cId = cd89eef8-3b49-4870-bd8f-d5b310f32620
 PATCH {{consultationsPath}}/{{cId}}/onsite_cancel_at
 Authorization: {{accessToken}}
 Content-Type: application/json

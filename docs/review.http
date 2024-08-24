@@ -1,0 +1,30 @@
+@hostname = http://localhost:10000
+
+@usersPath = {{hostname}}/api/users
+
+### user signin
+# @name signin
+POST {{usersPath}}/signin
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "123456"
+}
+###
+@accessToken = Bearer {{signin.response.body.token}}
+@reviewsPath = {{hostname}}/api/reviews
+### get review list
+GET {{reviewsPath}}?limit=20&page=1&startDate=2024-05-01&endDate=2024-05-31&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### get single feedback
+@reviewId = e21b58e7-dd60-4ec0-8d3a-b4c46e89d30b
+GET {{reviewsPath}}/{{reviewId}}
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+
