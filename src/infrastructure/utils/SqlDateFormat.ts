@@ -5,12 +5,12 @@ export function getDateFormat(granularity: Granularity): string {
     case Granularity.DAY:
       return 'YYYY-MM-DD'
     case Granularity.WEEK:
-      return 'IYYY-IW' // ISO week number and year
+      return 'IYYY-IW'
     case Granularity.MONTH:
-      return 'YYYY-MM' // Year and month
+      return 'YYYY-MM'
     case Granularity.YEAR:
-      return 'YYYY' // Just the year
+      return 'YYYY'
     default:
-      return 'YYYY-MM-DD' // Default case to handle any unexpected values
+      return 'YYYY-MM-DD'
   }
 }
