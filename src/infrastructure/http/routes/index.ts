@@ -7,6 +7,8 @@ import { DoctorRoutes } from './DoctorRoutes'
 import { AcupunctureRoutes } from './AcupunctureRoutes'
 import { MedicineRoutes } from './MedicineRoutes'
 import { CommonRoutes } from './CommonRoutes'
+import { NotificationRoutes } from './NotificationRoutes'
+import { ReviewRoutes } from './ReviewRoutes'
 
 export class MainRoutes {
   private readonly routes: Router
@@ -18,6 +20,8 @@ export class MainRoutes {
     private readonly doctorRoutes: DoctorRoutes,
     private readonly acupunctureRoutes: AcupunctureRoutes,
     private readonly medicineRoutes: MedicineRoutes,
+    private readonly notificationRoutes: NotificationRoutes,
+    private readonly reviewRoutes: ReviewRoutes,
     private readonly commonRoutes: CommonRoutes
   ) {
     this.routes = Router()
@@ -32,6 +36,8 @@ export class MainRoutes {
       this.acupunctureRoutes.createRouter()
     )
     this.routes.use('/medicine-treatments', this.medicineRoutes.createRouter())
+    this.routes.use('/notifications', this.notificationRoutes.createRouter())
+    this.routes.use('/reviews', this.reviewRoutes.createRouter())
   }
 
   public createRouter(): Router {
