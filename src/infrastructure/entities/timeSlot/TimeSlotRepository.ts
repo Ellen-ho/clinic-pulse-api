@@ -243,4 +243,15 @@ export class TimeSlotRepository
       )
     }
   }
+
+  public async getById(id: string): Promise<TimeSlot | null> {
+    try {
+      const entity = await this.getRepo().findOne({
+        where: { id },
+      })
+      return entity != null ? this.getMapper().toDomainModel(entity) : null
+    } catch (e) {
+      throw new RepositoryError('TimeSlotRepository findById error', e as Error)
+    }
+  }
 }

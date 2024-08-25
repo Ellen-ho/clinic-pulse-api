@@ -964,8 +964,8 @@ export class ConsultationRepository
       >(
         `
         SELECT 
-        TO_CHAR(c.check_in_at, '${dateFormat}') AS date,
-        COUNT(*) AS count
+          TO_CHAR(c.check_in_at, '${dateFormat}') AS date,
+          COUNT(*) AS count
         FROM consultations c
         LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
         WHERE c.check_in_at BETWEEN $1 AND $2

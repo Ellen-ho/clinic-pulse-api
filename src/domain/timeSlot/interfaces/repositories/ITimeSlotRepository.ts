@@ -31,4 +31,5 @@ export interface ITimeSlotRepository extends IBaseRepository<TimeSlot> {
     consultationRoomNumber?: string,
     doctorId?: string
   ) => Promise<Array<{ id: string }>>
+  getById: (id: string) => Promise<TimeSlot | null>
 }

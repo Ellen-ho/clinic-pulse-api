@@ -40,7 +40,6 @@ export class CreateConsultationUseCase {
       await this.consultationRepository.getLatestOddConsultationNumber(
         timeSlotId
       )
-
     const consultationNumber = latestNumber + 2
 
     const status = ConsultationStatus.WAITING_FOR_CONSULTATION

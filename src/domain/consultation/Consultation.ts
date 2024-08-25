@@ -80,6 +80,13 @@ interface IConsultaionUpdateStatus {
   status: ConsultationStatus
 }
 
+interface IConsultaionUpdateToOnsiteCancel {
+  [key: string]: any
+  status: ConsultationStatus
+  onsiteCancelAt: Date
+  onsiteCancelReason: OnsiteCancelReasonType
+}
+
 export class Consultation {
   constructor(private readonly props: IConsultationProps) {}
 
@@ -163,6 +170,12 @@ export class Consultation {
   public updateToCheckOutAt(data: IConsultaionUpdateCheckOutAt): void {
     this.props.status = data.status
     this.props.checkOutAt = data.checkOutAt
+  }
+
+  public updateToOnsiteCancel(data: IConsultaionUpdateToOnsiteCancel): void {
+    this.props.status = data.status
+    this.props.onsiteCancelAt = data.onsiteCancelAt
+    this.props.onsiteCancelReason = data.onsiteCancelReason
   }
 
   public updateStatus(data: IConsultaionUpdateStatus): void {

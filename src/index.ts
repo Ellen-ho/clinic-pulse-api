@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import session from 'express-session'
 import passport from 'passport'
+import { Server } from 'socket.io'
 import { PostgresDatabase } from './infrastructure/database/PostgresDatabase'
 import { UuidService } from './infrastructure/utils/UuidService'
 import { BcryptHashGenerator } from './infrastructure/utils/BcryptHashGenerator'
@@ -63,6 +64,26 @@ import { GetDoctorsAndClinicsUseCase } from './application/common/GetDoctorsAndC
 import { ClinicRepository } from './infrastructure/entities/clinic/ClinicRepository'
 import { CommonRoutes } from './infrastructure/http/routes/CommonRoutes'
 import { UpdateConsultationStartAtUseCase } from './application/consultation/UpdateConsultationStartAtUseCase'
+import { GetDoctorProfileUseCase } from './application/doctor/GetDoctorProfieUseCase'
+import { NotificationRoutes } from './infrastructure/http/routes/NotificationRoutes'
+import { NotificationController } from './infrastructure/http/controllers/NotificationController'
+import { GetNotificationListUseCase } from './application/notification/GetNotificationListUseCase'
+import { GetNotificationDetailsUseCase } from './application/notification/GetNotificationDetailsUseCase'
+import { GetNotificationHintsUseCase } from './application/notification/GetNotificationHintsUseCase'
+import { ReadAllNotificationsUseCase } from './application/notification/ReadAllNotificationsUseCase'
+import { DeleteAllNotificationsUseCase } from './application/notification/DeleteAllNotificationsUseCase'
+import { DeleteNotificationUseCase } from './application/notification/DeleteNotificationUseCase'
+import { NotificationRepository } from './infrastructure/entities/notification/NotificationRepository'
+import { UpdateConsultationOnsiteCancelAtUseCase } from './application/consultation/UpdateConsultationOnsiteCancelAtUseCase'
+import { NotificationHelper } from './application/notification/NotificationHelper'
+import SocketService from './infrastructure/network/SocketService'
+import { createServer } from 'http'
+import { ReviewRepository } from './infrastructure/entities/review/ReviewRepository'
+import { GetReviewListUseCase } from 'application/review/GetReviewListUseCase'
+import { ReviewController } from 'infrastructure/http/controllers/ReviewController'
+import { ReviewRoutes } from 'infrastructure/http/routes/ReviewRoutes'
+import { GetSingleReviewUseCase } from 'application/review/GetSingleReviewUseCase'
+import GoogleReviewService from 'infrastructure/network/GoogleReviewService'
 
 void main()
 
@@ -86,9 +107,25 @@ async function main(): Promise<void> {
 
   const app: Express = express()
 
+  // Socket.io init
+  const httpServer = createServer(app)
+  const io = new Server(httpServer, {
+    path: '/ws/notification',
+    transports: ['websocket'],
+    cors: corsOptions,
+  })
+
+  const socketService = new SocketService(io)
+
+  /**
+   * Database Connection
+   */
   const postgresDatabase = await PostgresDatabase.getInstance()
   const dataSource = postgresDatabase.getDataSource()
 
+  /**
+   * Shared Services
+   */
   const uuidService = new UuidService()
   const hashGenerator = new BcryptHashGenerator()
 
@@ -106,6 +143,18 @@ async function main(): Promise<void> {
     dataSource
   )
   const clinicRepository = new ClinicRepository(dataSource)
+  const notificationRepository = new NotificationRepository(dataSource)
+  const reviewRepository = new ReviewRepository(dataSource)
+
+  /**
+   * Cross domain helper
+   */
+
+  const notificationHelper = new NotificationHelper(
+    notificationRepository,
+    uuidService,
+    socketService
+  )
 
   // Domain
   const createUserUseCase = new CreateUserUseCase(
@@ -120,6 +169,8 @@ async function main(): Promise<void> {
   )
 
   const getAllDoctorsUseCase = new GetAllDoctorsUseCase(doctorRepository)
+
+  const getDoctorProfileUseCase = new GetDoctorProfileUseCase(doctorRepository)
 
   const getConsultationListUseCase = new GetConsultationListUseCase(
     consultationRepository,
@@ -230,6 +281,15 @@ async function main(): Promise<void> {
   const updateConsultationToWaitRemoveNeedleUseCase =
     new UpdateConsultationToWaitRemoveNeedleUseCase(consultationRepository)
 
+  const updateConsultationOnsiteCancelAtUseCase =
+    new UpdateConsultationOnsiteCancelAtUseCase(
+      consultationRepository,
+      timeSlotRepository,
+      doctorRepository,
+      userRepository,
+      notificationHelper
+    )
+
   const updateMedicineTreatmentUseCase = new UpdateMedicineTreatmentUseCase(
     medicineTreatmentRepository
   )
@@ -238,6 +298,38 @@ async function main(): Promise<void> {
     doctorRepository,
     clinicRepository
   )
+
+  /**
+   * Notification Domain
+   */
+
+  const getNotificationListUseCase = new GetNotificationListUseCase(
+    notificationRepository
+  )
+
+  const getNotificationDetailsUseCase = new GetNotificationDetailsUseCase(
+    notificationRepository
+  )
+
+  const getNotificationHintsUseCase = new GetNotificationHintsUseCase(
+    notificationRepository
+  )
+
+  const readAllNotificationsUseCase = new ReadAllNotificationsUseCase(
+    notificationRepository
+  )
+
+  const deleteAllNotificationsUseCase = new DeleteAllNotificationsUseCase(
+    notificationRepository
+  )
+
+  const deleteNotificationUseCase = new DeleteNotificationUseCase(
+    notificationRepository
+  )
+
+  const getReviewListUseCase = new GetReviewListUseCase(reviewRepository)
+
+  const getSingleReviewUseCase = new GetSingleReviewUseCase(reviewRepository)
 
   // Controller
   const commonController = new CommonController(getDoctorsAndClinicsUseCase)
@@ -259,7 +351,8 @@ async function main(): Promise<void> {
     getDifferentTreatmentConsultationUseCase,
     createConsultationUseCase,
     updateConsultationCheckOutAtUseCase,
-    updateConsultationStartAtUseCase
+    updateConsultationStartAtUseCase,
+    updateConsultationOnsiteCancelAtUseCase
   )
 
   const feedbackController = new FeedbackController(
@@ -272,7 +365,10 @@ async function main(): Promise<void> {
     getPatientNameAutoCompleteUseCase
   )
 
-  const doctorController = new DoctorController(getAllDoctorsUseCase)
+  const doctorController = new DoctorController(
+    getAllDoctorsUseCase,
+    getDoctorProfileUseCase
+  )
 
   const acupunctureTreatmentController = new AcupunctureTreatmentController(
     createAcupunctureTreatmentUseCase,
@@ -289,6 +385,20 @@ async function main(): Promise<void> {
     updateConsultationToMedicineUseCase,
     updateMedicineTreatmentUseCase,
     updateConsultationCheckOutAtUseCase
+  )
+
+  const notificationController = new NotificationController(
+    getNotificationListUseCase,
+    getNotificationDetailsUseCase,
+    getNotificationHintsUseCase,
+    readAllNotificationsUseCase,
+    deleteAllNotificationsUseCase,
+    deleteNotificationUseCase
+  )
+
+  const reviewController = new ReviewController(
+    getReviewListUseCase,
+    getSingleReviewUseCase
   )
 
   app.use(express.urlencoded({ extended: true }))
@@ -316,6 +426,8 @@ async function main(): Promise<void> {
     acupunctureTreatmentController
   )
   const medicineRoutes = new MedicineRoutes(medicineTreatmentController)
+  const notificationRoutes = new NotificationRoutes(notificationController)
+  const reviewRoutes = new ReviewRoutes(reviewController)
   const commonRoutes = new CommonRoutes(commonController)
 
   const mainRoutes = new MainRoutes(
@@ -326,8 +438,16 @@ async function main(): Promise<void> {
     doctorRoutes,
     acupunctureRoutes,
     medicineRoutes,
+    notificationRoutes,
+    reviewRoutes,
     commonRoutes
   )
+
+  // const googleReviewService = new GoogleReviewService(
+  //   reviewRepository,
+  //   uuidService
+  // )
+  // await googleReviewService.fetchAllGoogleReviews()
 
   app.use(cors(corsOptions))
 
@@ -340,7 +460,7 @@ async function main(): Promise<void> {
 
   app.use(errorHandler)
 
-  app.listen(port, () => {
+  httpServer.listen(port, () => {
     console.log(`Server is running at ${port}, CORS: ${corsOptions.origin}`)
   })
 }

@@ -8,14 +8,14 @@ POST {{usersPath}}/signin
 Content-Type: application/json
 
 {
-  "email": "111@gmail.com",
-  "password": "111"
+  "email": "doctor_zhang@example.com",
+  "password": "123456"
 }
 ###
 @accessToken = Bearer {{signin.response.body.token}}
 @feedbacksPath = {{hostname}}/api/feedbacks
 ### get feedback list
-GET {{feedbacksPath}}?limit=20&page=1&startDate=2024-08-01&endDate=2024-08-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b&patientName=豪
+GET {{feedbacksPath}}?limit=20&page=1&startDate=2024-08-01&endDate=2024-08-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###

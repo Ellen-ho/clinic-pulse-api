@@ -8,8 +8,8 @@ POST {{usersPath}}/signin
 Content-Type: application/json
 
 {
-  "email": "111@gmail.com",
-  "password": "111"
+  "email": "doctor_tsai@example.com",
+  "password": "123456"
 }
 ###
 @accessToken = Bearer {{signin.response.body.token}}
@@ -18,6 +18,14 @@ Content-Type: application/json
 
 ### get all doctors
 GET {{doctorsPath}}
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+
+### get doctor profile
+@doctorId = 8545ef60-a94d-4160-829f-f4fd7ed77551
+GET {{doctorsPath}}/{{doctorId}}
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
