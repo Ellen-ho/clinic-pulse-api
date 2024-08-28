@@ -14,6 +14,7 @@ export class FeedbackRoutes {
   constructor(private readonly feedbackController: IFeedbackController) {
     this.routes = Router()
     this.routes
+      .post('/', asyncHandler(this.feedbackController.createFeedback))
       .get(
         '/related_ratios',
         authenticated,

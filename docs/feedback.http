@@ -8,7 +8,7 @@ POST {{usersPath}}/signin
 Content-Type: application/json
 
 {
-  "email": "doctor_zhang@example.com",
+  "email": "admin@example.com",
   "password": "123456"
 }
 ###
@@ -33,3 +33,15 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
+### create feedback 
+POST {{feedbacksPath}}/
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "feedbackRating": 3,
+  "selectedContent":"LONG_WAIT_TIME_FOR_ACUPUNCTURE",
+   "detailedContent": "等候時間太長了，期待改善。",
+   "consultationId": "bd2c7e38-c66a-4b30-8832-a52d053f95be"
+}
+###
