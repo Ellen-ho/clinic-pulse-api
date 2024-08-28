@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -13,6 +14,8 @@ import { ClinicEntity } from '../clinic/ClinicEntity'
 import { TimePeriodType } from '../../../domain/timeSlot/TimeSlot'
 import { ConsultationRoomEntity } from '../consultationRoom/ConsultationRoomEntity'
 
+@Index('IDX_DOCTOR_ID', ['doctorId'])
+@Index('IDX_CLINIC_CONSULTATION_ROOM', ['clinicId', 'consultationRoomId'])
 @Entity('time_slots')
 export class TimeSlotEntity {
   @PrimaryGeneratedColumn('uuid')

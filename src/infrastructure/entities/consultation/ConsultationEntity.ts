@@ -6,6 +6,7 @@ import {
   JoinColumn,
   RelationId,
   ManyToOne,
+  Index,
 } from 'typeorm'
 import {
   ConsultationSource,
@@ -19,6 +20,7 @@ import { PatientEntity } from '../patient/PatientEntity'
 import { AcupunctureTreatmentEntity } from '../treatment/AcupunctureTreatmentEntity'
 import { MedicineTreatmentEntity } from '../treatment/MedicineTreatmentEntity'
 
+@Index('IDX_CHECK_IN_AT_TIME_SLOT_ID', ['checkInAt', 'timeSlotId'])
 @Entity('consultations')
 export class ConsultationEntity {
   @PrimaryGeneratedColumn('uuid')
