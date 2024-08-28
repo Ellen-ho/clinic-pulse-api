@@ -1,3 +1,4 @@
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 import { GenderType, Granularity } from '../../../../domain/common'
 import {
   Consultation,
@@ -109,6 +110,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     waitForNeedleRemovedCount: number
     waitForMedicineCount: number
     completedCount: number
+    onsiteCancelCount: number
   }>
   getAverageWaitingTime: (
     startDate: string,
@@ -187,7 +189,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
   findSocketData: (id: string) => Promise<{
     timeSlotId: string
     clinicId: string
-    consultationRoomNumber: string
+    consultationRoomNumber: RoomNumberType
   }>
   getRealTimeLists: (
     timeSlotId: string | Array<{ id: string }>,
@@ -211,7 +213,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       status: ConsultationStatus
       timeSlotId: string
       clinicId: string
-      consultationRoomNumber: string
+      consultationRoomNumber: RoomNumberType
     }>
     totalCounts: number
   }>
@@ -232,6 +234,6 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     status: ConsultationStatus
     timeSlotId: string
     clinicId: string
-    consultationRoomNumber: string
+    consultationRoomNumber: RoomNumberType
   }>
 }

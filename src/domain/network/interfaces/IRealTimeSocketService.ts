@@ -1,9 +1,10 @@
 import { GenderType } from 'domain/common'
 import { ConsultationStatus } from 'domain/consultation/Consultation'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 
 export interface ISendToUser {
   clinicId: string
-  consultationRoomNumber: string
+  consultationRoomNumber: RoomNumberType
   event: 'realTimeCounts' | 'realTimeList'
   message:
     | {

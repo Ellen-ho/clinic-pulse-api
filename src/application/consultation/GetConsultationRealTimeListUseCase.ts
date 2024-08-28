@@ -19,7 +19,7 @@ interface GetConsultationRealTimeListResponse {
   data: Array<{
     id: string
     isOnsiteCanceled: boolean
-    consultationNumber: RoomNumberType
+    consultationNumber: number
     doctor: {
       firstName: string
       lastName: string
@@ -130,16 +130,16 @@ export class GetConsultationRealTimeListUseCase {
         id: result.id,
       }))
 
-      const realTimeCounts = await this.consultationRepository.getRealTimeLists(
+      const realTimeLists = await this.consultationRepository.getRealTimeLists(
         timeSlotIds,
         limit,
         offset
       )
 
       return {
-        data: realTimeCounts.data,
-        pagination: getPagination(limit, page, realTimeCounts.totalCounts),
-        totalCounts: realTimeCounts.totalCounts,
+        data: realTimeLists.data,
+        pagination: getPagination(limit, page, realTimeLists.totalCounts),
+        totalCounts: realTimeLists.totalCounts,
       }
     }
 

@@ -14,6 +14,7 @@ import {
   GetConsultationSocketRealTimeListRequest,
   GetConsultationSocketRealTimeListUseCase,
 } from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 
 export interface IMedicineTreatmentController {
   createMedicineTreatment: (req: Request, res: Response) => Promise<Response>
@@ -57,7 +58,8 @@ export class MedicineTreatmentController
 
     await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
       clinicId: result?.clinicId ?? '',
-      consultationRoomNumber: result?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        result?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         waitForConsultationCount: result?.waitForConsultationCount ?? 0,
         waitForBedAssignedCount: result?.waitForBedAssignedCount ?? 0,
@@ -81,7 +83,8 @@ export class MedicineTreatmentController
 
     await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
       clinicId: listResult?.clinicId ?? '',
-      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         id: listResult?.id ?? '',
         isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
@@ -130,7 +133,8 @@ export class MedicineTreatmentController
 
     await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
       clinicId: result?.clinicId ?? '',
-      consultationRoomNumber: result?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        result?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         waitForConsultationCount: result?.waitForConsultationCount ?? 0,
         waitForBedAssignedCount: result?.waitForBedAssignedCount ?? 0,
@@ -154,7 +158,8 @@ export class MedicineTreatmentController
 
     await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
       clinicId: listResult?.clinicId ?? '',
-      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         id: listResult?.id ?? '',
         isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,

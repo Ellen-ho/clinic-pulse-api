@@ -1,6 +1,7 @@
 import { GenderType } from 'domain/common'
 import { ConsultationStatus } from 'domain/consultation/Consultation'
 import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 
 export interface GetConsultationSocketRealTimeListRequest {
   consultationId: string
@@ -23,7 +24,7 @@ interface GetConsultationSocketRealTimeListResponse {
   status: ConsultationStatus
   timeSlotId: string
   clinicId: string
-  consultationRoomNumber: string
+  consultationRoomNumber: RoomNumberType
 }
 
 export class GetConsultationSocketRealTimeListUseCase {

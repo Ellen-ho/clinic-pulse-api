@@ -19,8 +19,11 @@ interface GetConsultationRealTimeCountResponse {
   waitForNeedleRemovedCount: number
   waitForMedicineCount: number
   completedCount: number
+  onsiteCancelCount: number
   clinicId: string | Array<{ clinicId: string }>
-  consultationRoomNumber: string | Array<{ consultationRoomNumber: string }>
+  consultationRoomNumber:
+    | RoomNumberType
+    | Array<{ consultationRoomNumber: RoomNumberType }>
   timePeriod: TimePeriodType | Array<{ timePeriod: string }> | null
 }
 
@@ -60,8 +63,9 @@ export class GetConsultationRealTimeCountUseCase {
             waitForNeedleRemovedCount: 0,
             waitForMedicineCount: 0,
             completedCount: 0,
+            onsiteCancelCount: 0,
             clinicId: '',
-            consultationRoomNumber: '',
+            consultationRoomNumber: RoomNumberType.ROOM_ONE,
             timePeriod: null,
           }
         }
@@ -94,6 +98,7 @@ export class GetConsultationRealTimeCountUseCase {
           waitForNeedleRemovedCount: 0,
           waitForMedicineCount: 0,
           completedCount: 0,
+          onsiteCancelCount: 0,
           clinicId: [],
           consultationRoomNumber: [],
           timePeriod: null,

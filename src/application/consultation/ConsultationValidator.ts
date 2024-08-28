@@ -1,3 +1,4 @@
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 import { Granularity } from '../../domain/common'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
 import Joi from 'joi'
@@ -44,14 +45,18 @@ export const getConsultationOnsiteCanceledAndBookingSchema = {
 export const getConsultationRealTimeCountSchema = {
   query: Joi.object({
     clinicId: Joi.string().optional(),
-    consultationRoomNumber: Joi.string().optional(),
+    consultationRoomNumber: Joi.string()
+      .valid(...Object.values(RoomNumberType))
+      .optional(),
   }),
 }
 
 export const getConsultationRealTimeListSchema = {
   query: Joi.object({
     clinicId: Joi.string().optional(),
-    consultationRoomNumber: Joi.string().optional(),
+    consultationRoomNumber: Joi.string()
+      .valid(...Object.values(RoomNumberType))
+      .optional(),
     limit: Joi.number().required(),
     page: Joi.number().required(),
   }),
@@ -126,7 +131,9 @@ export const createConsultationSchema = {
 export const getConsultationRealTimeSchema = {
   query: Joi.object({
     clinicId: Joi.string().optional(),
-    consultationRoomNumber: Joi.string().optional(),
+    consultationRoomNumber: Joi.string()
+      .valid(...Object.values(RoomNumberType))
+      .optional(),
     doctorId: Joi.string().optional(),
   }),
 }

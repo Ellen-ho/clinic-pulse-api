@@ -41,6 +41,12 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
+### get consultation real time list
+GET {{consultationsPath}}/real_time_lists?limit=25&page=1&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b&consultationRoomNumber=1
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
 ### get average waiting time
 GET {{consultationsPath}}/average_waiting_time?granularity=DAY&startDate=2024-05-27&endDate=2024-06-02&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
@@ -85,7 +91,7 @@ Content-Type: application/json
 ###
 
 ### update consultation onsite cancel at
-@cId = 4dba5f04-a422-400b-a9cb-848eb77f7988
+@cId = 93f4dfcc-6d91-4d2f-9021-66ab57bf6e03
 PATCH {{consultationsPath}}/{{cId}}/onsite_cancel_at
 Authorization: {{accessToken}}
 Content-Type: application/json

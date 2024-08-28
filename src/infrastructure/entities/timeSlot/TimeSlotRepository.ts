@@ -133,7 +133,7 @@ export class TimeSlotRepository
   ): Promise<{
     timeSlotId: string
     clinicId: string
-    consultationRoomNumber: string
+    consultationRoomNumber: RoomNumberType
     timePeriod: TimePeriodType
   } | null> {
     const utc8Time = currentTime
@@ -165,7 +165,8 @@ export class TimeSlotRepository
       return {
         timeSlotId: result[0].id,
         clinicId: result[0].clinic_id,
-        consultationRoomNumber: result[0].consultation_room_number,
+        consultationRoomNumber: result[0]
+          .consultation_room_number as RoomNumberType,
         timePeriod: result[0].time_period,
       }
     } catch (e) {

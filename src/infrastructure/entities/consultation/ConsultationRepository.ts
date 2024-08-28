@@ -15,6 +15,7 @@ import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 import dayjs from 'dayjs'
 import { MedicineTreatment } from '../../../domain/treatment/MedicineTreatment'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 
 export class ConsultationRepository
   extends BaseRepository<ConsultationEntity, Consultation>
@@ -564,10 +565,14 @@ export class ConsultationRepository
     waitForNeedleRemovedCount: number
     waitForMedicineCount: number
     completedCount: number
+    onsiteCancelCount: number
   }> {
     try {
       let baseQuery = `
-      SELECT status, COUNT(*) as count
+      SELECT 
+        status,
+        COUNT(*) as count,
+        SUM(CASE WHEN onsite_cancel_at IS NOT NULL THEN 1 ELSE 0 END) as onsite_cancel_count
       FROM consultations
       JOIN time_slots ON consultations.time_slot_id = time_slots.id
       WHERE 1=1
@@ -589,7 +594,11 @@ export class ConsultationRepository
       baseQuery += ' GROUP BY status'
 
       const results = await this.getQuery<
-        Array<{ status: ConsultationStatus; count: string }>
+        Array<{
+          status: ConsultationStatus
+          count: string
+          onsite_cancel_count: string
+        }>
       >(baseQuery, queryParams)
 
       const response = {
@@ -600,11 +609,13 @@ export class ConsultationRepository
         waitForNeedleRemovedCount: 0,
         waitForMedicineCount: 0,
         completedCount: 0,
+        onsiteCancelCount: 0,
       }
 
       results.forEach((result) => {
         const statusTrimmed = result.status.trim()
         const count = parseInt(result.count, 10)
+        const onsiteCancelCount = parseInt(result.onsite_cancel_count, 10)
         switch (statusTrimmed) {
           case ConsultationStatus.WAITING_FOR_CONSULTATION:
             response.waitForConsultationCount = count
@@ -625,6 +636,7 @@ export class ConsultationRepository
             response.completedCount = count
             break
         }
+        response.onsiteCancelCount += onsiteCancelCount
       })
 
       return response
@@ -1215,7 +1227,7 @@ export class ConsultationRepository
   public async findSocketData(id: string): Promise<{
     timeSlotId: string
     clinicId: string
-    consultationRoomNumber: string
+    consultationRoomNumber: RoomNumberType
   }> {
     try {
       const result = await this.getQuery<
@@ -1239,7 +1251,8 @@ export class ConsultationRepository
       return {
         timeSlotId: result[0].time_slot_id,
         clinicId: result[0].clinic_id,
-        consultationRoomNumber: result[0].consultation_room_id,
+        consultationRoomNumber: result[0]
+          .consultation_room_id as RoomNumberType,
       }
     } catch (e) {
       throw new RepositoryError(
@@ -1266,7 +1279,7 @@ export class ConsultationRepository
     status: ConsultationStatus
     timeSlotId: string
     clinicId: string
-    consultationRoomNumber: string
+    consultationRoomNumber: RoomNumberType
   }> {
     try {
       const result = await this.getQuery<
@@ -1328,7 +1341,7 @@ export class ConsultationRepository
         status: row.status,
         timeSlotId: row.time_slot_id,
         clinicId: row.clinic_id,
-        consultationRoomNumber: row.consultation_room_number,
+        consultationRoomNumber: row.consultation_room_number as RoomNumberType,
       }
     } catch (e) {
       throw new RepositoryError(
@@ -1410,7 +1423,7 @@ export class ConsultationRepository
       status: ConsultationStatus
       timeSlotId: string
       clinicId: string
-      consultationRoomNumber: string
+      consultationRoomNumber: RoomNumberType
     }>
     totalCounts: number
   }> {
@@ -1443,7 +1456,7 @@ export class ConsultationRepository
           status: ConsultationStatus
           time_slot_id: string
           clinic_id: string
-          consultation_room_number: string
+          consultation_room_number: RoomNumberType
         }>
       >(
         `

@@ -1,3 +1,4 @@
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 export interface GetConsultationSocketRealTimeCountRequest {
   consultationId: string
@@ -6,7 +7,7 @@ export interface GetConsultationSocketRealTimeCountRequest {
 interface GetConsultationSocketRealTimeCountResponse {
   timeSlotId: string
   clinicId: string
-  consultationRoomNumber: string
+  consultationRoomNumber: RoomNumberType
   waitForConsultationCount: number
   waitForBedAssignedCount: number
   waitForAcupunctureTreatmentCount: number

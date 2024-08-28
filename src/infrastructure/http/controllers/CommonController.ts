@@ -13,6 +13,7 @@ import {
 } from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
 import { GenderType } from 'domain/common'
 import { ConsultationStatus } from 'domain/consultation/Consultation'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 export interface ICommonController {
   getDoctorsAndClinics: (req: Request, res: Response) => Promise<Response>
 }
@@ -60,7 +61,8 @@ export class CommonController implements ICommonController {
 
     await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
       clinicId: result?.clinicId ?? '',
-      consultationRoomNumber: result?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        result?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         waitForConsultationCount: result?.waitForConsultationCount ?? 0,
         waitForBedAssignedCount: result?.waitForBedAssignedCount ?? 0,
@@ -84,7 +86,8 @@ export class CommonController implements ICommonController {
 
     await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
       clinicId: listResult?.clinicId ?? '',
-      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         id: listResult?.id ?? '',
         isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,

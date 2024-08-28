@@ -262,7 +262,8 @@ export class ConsultationController implements IConsultationController {
 
     await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
       clinicId: listResult?.clinicId ?? '',
-      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         id: listResult?.id ?? '',
         isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
@@ -306,7 +307,8 @@ export class ConsultationController implements IConsultationController {
 
     await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
       clinicId: countResult?.clinicId ?? '',
-      consultationRoomNumber: countResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        countResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         waitForConsultationCount: countResult?.waitForConsultationCount ?? 0,
         waitForBedAssignedCount: countResult?.waitForBedAssignedCount ?? 0,
@@ -330,7 +332,8 @@ export class ConsultationController implements IConsultationController {
 
     await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
       clinicId: listResult?.clinicId ?? '',
-      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         id: listResult?.id ?? '',
         isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
@@ -369,7 +372,8 @@ export class ConsultationController implements IConsultationController {
 
     await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
       clinicId: countResult?.clinicId ?? '',
-      consultationRoomNumber: countResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        countResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         waitForConsultationCount: countResult?.waitForConsultationCount ?? 0,
         waitForBedAssignedCount: countResult?.waitForBedAssignedCount ?? 0,
@@ -393,7 +397,8 @@ export class ConsultationController implements IConsultationController {
 
     await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
       clinicId: listResult?.clinicId ?? '',
-      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         id: listResult?.id ?? '',
         isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
@@ -437,7 +442,8 @@ export class ConsultationController implements IConsultationController {
 
     await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
       clinicId: listResult?.clinicId ?? '',
-      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         id: listResult?.id ?? '',
         isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
@@ -467,7 +473,8 @@ export class ConsultationController implements IConsultationController {
       limit: Number(req.query.limit),
       page: Number(req.query.page),
       clinicId: req.query.clinicId as string,
-      consultaionRoomNumber: req.query.consultaionRoomNumber as string,
+      consultationRoomNumber: req.query
+        .consultationRoomNumber as RoomNumberType,
       doctorId: req.query.doctorId as string,
       currentUser: req.user as User,
     }

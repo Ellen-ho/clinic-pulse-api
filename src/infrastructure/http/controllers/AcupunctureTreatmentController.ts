@@ -19,6 +19,7 @@ import {
 } from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
 import { GenderType } from 'domain/common'
 import { ConsultationStatus } from 'domain/consultation/Consultation'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 
 export interface IAcupunctureTreatmentController {
   createAcupunctureTreatment: (req: Request, res: Response) => Promise<Response>
@@ -78,7 +79,8 @@ export class AcupunctureTreatmentController
 
     await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
       clinicId: result?.clinicId ?? '',
-      consultationRoomNumber: result?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        result?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         waitForConsultationCount: result?.waitForConsultationCount ?? 0,
         waitForBedAssignedCount: result?.waitForBedAssignedCount ?? 0,
@@ -102,7 +104,8 @@ export class AcupunctureTreatmentController
 
     await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
       clinicId: listResult?.clinicId ?? '',
-      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         id: listResult?.id ?? '',
         isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
@@ -158,7 +161,8 @@ export class AcupunctureTreatmentController
 
     await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
       clinicId: result?.clinicId ?? '',
-      consultationRoomNumber: result?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        result?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         waitForConsultationCount: result?.waitForConsultationCount ?? 0,
         waitForBedAssignedCount: result?.waitForBedAssignedCount ?? 0,
@@ -182,7 +186,8 @@ export class AcupunctureTreatmentController
 
     await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
       clinicId: listResult?.clinicId ?? '',
-      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      consultationRoomNumber:
+        listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
       content: {
         id: listResult?.id ?? '',
         isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
@@ -241,7 +246,8 @@ export class AcupunctureTreatmentController
 
           await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
             clinicId: result?.clinicId ?? '',
-            consultationRoomNumber: result?.consultationRoomNumber ?? '',
+            consultationRoomNumber:
+              result?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
             content: {
               waitForConsultationCount: result?.waitForConsultationCount ?? 0,
               waitForBedAssignedCount: result?.waitForBedAssignedCount ?? 0,
@@ -265,7 +271,8 @@ export class AcupunctureTreatmentController
 
           await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
             clinicId: listResult?.clinicId ?? '',
-            consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+            consultationRoomNumber:
+              listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
             content: {
               id: listResult?.id ?? '',
               isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
@@ -327,7 +334,8 @@ export class AcupunctureTreatmentController
 
       await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
         clinicId: data?.clinicId ?? '',
-        consultationRoomNumber: data?.consultationRoomNumber ?? '',
+        consultationRoomNumber:
+          data?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
         content: {
           waitForConsultationCount: data?.waitForConsultationCount ?? 0,
           waitForBedAssignedCount: data?.waitForBedAssignedCount ?? 0,
@@ -351,7 +359,8 @@ export class AcupunctureTreatmentController
 
       await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
         clinicId: listResult?.clinicId ?? '',
-        consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+        consultationRoomNumber:
+          listResult?.consultationRoomNumber ?? RoomNumberType.ROOM_ONE,
         content: {
           id: listResult?.id ?? '',
           isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
