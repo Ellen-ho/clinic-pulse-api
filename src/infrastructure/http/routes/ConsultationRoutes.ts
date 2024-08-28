@@ -10,6 +10,7 @@ import {
   getConsultationListSchema,
   getConsultationOnsiteCanceledAndBookingSchema,
   getConsultationRealTimeCountSchema,
+  getConsultationRealTimeListSchema,
   getDifferentTreatmentConsultationSchema,
   getSingleConsultationSchema,
 } from '../../../application/consultation/ConsultationValidator'
@@ -62,6 +63,12 @@ export class ConsultationRoutes {
         authenticated,
         validator(getConsultationRealTimeCountSchema),
         asyncHandler(this.consultationController.getConsultationRealTimeCount)
+      )
+      .get(
+        '/real_time_lists',
+        authenticated,
+        validator(getConsultationRealTimeListSchema),
+        asyncHandler(this.consultationController.getConsultationRealTimeList)
       )
       .get(
         '/:id',
