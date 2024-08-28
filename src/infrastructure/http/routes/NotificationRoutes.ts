@@ -2,11 +2,11 @@ import { Router } from 'express'
 import { INotificationController } from '../controllers/NotificationController'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import { validator } from '../middlewares/Validator'
+import { authenticated } from '../middlewares/Auth'
 import {
   deleteNotificationSchema,
   getNotificationDetailsSchema,
-} from '../../../application/notification/notificationValidator'
-import { authenticated } from '../middlewares/Auth'
+} from 'application/notification/notificationValidator'
 
 export class NotificationRoutes {
   private readonly routes: Router

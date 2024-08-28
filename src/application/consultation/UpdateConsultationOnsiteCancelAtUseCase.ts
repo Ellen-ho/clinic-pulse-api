@@ -73,7 +73,7 @@ export class UpdateConsultationOnsiteCancelAtUseCase {
 
     for (const user of usersToNotify) {
       await this.notificationHelper.createNotification({
-        title: 'A patient has onsite canceled.',
+        title: '患者退掛號',
         content:
           'A patient has onsite canceled. Please proceed to view consultation detail.',
         notificationType: NotificationType.ONSITE_CANCELLATION,

@@ -13,7 +13,8 @@ export interface INotificationProps {
 }
 
 export enum NotificationType {
-  NEGATIVE_FEEDBACK = 'NEGATIVE_FEEDBACK', // reference_id = feedback ID
+  NEGATIVE_FEEDBACK = 'NEGATIVE_FEEDBACK',
+  NEGATIVE_REVIEW = 'NEGATIVE_REVIEW',
   ABNORMAL_CONSULTATION_WAIT_TIME = 'ABNORMAL_CONSULTATION_WAIT_TIME', // reference_id = acupuncture ID
   ABNORMAL_BED_WAIT_TIME = 'ABNORMAL_BED_WAIT_TIME', // reference_id = acupuncture ID
   ABNORMAL_ACUPUNCTURE_WAIT_TIME = 'ABNORMAL_ACUPUNCTURE_WAIT_TIME', // reference_id = acupuncture ID

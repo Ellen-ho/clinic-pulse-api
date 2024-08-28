@@ -26,7 +26,7 @@ export class NotificationRepository
       const entity = await this.getRepo().findOne({
         where: {
           id: notificationId,
-          user: { id: userId }, // need to set @RelationId
+          user: { id: userId },
         },
         relations: ['user'],
       })
