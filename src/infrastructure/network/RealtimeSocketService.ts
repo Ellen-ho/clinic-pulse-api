@@ -1,3 +1,4 @@
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 import {
   IRealTimeSocketService,
   ISendToUser,
@@ -17,7 +18,7 @@ class RealTimeSocketService implements IRealTimeSocketService {
         .query as {
         userId: string
         clinicId: string
-        consultationRoomNumber: string
+        consultationRoomNumber: RoomNumberType
       }
       const mapKey = `${clinicId}_${consultationRoomNumber}`
 
