@@ -48,6 +48,15 @@ export const getConsultationRealTimeCountSchema = {
   }),
 }
 
+export const getConsultationRealTimeListSchema = {
+  query: Joi.object({
+    clinicId: Joi.string().optional(),
+    consultationRoomNumber: Joi.string().optional(),
+    limit: Joi.number().required(),
+    page: Joi.number().required(),
+  }),
+}
+
 export const getAverageWaitingTimeSchema = {
   query: Joi.object({
     startDate: Joi.string().required(),

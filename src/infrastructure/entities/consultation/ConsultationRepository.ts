@@ -14,6 +14,7 @@ import { GenderType, Granularity } from '../../../domain/common'
 import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 import dayjs from 'dayjs'
+import { MedicineTreatment } from '../../../domain/treatment/MedicineTreatment'
 
 export class ConsultationRepository
   extends BaseRepository<ConsultationEntity, Consultation>
@@ -555,10 +556,7 @@ export class ConsultationRepository
   }
 
   public async getRealTimeCounts(
-    timeSlotId: string | Array<{ id: string }>,
-    clinicId?: string,
-    consultationRoomNumber?: string,
-    doctorId?: string
+    timeSlotId: string | Array<{ id: string }>
   ): Promise<{
     waitForConsultationCount: number
     waitForBedAssignedCount: number
@@ -586,27 +584,6 @@ export class ConsultationRepository
       } else {
         baseQuery += ' AND time_slot_id = $1'
         queryParams.push(timeSlotId)
-      }
-
-      let paramIndex = queryParams.length + 1
-
-      if (clinicId !== undefined) {
-        baseQuery += ` AND time_slots.clinic_id = $${paramIndex++}`
-        queryParams.push(clinicId)
-      }
-
-      if (consultationRoomNumber !== undefined) {
-        baseQuery += `
-        AND time_slots.consultation_room_id = (
-          SELECT id FROM consultation_rooms WHERE room_number = $${paramIndex++}
-        )
-      `
-        queryParams.push(consultationRoomNumber)
-      }
-
-      if (doctorId !== undefined) {
-        baseQuery += ` AND time_slots.doctor_id = $${paramIndex++}`
-        queryParams.push(doctorId)
       }
 
       baseQuery += ' GROUP BY status'
@@ -1230,6 +1207,308 @@ export class ConsultationRepository
     } catch (e) {
       throw new RepositoryError(
         'ConsultAppointmentEntity getById error',
+        e as Error
+      )
+    }
+  }
+
+  public async findSocketData(id: string): Promise<{
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: string
+  }> {
+    try {
+      const result = await this.getQuery<
+        Array<{
+          time_slot_id: string
+          clinic_id: string
+          consultation_room_id: string
+        }>
+      >(
+        `
+        SELECT 
+          t.id AS time_slot_id, 
+          t.clinic_id AS clinic_id, 
+          t.consultation_room_id AS consultation_room_id 
+        FROM consultations c
+        JOIN time_slots t ON c.time_slot_id = t.id
+        WHERE c.id = $1;
+        `,
+        [id]
+      )
+      return {
+        timeSlotId: result[0].time_slot_id,
+        clinicId: result[0].clinic_id,
+        consultationRoomNumber: result[0].consultation_room_id,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultAppointmentEntity findSocketData error',
+        e as Error
+      )
+    }
+  }
+
+  public async getSocketUpdatedData(id: string): Promise<{
+    id: string
+    isOnsiteCanceled: boolean
+    consultationNumber: number
+    doctor: {
+      firstName: string
+      lastName: string
+    }
+    patient: {
+      firstName: string
+      lastName: string
+      gender: GenderType
+      age: number
+    }
+    status: ConsultationStatus
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: string
+  }> {
+    try {
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          is_onsite_canceled: boolean
+          consultation_number: number
+          doctor_first_name: string
+          doctor_last_name: string
+          patient_first_name: string
+          patient_last_name: string
+          patient_gender: GenderType
+          patient_age: number
+          status: ConsultationStatus
+          time_slot_id: string
+          clinic_id: string
+          consultation_room_number: string
+        }>
+      >(
+        `
+          SELECT 
+            c.id,
+            CASE WHEN c.onsite_cancel_at IS NOT NULL THEN true ELSE false END AS is_onsite_canceled,
+            c.consultation_number,
+            d.first_name AS doctor_first_name,
+            d.last_name AS doctor_last_name,
+            p.first_name AS patient_first_name,
+            p.last_name AS patient_last_name,
+            p.gender AS patient_gender,
+             date_part('year', age(p.birth_date)) AS patient_age,
+            c.status,
+            c.time_slot_id,
+            t.clinic_id,
+            t.consultation_room_id AS consultation_room_number
+          FROM consultations c
+          JOIN time_slots t ON c.time_slot_id = t.id
+          JOIN doctors d ON t.doctor_id = d.id
+          JOIN patients p ON c.patient_id = p.id
+          WHERE c.id = $1
+          `,
+        [id]
+      )
+      const row = result[0]
+
+      return {
+        id: row.id,
+        isOnsiteCanceled: row.is_onsite_canceled,
+        consultationNumber: row.consultation_number,
+        doctor: {
+          firstName: row.doctor_first_name,
+          lastName: row.doctor_last_name,
+        },
+        patient: {
+          firstName: row.patient_first_name,
+          lastName: row.patient_last_name,
+          gender: row.patient_gender,
+          age: row.patient_age,
+        },
+        status: row.status,
+        timeSlotId: row.time_slot_id,
+        clinicId: row.clinic_id,
+        consultationRoomNumber: row.consultation_room_number,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultAppointmentEntity getSocketUpdatedData error',
+        e as Error
+      )
+    }
+  }
+
+  public async checkMedicineTreatment(acupunctureTreatmentId: string): Promise<{
+    consultationId: string
+    medicineTreatment: MedicineTreatment
+  } | null> {
+    try {
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          medicine_treatment_id: string
+          get_medicine_at: Date | null
+        }>
+      >(
+        `
+        SELECT c.id, mt.id AS medicine_treatment_id, mt.get_medicine_at
+        FROM consultations c
+        LEFT JOIN medicine_treatments mt ON mt.id = c.medicine_treatment_id
+        WHERE c.acupuncture_treatment_id = $1
+        AND c.medicine_treatment_id IS NOT NULL
+        LIMIT 1
+        `,
+        [acupunctureTreatmentId]
+      )
+
+      if (result.length > 0) {
+        const {
+          id: consultationId,
+          medicine_treatment_id: medicineTreatmentId,
+          get_medicine_at: getMedicineAt,
+        } = result[0]
+
+        const medicineTreatment = new MedicineTreatment({
+          id: medicineTreatmentId,
+          getMedicineAt,
+        })
+
+        return {
+          consultationId,
+          medicineTreatment,
+        }
+      }
+
+      return null
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationEntity checkMedicineTreatment error',
+        e as Error
+      )
+    }
+  }
+
+  public async getRealTimeLists(
+    timeSlotId: string | Array<{ id: string }>,
+    limit: number,
+    offset: number
+  ): Promise<{
+    data: Array<{
+      id: string
+      isOnsiteCanceled: boolean
+      consultationNumber: number
+      doctor: {
+        firstName: string
+        lastName: string
+      }
+      patient: {
+        firstName: string
+        lastName: string
+        gender: GenderType
+        age: number
+      }
+      status: ConsultationStatus
+      timeSlotId: string
+      clinicId: string
+      consultationRoomNumber: string
+    }>
+    totalCounts: number
+  }> {
+    try {
+      let timeSlotCondition = ''
+      let queryParams: any[] = [limit, offset]
+
+      if (typeof timeSlotId === 'string') {
+        timeSlotCondition = `c.time_slot_id = $1`
+        queryParams = [timeSlotId, limit, offset]
+      } else if (Array.isArray(timeSlotId)) {
+        const ids = timeSlotId.map((ts) => ts.id)
+        timeSlotCondition = `c.time_slot_id IN (${ids
+          .map((_, index) => `$${index + 1}`)
+          .join(', ')})`
+        queryParams = [...ids, limit, offset]
+      }
+
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          is_onsite_canceled: boolean
+          consultation_number: number
+          doctor_first_name: string
+          doctor_last_name: string
+          patient_first_name: string
+          patient_last_name: string
+          patient_gender: GenderType
+          patient_age: number
+          status: ConsultationStatus
+          time_slot_id: string
+          clinic_id: string
+          consultation_room_number: string
+        }>
+      >(
+        `
+      SELECT 
+        c.id,
+        CASE WHEN c.onsite_cancel_at IS NOT NULL THEN true ELSE false END AS is_onsite_canceled,
+        c.consultation_number,
+        d.first_name AS doctor_first_name,
+        d.last_name AS doctor_last_name,
+        p.first_name AS patient_first_name,
+        p.last_name AS patient_last_name,
+        p.gender AS patient_gender,
+        date_part('year', age(p.birth_date)) AS patient_age,
+        c.status,
+        c.time_slot_id,
+        ts.clinic_id,
+        cr.room_number AS consultation_room_number
+      FROM consultations c
+      JOIN time_slots ts ON ts.id = c.time_slot_id
+      JOIN doctors d ON d.id = ts.doctor_id
+      JOIN patients p ON p.id = c.patient_id
+      LEFT JOIN consultation_rooms cr ON cr.id = ts.consultation_room_id
+      WHERE ${timeSlotCondition}
+      ORDER BY c.check_in_at ASC
+      LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}
+      `,
+        queryParams
+      )
+
+      const countResult = await this.getQuery<Array<{ total_count: string }>>(
+        `
+      SELECT COUNT(*) AS total_count
+      FROM consultations c
+      WHERE ${timeSlotCondition}
+      `,
+        queryParams.slice(0, -2)
+      )
+
+      const totalCounts = parseInt(countResult[0].total_count, 10)
+
+      return {
+        data: result.map((row) => ({
+          id: row.id,
+          isOnsiteCanceled: row.is_onsite_canceled,
+          consultationNumber: row.consultation_number,
+          doctor: {
+            firstName: row.doctor_first_name,
+            lastName: row.doctor_last_name,
+          },
+          patient: {
+            firstName: row.patient_first_name,
+            lastName: row.patient_last_name,
+            gender: row.patient_gender,
+            age: row.patient_age,
+          },
+          status: row.status,
+          timeSlotId: row.time_slot_id,
+          clinicId: row.clinic_id,
+          consultationRoomNumber: row.consultation_room_number,
+        })),
+        totalCounts,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationEntity getRealTimeLists error',
         e as Error
       )
     }

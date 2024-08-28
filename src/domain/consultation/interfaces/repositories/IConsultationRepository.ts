@@ -1,6 +1,7 @@
 import { GenderType, Granularity } from '../../../../domain/common'
 import {
   Consultation,
+  ConsultationStatus,
   OnsiteCancelReasonType,
   TreatmentType,
 } from '../../../../domain/consultation/Consultation'
@@ -101,12 +102,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       onsiteCancelRate: number
     }>
   }>
-  getRealTimeCounts: (
-    timeSlotId: string | Array<{ id: string }>,
-    clinicId?: string,
-    consultationRoomNumber?: string,
-    doctorId?: string
-  ) => Promise<{
+  getRealTimeCounts: (timeSlotId: string | Array<{ id: string }>) => Promise<{
     waitForConsultationCount: number
     waitForBedAssignedCount: number
     waitForAcupunctureTreatmentCount: number
@@ -188,4 +184,54 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
   isFirstTimeVisit: (patientId: string) => Promise<boolean>
   getLatestOddConsultationNumber: (timeSlotId: string) => Promise<number>
   getById: (id: string) => Promise<Consultation | null>
+  findSocketData: (id: string) => Promise<{
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: string
+  }>
+  getRealTimeLists: (
+    timeSlotId: string | Array<{ id: string }>,
+    limit: number,
+    offset: number
+  ) => Promise<{
+    data: Array<{
+      id: string
+      isOnsiteCanceled: boolean
+      consultationNumber: number
+      doctor: {
+        firstName: string
+        lastName: string
+      }
+      patient: {
+        firstName: string
+        lastName: string
+        gender: GenderType
+        age: number
+      }
+      status: ConsultationStatus
+      timeSlotId: string
+      clinicId: string
+      consultationRoomNumber: string
+    }>
+    totalCounts: number
+  }>
+  getSocketUpdatedData: (id: string) => Promise<{
+    id: string
+    isOnsiteCanceled: boolean
+    consultationNumber: number
+    doctor: {
+      firstName: string
+      lastName: string
+    }
+    patient: {
+      firstName: string
+      lastName: string
+      gender: GenderType
+      age: number
+    }
+    status: ConsultationStatus
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: string
+  }>
 }
