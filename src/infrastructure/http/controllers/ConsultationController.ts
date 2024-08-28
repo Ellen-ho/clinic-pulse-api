@@ -2,19 +2,33 @@ import { Request, Response } from 'express'
 import { GetConsultationListUseCase } from '../../../application/consultation/GetConsultationListUseCase'
 import { TimePeriodType } from '../../../domain/timeSlot/TimeSlot'
 import { GetSingleConsultationUseCase } from '../../../application/consultation/GetSingleConsultationUseCase'
-import { GetConsultationRealTimeCountUseCase } from '../../../application/consultation/GetConsultatoinRealTimeCountUseCase'
+import { GetConsultationRealTimeCountUseCase } from '../../../application/consultation/GetConsultationRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from '../../../application/consultation/GetAverageWaitingTimeUseCase'
 import { GetFirstTimeConsultationCountAndRateUseCase } from '../../../application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
 import { GetAverageConsultationCountUseCase } from '../../../application/consultation/GetAverageConsultationCountUseCase'
 import { GetDifferentTreatmentConsultationUseCase } from '../../../application/consultation/GetDifferentTreatmentConsultationUseCase'
 import { User } from '../../../domain/user/User'
-import { Granularity } from '../../../domain/common'
+import { GenderType, Granularity } from '../../../domain/common'
 import { GetConsultationOnsiteCanceledAndBookingUseCase } from '../../../application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
 import { CreateConsultationUseCase } from '../../../application/consultation/CreateConsultationUseCase'
 import { UpdateConsultationCheckOutAtUseCase } from '../../../application/consultation/UpdateConsultationCheckOutAtUseCase'
 import { UpdateConsultationStartAtUseCase } from '../../../application/consultation/UpdateConsultationStartAtUseCase'
-import { UpdateConsultationOnsiteCancelAtUseCase } from 'application/consultation/UpdateConsultationOnsiteCancelAtUseCase'
-import { OnsiteCancelReasonType } from 'domain/consultation/Consultation'
+import { UpdateConsultationOnsiteCancelAtUseCase } from '../../../application/consultation/UpdateConsultationOnsiteCancelAtUseCase'
+import {
+  ConsultationStatus,
+  OnsiteCancelReasonType,
+} from '../../../domain/consultation/Consultation'
+import { IRealTimeUpdateHelper } from '../../../application/consultation/RealTimeUpdateHelper'
+import {
+  GetConsultationSocketRealTimeCountRequest,
+  GetConsultationSocketRealTimeCountUseCase,
+} from 'application/consultation/GetConsultationSocketRealTimeCountUseCase'
+import { GetConsultationRealTimeListUseCase } from 'application/consultation/GetConsultationRealTimeListUseCase'
+import {
+  GetConsultationSocketRealTimeListRequest,
+  GetConsultationSocketRealTimeListUseCase,
+} from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
@@ -50,10 +64,15 @@ export interface IConsultationController {
     req: Request,
     res: Response
   ) => Promise<Response>
+  getConsultationRealTimeList: (
+    req: Request,
+    res: Response
+  ) => Promise<Response>
 }
 
 export class ConsultationController implements IConsultationController {
   constructor(
+    private readonly realTimeUpdateHelper: IRealTimeUpdateHelper,
     private readonly getConsultationListUseCase: GetConsultationListUseCase,
     private readonly getSingleConsultationUseCase: GetSingleConsultationUseCase,
     private readonly getConsultationOnsiteCanceledAndBookingUseCase: GetConsultationOnsiteCanceledAndBookingUseCase,
@@ -65,7 +84,10 @@ export class ConsultationController implements IConsultationController {
     private readonly createConsultationUseCase: CreateConsultationUseCase,
     private readonly updateConsultationCheckOutAtUseCase: UpdateConsultationCheckOutAtUseCase,
     private readonly updateConsultationStartAtUseCase: UpdateConsultationStartAtUseCase,
-    private readonly updateConsultationOnsiteCancelAtUseCase: UpdateConsultationOnsiteCancelAtUseCase
+    private readonly updateConsultationOnsiteCancelAtUseCase: UpdateConsultationOnsiteCancelAtUseCase,
+    private readonly getConsultationSocketRealTimeCountUseCase: GetConsultationSocketRealTimeCountUseCase,
+    private readonly getConsultationRealTimeListUseCase: GetConsultationRealTimeListUseCase,
+    private readonly getConsultationSocketRealTimeListUseCase: GetConsultationSocketRealTimeListUseCase
   ) {}
 
   public getConsultationList = async (
@@ -133,10 +155,12 @@ export class ConsultationController implements IConsultationController {
   ): Promise<Response> => {
     const request = {
       clinicId: req.query.clinicId as string,
-      consultaionRoomNumber: req.query.consultaionRoomNumber as string,
+      consultationRoomNumber: req.query
+        .consultationRoomNumber as RoomNumberType,
       doctorId: req.query.doctorId as string,
       currentUser: req.user as User,
     }
+
     const result = await this.getConsultationRealTimeCountUseCase.execute(
       request
     )
@@ -226,6 +250,38 @@ export class ConsultationController implements IConsultationController {
   ): Promise<Response> => {
     const request = { ...req.body }
     const consultation = await this.createConsultationUseCase.execute(request)
+    const getConsultationSocketRealTimeListRequest: GetConsultationSocketRealTimeListRequest =
+      {
+        consultationId: request.consultationId,
+      }
+
+    const listResult =
+      await this.getConsultationSocketRealTimeListUseCase.execute(
+        getConsultationSocketRealTimeListRequest
+      )
+
+    await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
+      clinicId: listResult?.clinicId ?? '',
+      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      content: {
+        id: listResult?.id ?? '',
+        isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
+        consultationNumber: listResult?.consultationNumber ?? 0,
+        doctor: {
+          firstName: listResult?.doctor.firstName ?? '',
+          lastName: listResult?.doctor.lastName ?? '',
+        },
+        patient: {
+          firstName: listResult?.patient.firstName ?? '',
+          lastName: listResult?.patient.lastName ?? '',
+          gender: listResult?.patient.gender ?? GenderType.FEMALE,
+          age: listResult?.patient.age ?? 0,
+        },
+        status:
+          listResult?.status ?? ConsultationStatus.WAITING_FOR_CONSULTATION,
+        timeSlotId: listResult?.timeSlotId ?? '',
+      },
+    })
     return res.status(200).json(consultation)
   }
 
@@ -237,6 +293,62 @@ export class ConsultationController implements IConsultationController {
       id: '6a7815ff-6d51-4351-b765-28b68ce61843',
     }
     await this.updateConsultationCheckOutAtUseCase.execute(consultationRequest)
+
+    const getConsultationSocketRealTimeCountRequest: GetConsultationSocketRealTimeCountRequest =
+      {
+        consultationId: consultationRequest.id,
+      }
+
+    const countResult =
+      await this.getConsultationSocketRealTimeCountUseCase.execute(
+        getConsultationSocketRealTimeCountRequest
+      )
+
+    await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
+      clinicId: countResult?.clinicId ?? '',
+      consultationRoomNumber: countResult?.consultationRoomNumber ?? '',
+      content: {
+        waitForConsultationCount: countResult?.waitForConsultationCount ?? 0,
+        waitForBedAssignedCount: countResult?.waitForBedAssignedCount ?? 0,
+        waitForAcupunctureTreatmentCount:
+          countResult?.waitForAcupunctureTreatmentCount ?? 0,
+        waitForNeedleRemovedCount: countResult?.waitForNeedleRemovedCount ?? 0,
+        waitForMedicineCount: countResult?.waitForMedicineCount ?? 0,
+        completedCount: countResult?.completedCount ?? 0,
+      },
+    })
+
+    const getConsultationSocketRealTimeListRequest: GetConsultationSocketRealTimeListRequest =
+      {
+        consultationId: consultationRequest.id,
+      }
+
+    const listResult =
+      await this.getConsultationSocketRealTimeListUseCase.execute(
+        getConsultationSocketRealTimeListRequest
+      )
+
+    await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
+      clinicId: listResult?.clinicId ?? '',
+      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      content: {
+        id: listResult?.id ?? '',
+        isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
+        consultationNumber: listResult?.consultationNumber ?? 0,
+        doctor: {
+          firstName: listResult?.doctor.firstName ?? '',
+          lastName: listResult?.doctor.lastName ?? '',
+        },
+        patient: {
+          firstName: listResult?.patient.firstName ?? '',
+          lastName: listResult?.patient.lastName ?? '',
+          gender: listResult?.patient.gender ?? GenderType.FEMALE,
+          age: listResult?.patient.age ?? 0,
+        },
+        status: listResult?.status ?? ConsultationStatus.CHECK_OUT,
+        timeSlotId: listResult?.timeSlotId ?? '',
+      },
+    })
     return res.status(200).json()
   }
 
@@ -247,19 +359,60 @@ export class ConsultationController implements IConsultationController {
     const request = {
       id: req.params.id,
     }
-    const result = await this.updateConsultationStartAtUseCase.execute(request)
-    return res.status(200).json(result)
-  }
+    const consultationId = (
+      await this.updateConsultationStartAtUseCase.execute(request)
+    ).id
+    const countResult =
+      await this.getConsultationSocketRealTimeCountUseCase.execute({
+        consultationId,
+      })
 
-  public updateConsultation = async (
-    req: Request,
-    res: Response
-  ): Promise<Response> => {
-    const request = {
-      id: req.params.id,
-    }
-    const result = await this.updateConsultationStartAtUseCase.execute(request)
-    return res.status(200).json(result)
+    await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
+      clinicId: countResult?.clinicId ?? '',
+      consultationRoomNumber: countResult?.consultationRoomNumber ?? '',
+      content: {
+        waitForConsultationCount: countResult?.waitForConsultationCount ?? 0,
+        waitForBedAssignedCount: countResult?.waitForBedAssignedCount ?? 0,
+        waitForAcupunctureTreatmentCount:
+          countResult?.waitForAcupunctureTreatmentCount ?? 0,
+        waitForNeedleRemovedCount: countResult?.waitForNeedleRemovedCount ?? 0,
+        waitForMedicineCount: countResult?.waitForMedicineCount ?? 0,
+        completedCount: countResult?.completedCount ?? 0,
+      },
+    })
+
+    const getConsultationSocketRealTimeListRequest: GetConsultationSocketRealTimeListRequest =
+      {
+        consultationId,
+      }
+
+    const listResult =
+      await this.getConsultationSocketRealTimeListUseCase.execute(
+        getConsultationSocketRealTimeListRequest
+      )
+
+    await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
+      clinicId: listResult?.clinicId ?? '',
+      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      content: {
+        id: listResult?.id ?? '',
+        isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
+        consultationNumber: listResult?.consultationNumber ?? 0,
+        doctor: {
+          firstName: listResult?.doctor.firstName ?? '',
+          lastName: listResult?.doctor.lastName ?? '',
+        },
+        patient: {
+          firstName: listResult?.patient.firstName ?? '',
+          lastName: listResult?.patient.lastName ?? '',
+          gender: listResult?.patient.gender ?? GenderType.FEMALE,
+          age: listResult?.patient.age ?? 0,
+        },
+        status: listResult?.status ?? ConsultationStatus.IN_CONSULTATION,
+        timeSlotId: listResult?.timeSlotId ?? '',
+      },
+    })
+    return res.status(200).json()
   }
 
   public updateConsultationOnsiteCancelAt = async (
@@ -271,6 +424,57 @@ export class ConsultationController implements IConsultationController {
       onsiteCancelReason: OnsiteCancelReasonType.LONG_WAITING_TIME,
     }
     await this.updateConsultationOnsiteCancelAtUseCase.execute(request)
+
+    const getConsultationSocketRealTimeListRequest: GetConsultationSocketRealTimeListRequest =
+      {
+        consultationId: request.consultationId,
+      }
+
+    const listResult =
+      await this.getConsultationSocketRealTimeListUseCase.execute(
+        getConsultationSocketRealTimeListRequest
+      )
+
+    await this.realTimeUpdateHelper.sendUpdatedRealTimeList({
+      clinicId: listResult?.clinicId ?? '',
+      consultationRoomNumber: listResult?.consultationRoomNumber ?? '',
+      content: {
+        id: listResult?.id ?? '',
+        isOnsiteCanceled: listResult?.isOnsiteCanceled ?? false,
+        consultationNumber: listResult?.consultationNumber ?? 0,
+        doctor: {
+          firstName: listResult?.doctor.firstName ?? '',
+          lastName: listResult?.doctor.lastName ?? '',
+        },
+        patient: {
+          firstName: listResult?.patient.firstName ?? '',
+          lastName: listResult?.patient.lastName ?? '',
+          gender: listResult?.patient.gender ?? GenderType.FEMALE,
+          age: listResult?.patient.age ?? 0,
+        },
+        status: listResult?.status ?? ConsultationStatus.ONSITE_CANCEL,
+        timeSlotId: listResult?.timeSlotId ?? '',
+      },
+    })
     return res.status(200).json()
+  }
+
+  public getConsultationRealTimeList = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      limit: Number(req.query.limit),
+      page: Number(req.query.page),
+      clinicId: req.query.clinicId as string,
+      consultaionRoomNumber: req.query.consultaionRoomNumber as string,
+      doctorId: req.query.doctorId as string,
+      currentUser: req.user as User,
+    }
+    const result = await this.getConsultationRealTimeListUseCase.execute(
+      request
+    )
+
+    return res.status(200).json(result)
   }
 }
