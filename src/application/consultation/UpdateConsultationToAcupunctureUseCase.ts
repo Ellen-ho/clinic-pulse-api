@@ -17,7 +17,7 @@ export class UpdateConsultationToAcupunctureUseCase {
     request: UpdateConsultationToAcupunctureRequest
   ): Promise<void> {
     const { acupunctureTreatment } = request
-    const id = '6a7815ff-6d51-4351-b765-28b68ce61843'
+    const id = '2762e440-3932-47d6-af43-9a5a85888df5'
 
     const existingConsultation = await this.consultationRepository.getById(id)
 

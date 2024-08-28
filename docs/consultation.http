@@ -23,7 +23,7 @@ Content-Type: application/json
 ###
 
 ### get single consultation 
-@consultationId = e1b92d4d-b73b-4592-bd68-a42fc6472cc5
+@consultationId = 4dba5f04-a422-400b-a9cb-848eb77f7988
 GET {{consultationsPath}}/{{consultationId}}
 Authorization: {{accessToken}}
 Content-Type: application/json
@@ -36,7 +36,7 @@ Content-Type: application/json
 ###
 
 ### get consultation real time count
-GET {{consultationsPath}}/real_time_counts?clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b&consultationRoomNumber=ffeaea79-b30f-4f62-87b4-acee6c747d18s
+GET {{consultationsPath}}/real_time_counts?clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b&consultationRoomNumber=1
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
@@ -77,7 +77,7 @@ Content-Type: application/json
 ###
 
 ### update consultation startAt
-@id = 4d122970-8e74-49fe-8263-5b823562d02b
+@id = 2762e440-3932-47d6-af43-9a5a85888df5
 PATCH {{consultationsPath}}/{{id}}/start_at
 Authorization: {{accessToken}}
 Content-Type: application/json
@@ -85,9 +85,10 @@ Content-Type: application/json
 ###
 
 ### update consultation onsite cancel at
-@cId = cd89eef8-3b49-4870-bd8f-d5b310f32620
+@cId = 4dba5f04-a422-400b-a9cb-848eb77f7988
 PATCH {{consultationsPath}}/{{cId}}/onsite_cancel_at
 Authorization: {{accessToken}}
 Content-Type: application/json
 
 ###
+
