@@ -20,7 +20,7 @@ import { GetConsultationListUseCase } from './application/consultation/GetConsul
 import { ConsultationController } from './infrastructure/http/controllers/ConsultationController'
 import { ConsultationRoutes } from './infrastructure/http/routes/ConsultationRoutes'
 import { GetSingleConsultationUseCase } from './application/consultation/GetSingleConsultationUseCase'
-import { GetConsultationRealTimeCountUseCase } from './application/consultation/GetConsultatoinRealTimeCountUseCase'
+import { GetConsultationRealTimeCountUseCase } from './application/consultation/GetConsultationRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from './application/consultation/GetAverageWaitingTimeUseCase'
 import { GetFirstTimeConsultationCountAndRateUseCase } from './application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
 import { GetAverageConsultationCountUseCase } from './application/consultation/GetAverageConsultationCountUseCase'
@@ -79,11 +79,17 @@ import { NotificationHelper } from './application/notification/NotificationHelpe
 import SocketService from './infrastructure/network/SocketService'
 import { createServer } from 'http'
 import { ReviewRepository } from './infrastructure/entities/review/ReviewRepository'
-import { GetReviewListUseCase } from 'application/review/GetReviewListUseCase'
-import { ReviewController } from 'infrastructure/http/controllers/ReviewController'
-import { ReviewRoutes } from 'infrastructure/http/routes/ReviewRoutes'
-import { GetSingleReviewUseCase } from 'application/review/GetSingleReviewUseCase'
-import GoogleReviewService from 'infrastructure/network/GoogleReviewService'
+import { GetReviewListUseCase } from './application/review/GetReviewListUseCase'
+import { ReviewController } from './infrastructure/http/controllers/ReviewController'
+import { ReviewRoutes } from './infrastructure/http/routes/ReviewRoutes'
+import { GetSingleReviewUseCase } from './application/review/GetSingleReviewUseCase'
+import RealTimeSocketService from './infrastructure/network/RealtimeSocketService'
+import { RealTimeUpdateHelper } from './application/consultation/RealTimeUpdateHelper'
+import { CreateAcupunctureAndMedicineUseCase } from 'application/common/CreateAcupunctureAndMedicineUseCase'
+import { GetConsultationSocketRealTimeCountUseCase } from 'application/consultation/GetConsultationSocketRealTimeCountUseCase'
+import { GetConsultationRealTimeListUseCase } from 'application/consultation/GetConsultationRealTimeListUseCase'
+import { GetConsultationSocketRealTimeListUseCase } from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
+import { CreateFeedbackUseCase } from 'application/feedback/CreateFeedbackUseCase'
 
 void main()
 
@@ -106,16 +112,23 @@ async function main(): Promise<void> {
   }
 
   const app: Express = express()
-
-  // Socket.io init
   const httpServer = createServer(app)
-  const io = new Server(httpServer, {
+
+  // Notofication socket
+  const notificationIO = new Server(httpServer, {
     path: '/ws/notification',
     transports: ['websocket'],
     cors: corsOptions,
   })
+  const notificationSocketService = new SocketService(notificationIO)
 
-  const socketService = new SocketService(io)
+  // Real time socket
+  const realTimeIO = new Server(httpServer, {
+    path: '/ws/real-time',
+    transports: ['websocket'],
+    cors: corsOptions,
+  })
+  const realTimeSocketService = new RealTimeSocketService(realTimeIO)
 
   /**
    * Database Connection
@@ -153,8 +166,10 @@ async function main(): Promise<void> {
   const notificationHelper = new NotificationHelper(
     notificationRepository,
     uuidService,
-    socketService
+    notificationSocketService
   )
+
+  const realTimeUpdateHelper = new RealTimeUpdateHelper(realTimeSocketService)
 
   // Domain
   const createUserUseCase = new CreateUserUseCase(
@@ -215,6 +230,13 @@ async function main(): Promise<void> {
       doctorRepository
     )
 
+  const createFeedbackUseCase = new CreateFeedbackUseCase(
+    feedbackRepository,
+    uuidService,
+    notificationHelper,
+    userRepository
+  )
+
   const getFeedbackListUseCase = new GetFeedbackListUseCase(
     feedbackRepository,
     doctorRepository
@@ -253,6 +275,13 @@ async function main(): Promise<void> {
     uuidService
   )
 
+  const createAcupunctureAndMedicineUseCase =
+    new CreateAcupunctureAndMedicineUseCase(
+      acupunctureTreatmentRepository,
+      medicineTreatmentRepository,
+      uuidService
+    )
+
   const updateConsultationToAcupunctureUseCase =
     new UpdateConsultationToAcupunctureUseCase(consultationRepository)
 
@@ -288,6 +317,13 @@ async function main(): Promise<void> {
       doctorRepository,
       userRepository,
       notificationHelper
+    )
+
+  const getConsultationRealTimeListUseCase =
+    new GetConsultationRealTimeListUseCase(
+      consultationRepository,
+      doctorRepository,
+      timeSlotRepository
     )
 
   const updateMedicineTreatmentUseCase = new UpdateMedicineTreatmentUseCase(
@@ -331,8 +367,21 @@ async function main(): Promise<void> {
 
   const getSingleReviewUseCase = new GetSingleReviewUseCase(reviewRepository)
 
+  const getConsultationSocketRealTimeCountUseCase =
+    new GetConsultationSocketRealTimeCountUseCase(consultationRepository)
+
+  const getConsultationSocketRealTimeListUseCase =
+    new GetConsultationSocketRealTimeListUseCase(consultationRepository)
+
   // Controller
-  const commonController = new CommonController(getDoctorsAndClinicsUseCase)
+  const commonController = new CommonController(
+    getDoctorsAndClinicsUseCase,
+    createAcupunctureAndMedicineUseCase,
+    updateConsultationToAcupunctureUseCase,
+    getConsultationSocketRealTimeCountUseCase,
+    getConsultationSocketRealTimeListUseCase,
+    realTimeUpdateHelper
+  )
 
   const userController = new UserController(
     createUserUseCase,
@@ -341,6 +390,7 @@ async function main(): Promise<void> {
   )
 
   const consultationController = new ConsultationController(
+    realTimeUpdateHelper,
     getConsultationListUseCase,
     getSingleConsultationUseCase,
     getConsultationOnsiteCanceledAndBookingUseCase,
@@ -352,13 +402,17 @@ async function main(): Promise<void> {
     createConsultationUseCase,
     updateConsultationCheckOutAtUseCase,
     updateConsultationStartAtUseCase,
-    updateConsultationOnsiteCancelAtUseCase
+    updateConsultationOnsiteCancelAtUseCase,
+    getConsultationSocketRealTimeCountUseCase,
+    getConsultationRealTimeListUseCase,
+    getConsultationSocketRealTimeListUseCase
   )
 
   const feedbackController = new FeedbackController(
     getFeedbackListUseCase,
     getSingleFeedbackUseCase,
-    getFeedbackCountAndRateUseCase
+    getFeedbackCountAndRateUseCase,
+    createFeedbackUseCase
   )
 
   const patientController = new PatientController(
@@ -377,14 +431,22 @@ async function main(): Promise<void> {
     updateAcupunctureTreatmentStartAtUseCase,
     updateAcupunctureTreatmentRemoveNeedleAtUseCase,
     updateConsultationToWaitAcupunctureUseCase,
-    updateConsultationToWaitRemoveNeedleUseCase
+    updateConsultationToWaitRemoveNeedleUseCase,
+    getConsultationSocketRealTimeCountUseCase,
+    getConsultationSocketRealTimeListUseCase,
+    updateConsultationToMedicineUseCase,
+    realTimeUpdateHelper,
+    consultationRepository
   )
 
   const medicineTreatmentController = new MedicineTreatmentController(
     createMedicineTreatmentUseCase,
     updateConsultationToMedicineUseCase,
     updateMedicineTreatmentUseCase,
-    updateConsultationCheckOutAtUseCase
+    updateConsultationCheckOutAtUseCase,
+    getConsultationSocketRealTimeCountUseCase,
+    getConsultationSocketRealTimeListUseCase,
+    realTimeUpdateHelper
   )
 
   const notificationController = new NotificationController(
