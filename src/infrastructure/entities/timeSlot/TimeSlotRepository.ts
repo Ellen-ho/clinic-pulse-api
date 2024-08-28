@@ -8,7 +8,7 @@ import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 import { ITimeSlotRepository } from '../../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
 import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import dayjs from 'dayjs'
-import { convertToUTC8 } from '../../../infrastructure/utils/DateFormatToUTC'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 
 export class TimeSlotRepository
   extends BaseRepository<TimeSlotEntity, TimeSlot>
@@ -95,41 +95,6 @@ export class TimeSlotRepository
     }
   }
 
-  // public async findMatchingTimeSlot(
-  //   doctorId: string,
-  //   checkInAt: Date
-  // ): Promise<{ timeSlotId: string }> {
-  //   try {
-  //     const formattedCheckInAt = dayjs(checkInAt).format('YYYY-MM-DD HH:mm:ss')
-  //     const checkInDate = formattedCheckInAt.slice(0, 10)
-  //     const checkInTime = formattedCheckInAt.slice(11, 16)
-
-  //     const result = await this.getQuery<
-  //       Array<{
-  //         time_slot_id: string
-  //       }>
-  //     >(
-  //       `
-  //         SELECT id AS time_slot_id
-  //         FROM time_slots
-  //         WHERE doctor_id = $1
-  //           AND CAST(start_at AS date) = $2
-  //           AND CAST(start_at AS time) <= $3
-  //           AND CAST(end_at AS time) >= $3
-  //         LIMIT 1;
-  //       `,
-  //       [doctorId, checkInDate, checkInTime]
-  //     )
-
-  //     return { timeSlotId: result[0].time_slot_id }
-  //   } catch (e) {
-  //     throw new RepositoryError(
-  //       'TimeSlotRepository findMatchingTimeSlot error',
-  //       e as Error
-  //     )
-  //   }
-  // }
-
   public async findMatchingTimeSlot(
     doctorId: string,
     checkInAt: Date
@@ -165,16 +130,29 @@ export class TimeSlotRepository
   public async findCurrentTimeSlotForDoctor(
     doctorId: string,
     currentTime: Date
-  ): Promise<string | null> {
-    const utc8Time = convertToUTC8(currentTime)
+  ): Promise<{
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: string
+    timePeriod: TimePeriodType
+  } | null> {
+    const utc8Time = currentTime
     try {
-      const result = await this.getQuery<Array<{ id: string }>>(
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          clinic_id: string
+          consultation_room_number: string
+          time_period: TimePeriodType
+        }>
+      >(
         `
-        SELECT id
-        FROM time_slots
-        WHERE doctor_id = $1
-          AND start_at <= $2
-          AND end_at + interval '1 hour' >= $2
+        SELECT ts.id, ts.clinic_id, cr.room_number AS consultation_room_number, ts.time_period
+        FROM time_slots ts
+        LEFT JOIN consultation_rooms cr ON ts.consultation_room_id = cr.id
+        WHERE ts.doctor_id = $1
+          AND ts.start_at <= $2
+          AND ts.end_at + interval '1 hour' >= $2
         LIMIT 1
         `,
         [doctorId, utc8Time]
@@ -184,7 +162,12 @@ export class TimeSlotRepository
         return null
       }
 
-      return result[0].id
+      return {
+        timeSlotId: result[0].id,
+        clinicId: result[0].clinic_id,
+        consultationRoomNumber: result[0].consultation_room_number,
+        timePeriod: result[0].time_period,
+      }
     } catch (e) {
       throw new RepositoryError(
         'TimeSlotRepository findCurrentTimeSlotForDoctor error',
@@ -196,46 +179,60 @@ export class TimeSlotRepository
   public async findMatchingTimeSlotForAdmin(
     currentTime: Date,
     clinicId?: string,
-    consultationRoomNumber?: string,
+    consultationRoomNumber?: RoomNumberType,
     doctorId?: string
-  ): Promise<Array<{ id: string }>> {
+  ): Promise<
+    Array<{
+      id: string
+      clinicId: string
+      consultationRoomNumber: RoomNumberType
+      timePeriod: TimePeriodType
+    }>
+  > {
     try {
-      const utc8Time = convertToUTC8(currentTime)
-
       let query = `
-      SELECT id
-      FROM time_slots
-      WHERE start_at <= $1
-        AND end_at + interval '1 hour' >= $1
-       `
+        SELECT ts.id, ts.clinic_id, cr.room_number AS consultation_room_number, ts.time_period
+        FROM time_slots ts
+        LEFT JOIN consultation_rooms cr ON ts.consultation_room_id = cr.id
+        WHERE ts.start_at <= $1
+          AND ts.end_at + interval '1 hour' >= $1
+      `
 
-      const queryParams: any[] = [utc8Time]
+      const queryParams: any[] = [currentTime]
+      let paramIndex = 2
 
       if (clinicId !== undefined) {
-        query += ' AND clinic_id = $2'
+        query += ` AND ts.clinic_id = $${paramIndex}`
         queryParams.push(clinicId)
+        paramIndex++
       }
 
       if (consultationRoomNumber !== undefined) {
-        query += `
-          AND consultation_room_id = (
-            SELECT id FROM consultation_rooms WHERE room_number = $3
-          )
-        `
+        query += ` AND cr.room_number = $${paramIndex}`
         queryParams.push(consultationRoomNumber)
+        paramIndex++
       }
 
       if (doctorId !== undefined) {
-        query += ' AND doctor_id = $4'
+        query += ` AND ts.doctor_id = $${paramIndex}`
         queryParams.push(doctorId)
       }
 
-      const result = await this.getQuery<Array<{ id: string }>>(
-        query,
-        queryParams
-      )
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          clinic_id: string
+          consultation_room_number: RoomNumberType
+          time_period: TimePeriodType
+        }>
+      >(query, queryParams)
 
-      return result.map((row) => ({ id: row.id }))
+      return result.map((row) => ({
+        id: row.id,
+        clinicId: row.clinic_id,
+        consultationRoomNumber: row.consultation_room_number,
+        timePeriod: row.time_period,
+      }))
     } catch (e) {
       throw new RepositoryError(
         'TimeSlotRepository findMatchingTimeSlotForAdmin error',
