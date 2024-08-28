@@ -1,7 +1,6 @@
 import { IEntityMapper } from '../../../domain/shared/IEntityMapper'
 import { FeedbackEntity } from './FeedbackEntity'
 import { Feedback } from '../../../domain/feedback/Feedback'
-import { ConsultationMapper } from '../consultation/ConsultationMapper'
 
 export class FeedbackMapper implements IEntityMapper<FeedbackEntity, Feedback> {
   public toDomainModel(entity: FeedbackEntity): Feedback {
@@ -11,7 +10,7 @@ export class FeedbackMapper implements IEntityMapper<FeedbackEntity, Feedback> {
       selectedContent: entity.selectedContent,
       detailedContent: entity.detailedContent,
       receivedAt: entity.receivedAt,
-      consultation: new ConsultationMapper().toDomainModel(entity.consultation),
+      consultationId: entity.consultationId,
     })
     return feedback
   }
@@ -23,9 +22,7 @@ export class FeedbackMapper implements IEntityMapper<FeedbackEntity, Feedback> {
     feedbackEntity.selectedContent = domainModel.selectedContent
     feedbackEntity.detailedContent = domainModel.detailedContent
     feedbackEntity.receivedAt = domainModel.receivedAt
-    feedbackEntity.consultation = new ConsultationMapper().toPersistence(
-      domainModel.consultation
-    )
+    feedbackEntity.consultationId = domainModel.consultationId
 
     return feedbackEntity
   }
