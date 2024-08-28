@@ -1,4 +1,5 @@
 import express, { Express } from 'express'
+import * as path from 'path'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import session from 'express-session'
@@ -90,6 +91,8 @@ import { GetConsultationSocketRealTimeCountUseCase } from 'application/consultat
 import { GetConsultationRealTimeListUseCase } from 'application/consultation/GetConsultationRealTimeListUseCase'
 import { GetConsultationSocketRealTimeListUseCase } from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
 import { CreateFeedbackUseCase } from 'application/feedback/CreateFeedbackUseCase'
+import { S3 } from 'aws-sdk'
+import { EditDoctorAvatarUseCase } from 'application/doctor/EditDoctorAvatarUseCase'
 
 void main()
 
@@ -159,6 +162,12 @@ async function main(): Promise<void> {
   const notificationRepository = new NotificationRepository(dataSource)
   const reviewRepository = new ReviewRepository(dataSource)
 
+  const s3 = new S3({
+    accessKeyId: process.env.ACCESS_KEY,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    region: process.env.BUCKET_REGION,
+  })
+
   /**
    * Cross domain helper
    */
@@ -181,6 +190,12 @@ async function main(): Promise<void> {
   const createDoctorUseCase = new CreateDoctorUseCase(
     doctorRepository,
     uuidService
+  )
+
+  const editDoctorAvatarUseCase = new EditDoctorAvatarUseCase(
+    s3,
+    uuidService,
+    doctorRepository
   )
 
   const getAllDoctorsUseCase = new GetAllDoctorsUseCase(doctorRepository)
@@ -421,7 +436,8 @@ async function main(): Promise<void> {
 
   const doctorController = new DoctorController(
     getAllDoctorsUseCase,
-    getDoctorProfileUseCase
+    getDoctorProfileUseCase,
+    editDoctorAvatarUseCase
   )
 
   const acupunctureTreatmentController = new AcupunctureTreatmentController(
@@ -510,6 +526,8 @@ async function main(): Promise<void> {
   //   uuidService
   // )
   // await googleReviewService.fetchAllGoogleReviews()
+
+  app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
   app.use(cors(corsOptions))
 

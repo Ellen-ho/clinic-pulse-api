@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { authenticated } from '../middlewares/Auth'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import { IDoctorController } from '../controllers/DoctorController'
+import upload from '../middlewares/multer'
 
 export class DoctorRoutes {
   private readonly routes: Router
@@ -17,6 +18,11 @@ export class DoctorRoutes {
         '/',
         authenticated,
         asyncHandler(this.doctorController.getAllDoctors)
+      )
+      .post(
+        '/upload-avatar/:id',
+        upload.fields([{ name: 'avatar', maxCount: 1 }]),
+        asyncHandler(this.doctorController.uploadAvatar)
       )
   }
 
