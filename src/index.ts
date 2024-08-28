@@ -86,13 +86,14 @@ import { ReviewRoutes } from './infrastructure/http/routes/ReviewRoutes'
 import { GetSingleReviewUseCase } from './application/review/GetSingleReviewUseCase'
 import RealTimeSocketService from './infrastructure/network/RealtimeSocketService'
 import { RealTimeUpdateHelper } from './application/consultation/RealTimeUpdateHelper'
-import { CreateAcupunctureAndMedicineUseCase } from 'application/common/CreateAcupunctureAndMedicineUseCase'
-import { GetConsultationSocketRealTimeCountUseCase } from 'application/consultation/GetConsultationSocketRealTimeCountUseCase'
-import { GetConsultationRealTimeListUseCase } from 'application/consultation/GetConsultationRealTimeListUseCase'
-import { GetConsultationSocketRealTimeListUseCase } from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
-import { CreateFeedbackUseCase } from 'application/feedback/CreateFeedbackUseCase'
+import { CreateAcupunctureAndMedicineUseCase } from './application/common/CreateAcupunctureAndMedicineUseCase'
+import { GetConsultationSocketRealTimeCountUseCase } from './application/consultation/GetConsultationSocketRealTimeCountUseCase'
+import { GetConsultationRealTimeListUseCase } from './application/consultation/GetConsultationRealTimeListUseCase'
+import { GetConsultationSocketRealTimeListUseCase } from './application/consultation/GetConsultationSocketRealTimeListUseCase'
+import { CreateFeedbackUseCase } from './application/feedback/CreateFeedbackUseCase'
 import { S3 } from 'aws-sdk'
-import { EditDoctorAvatarUseCase } from 'application/doctor/EditDoctorAvatarUseCase'
+import { EditDoctorAvatarUseCase } from './application/doctor/EditDoctorAvatarUseCase'
+import { RedisServer } from './infrastructure/database/RedisServer'
 
 void main()
 
@@ -138,6 +139,16 @@ async function main(): Promise<void> {
    */
   const postgresDatabase = await PostgresDatabase.getInstance()
   const dataSource = postgresDatabase.getDataSource()
+
+  const redis = new RedisServer({
+    host: env.REDIS_HOST as string,
+    port: Number(env.REDIS_PORT as string),
+    authToken: env.REDIS_AUTH_TOKEN as string,
+    retryAttempts: Number(env.REDIS_RECONNECT_ATTEMPTS as string),
+    retryDelayMS: Number(env.REDIS_RECONNECT_DELAY_MS as string),
+    awsTlsEnabled: Boolean(env.REDIS_AWS_TLS_ENABLED as string),
+  })
+  await redis.connect()
 
   /**
    * Shared Services
