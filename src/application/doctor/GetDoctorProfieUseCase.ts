@@ -19,7 +19,6 @@ interface GetDoctorProfileResponse {
   onboardDate: Date
   resignationDate: Date | null
   email: string
-  // hashedPassword: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -55,7 +54,6 @@ export class GetDoctorProfileUseCase {
         onboardDate: existingDoctor.onboardDate,
         resignationDate: existingDoctor.resignationDate,
         email: user.email,
-        // hashedPassword: user.hashedPassword,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       }
@@ -76,7 +74,6 @@ export class GetDoctorProfileUseCase {
         onboardDate: existingDoctor.onboardDate,
         resignationDate: existingDoctor.resignationDate,
         email: existingDoctor.user.email,
-        // hashedPassword: null,
         createdAt: existingDoctor.user.createdAt,
         updatedAt: existingDoctor.user.updatedAt,
       }
