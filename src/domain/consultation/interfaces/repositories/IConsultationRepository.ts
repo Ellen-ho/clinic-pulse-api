@@ -81,7 +81,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     }>
     totalCounts: number
   }>
-  getDurationCanceledAndBookingByGranularity: (
+  getDurationCanceledByGranularity: (
     startDate: string,
     endDate: string,
     clinicId?: string,
@@ -90,16 +90,12 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     granularity?: Granularity
   ) => Promise<{
     totalConsultations: number
-    consultationWithOnlineBooking: number
     consultationWithOnsiteCancel: number
-    onlineBookingRate: number
     onsiteCancelRate: number
     data: Array<{
       date: string
-      onlineBookingCount: number
       onsiteCancelCount: number
       consultationCount: number
-      onlineBookingRate: number
       onsiteCancelRate: number
     }>
   }>
@@ -135,15 +131,23 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       averageMedicationWait: number
     }>
   }>
-  getFirstTimeConsultationCounts: (
+  getDurationFirstTimeByGranularity: (
     startDate: string,
     endDate: string,
     clinicId?: string,
     timePeriod?: TimePeriodType,
-    doctorId?: string
+    doctorId?: string,
+    granularity?: Granularity
   ) => Promise<{
-    totalConsultationCount: number
     firstTimeConsultationCount: number
+    firstTimeConsultationRate: number
+    totalConsultations: number
+    data: Array<{
+      date: string
+      firstTimeCount: number
+      consultationCount: number
+      firstTimeRate: number
+    }>
   }>
   getDurationCountByGranularity: (
     startDate: string,
@@ -235,5 +239,23 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     timeSlotId: string
     clinicId: string
     consultationRoomNumber: RoomNumberType
+  }>
+  getDurationBookingByGranularity: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType,
+    granularity?: Granularity
+  ) => Promise<{
+    totalConsultations: number
+    consultationWithOnlineBooking: number
+    onlineBookingRate: number
+    data: Array<{
+      date: string
+      onlineBookingCount: number
+      consultationCount: number
+      onlineBookingRate: number
+    }>
   }>
 }

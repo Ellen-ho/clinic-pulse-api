@@ -27,7 +27,22 @@ export const getSingleConsultationSchema = {
   }),
 }
 
-export const getConsultationOnsiteCanceledAndBookingSchema = {
+export const getConsultationOnsiteCanceledSchema = {
+  query: Joi.object({
+    startDate: Joi.string().required(),
+    endDate: Joi.string().required(),
+    clinicId: Joi.string().optional(),
+    timePeriod: Joi.string()
+      .valid(...Object.values(TimePeriodType))
+      .optional(),
+    granularity: Joi.string()
+      .valid(...Object.values(Granularity))
+      .optional(),
+    doctorId: Joi.string().optional(),
+  }),
+}
+
+export const getConsultationBookingSchema = {
   query: Joi.object({
     startDate: Joi.string().required(),
     endDate: Joi.string().required(),
@@ -87,6 +102,9 @@ export const getFirstTimeConsultationCountAndRateSchema = {
       .valid(...Object.values(TimePeriodType))
       .optional(),
     doctorId: Joi.string().optional(),
+    granularity: Joi.string()
+      .valid(...Object.values(Granularity))
+      .optional(),
   }),
 }
 

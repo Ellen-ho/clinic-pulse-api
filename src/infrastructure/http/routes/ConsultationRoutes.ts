@@ -7,8 +7,9 @@ import {
   createConsultationSchema,
   getAverageConsultationCountSchema,
   getAverageWaitingTimeSchema,
+  getConsultationBookingSchema,
   getConsultationListSchema,
-  getConsultationOnsiteCanceledAndBookingSchema,
+  getConsultationOnsiteCanceledSchema,
   getConsultationRealTimeCountSchema,
   getConsultationRealTimeListSchema,
   getDifferentTreatmentConsultationSchema,
@@ -51,11 +52,19 @@ export class ConsultationRoutes {
         asyncHandler(this.consultationController.getAverageWaitingTime)
       )
       .get(
-        '/canceled_and_booking',
+        '/canceled',
         authenticated,
-        validator(getConsultationOnsiteCanceledAndBookingSchema),
+        validator(getConsultationOnsiteCanceledSchema),
         asyncHandler(
-          this.consultationController.getConsultationOnsiteCanceledAndBooking
+          this.consultationController.getConsultationOnsiteCanceledCountAndRate
+        )
+      )
+      .get(
+        '/booking',
+        authenticated,
+        validator(getConsultationBookingSchema),
+        asyncHandler(
+          this.consultationController.getConsultationBookingCountAndRate
         )
       )
       .get(

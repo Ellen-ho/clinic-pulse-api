@@ -424,7 +424,7 @@ export class ConsultationRepository
     }
   }
 
-  public async getDurationCanceledAndBookingByGranularity(
+  public async getDurationCanceledByGranularity(
     startDate: string,
     endDate: string,
     clinicId?: string,
@@ -433,16 +433,12 @@ export class ConsultationRepository
     granularity: Granularity = Granularity.DAY
   ): Promise<{
     totalConsultations: number
-    consultationWithOnlineBooking: number
     consultationWithOnsiteCancel: number
-    onlineBookingRate: number
     onsiteCancelRate: number
     data: Array<{
       date: string
-      onlineBookingCount: number
       onsiteCancelCount: number
       consultationCount: number
-      onlineBookingRate: number
       onsiteCancelRate: number
     }>
   }> {
@@ -463,7 +459,6 @@ export class ConsultationRepository
       const result = await this.getQuery<
         Array<{
           date: string
-          online_booking_count: string
           onsite_cancel_count: string
           consultation_count: string
         }>
@@ -472,7 +467,6 @@ export class ConsultationRepository
           SELECT 
             TO_CHAR(c.check_in_at, $6) AS date,
             COUNT(*) AS consultation_count,
-            COUNT(CASE WHEN c.source = 'ONLINE_BOOKING' THEN 1 END) AS online_booking_count,
             COUNT(CASE WHEN c.onsite_cancel_at IS NOT NULL THEN 1 END) AS onsite_cancel_count
           FROM consultations c
           LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
@@ -494,17 +488,8 @@ export class ConsultationRepository
       )
       const data = result.map((row) => ({
         date: row.date,
-        onlineBookingCount: parseInt(row.online_booking_count, 10),
         onsiteCancelCount: parseInt(row.onsite_cancel_count, 10),
         consultationCount: parseInt(row.consultation_count, 10),
-        onlineBookingRate:
-          parseInt(row.consultation_count, 10) > 0
-            ? Math.round(
-                (parseInt(row.online_booking_count, 10) /
-                  parseInt(row.consultation_count, 10)) *
-                  100
-              )
-            : 0,
         onsiteCancelRate:
           parseInt(row.consultation_count, 10) > 0
             ? Math.round(
@@ -519,20 +504,10 @@ export class ConsultationRepository
         (acc, cur) => acc + cur.consultationCount,
         0
       )
-      const consultationWithOnlineBooking = data.reduce(
-        (acc, cur) => acc + cur.onlineBookingCount,
-        0
-      )
       const consultationWithOnsiteCancel = data.reduce(
         (acc, cur) => acc + cur.onsiteCancelCount,
         0
       )
-      const onlineBookingRate =
-        totalConsultations > 0
-          ? Math.round(
-              (consultationWithOnlineBooking / totalConsultations) * 100
-            )
-          : 0
       const onsiteCancelRate =
         totalConsultations > 0
           ? Math.round(
@@ -542,9 +517,7 @@ export class ConsultationRepository
 
       return {
         totalConsultations,
-        consultationWithOnlineBooking,
         consultationWithOnsiteCancel,
-        onlineBookingRate,
         onsiteCancelRate,
         data,
       }
@@ -852,66 +825,104 @@ export class ConsultationRepository
     }
   }
 
-  public async getFirstTimeConsultationCounts(
+  public async getDurationFirstTimeByGranularity(
     startDate: string,
     endDate: string,
     clinicId?: string,
     timePeriod?: TimePeriodType,
-    doctorId?: string
+    doctorId?: string,
+    granularity: Granularity = Granularity.DAY
   ): Promise<{
-    totalConsultationCount: number
     firstTimeConsultationCount: number
+    firstTimeConsultationRate: number
+    totalConsultations: number
+    data: Array<{
+      date: string
+      firstTimeCount: number
+      consultationCount: number
+      firstTimeRate: number
+    }>
   }> {
     try {
       const modifiedClinicId =
         clinicId !== undefined && clinicId !== '' ? clinicId : null
       const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
       const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+      const startDateTime = dayjs(startDate)
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const endDateTime = dayjs(endDate)
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const dateFormat = getDateFormat(granularity)
       const result = await this.getQuery<
         Array<{
-          totalConsultationCount: number
-          firstTimeConsultationCount: number
+          date: string
+          first_time_count: string
+          consultation_count: string
         }>
       >(
         `
         SELECT 
-        COUNT(*) AS "totalConsultationCount",
-        COUNT(CASE WHEN c.is_first_time_visit THEN 1 END) AS "firstTimeConsultationCount"
+          TO_CHAR(c.check_in_at, '${dateFormat}') AS date,
+          COUNT(*) AS consultation_count,
+          COUNT(CASE WHEN c.is_first_time_visit = true THEN 1 END) AS first_time_count
         FROM consultations c
-        LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+        LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
         WHERE c.check_in_at BETWEEN $1 AND $2
           AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
-          AND ($4::varchar IS NULL OR ts.time_period = $4::varchar)
-          AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid);
+          AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
+          AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)
+        GROUP BY TO_CHAR(c.check_in_at, '${dateFormat}')
+        ORDER BY date
       `,
         [
-          startDate,
-          endDate,
+          startDateTime,
+          endDateTime,
           modifiedClinicId,
-          modifiedTimePeriod,
           modifiedDoctorId,
+          modifiedTimePeriod,
         ]
       )
 
-      const totalConsultationCount = isNaN(
-        Number(result[0].totalConsultationCount)
-      )
-        ? 0
-        : Number(result[0].totalConsultationCount)
+      const data = result.map((row) => {
+        const firstTimeCount = parseInt(row.first_time_count, 10)
+        const consultationCount = parseInt(row.consultation_count, 10)
+        const firstTimeRate =
+          consultationCount > 0
+            ? Math.round((firstTimeCount / consultationCount) * 100)
+            : 0
 
-      const firstTimeConsultationCount = isNaN(
-        Number(result[0].firstTimeConsultationCount)
+        return {
+          date: row.date,
+          firstTimeCount,
+          consultationCount,
+          firstTimeRate,
+        }
+      })
+
+      const totalConsultations = data.reduce(
+        (acc, cur) => acc + cur.consultationCount,
+        0
       )
-        ? 0
-        : Number(result[0].firstTimeConsultationCount)
+      const firstTimeConsultationCount = data.reduce(
+        (acc, cur) => acc + cur.firstTimeCount,
+        0
+      )
+      const firstTimeConsultationRate =
+        totalConsultations > 0
+          ? Math.round((firstTimeConsultationCount / totalConsultations) * 100)
+          : 0
 
       return {
-        totalConsultationCount,
         firstTimeConsultationCount,
+        firstTimeConsultationRate,
+        totalConsultations,
+        data,
       }
     } catch (e) {
       throw new RepositoryError(
-        'ConsultationRepository getFirstTimeConsultationCounts error',
+        'ConsultationRepository getDurationFirstTimeByGranularity error',
         e as Error
       )
     }
@@ -1522,6 +1533,110 @@ export class ConsultationRepository
     } catch (e) {
       throw new RepositoryError(
         'ConsultationEntity getRealTimeLists error',
+        e as Error
+      )
+    }
+  }
+
+  public async getDurationBookingByGranularity(
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType,
+    granularity: Granularity = Granularity.DAY
+  ): Promise<{
+    totalConsultations: number
+    consultationWithOnlineBooking: number
+    onlineBookingRate: number
+    data: Array<{
+      date: string
+      onlineBookingCount: number
+      consultationCount: number
+      onlineBookingRate: number
+    }>
+  }> {
+    try {
+      const modifiedClinicId =
+        clinicId !== undefined && clinicId !== '' ? clinicId : null
+      const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+      const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+      const startDateTime = dayjs(startDate)
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const endDateTime = dayjs(endDate)
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+
+      const dateFormat = getDateFormat(granularity)
+
+      const result = await this.getQuery<
+        Array<{
+          date: string
+          online_booking_count: string
+          consultation_count: string
+        }>
+      >(
+        `
+          SELECT 
+            TO_CHAR(c.check_in_at, $6) AS date,
+            COUNT(*) AS consultation_count,
+            COUNT(CASE WHEN c.source = 'ONLINE_BOOKING' THEN 1 END) AS online_booking_count,
+          FROM consultations c
+          LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
+          WHERE c.check_in_at BETWEEN $1 AND $2
+            AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
+            AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
+            AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)
+          GROUP BY TO_CHAR(c.check_in_at, $6)
+          ORDER BY date
+        `,
+        [
+          startDateTime,
+          endDateTime,
+          modifiedClinicId,
+          modifiedDoctorId,
+          modifiedTimePeriod,
+          dateFormat,
+        ]
+      )
+      const data = result.map((row) => ({
+        date: row.date,
+        onlineBookingCount: parseInt(row.online_booking_count, 10),
+        consultationCount: parseInt(row.consultation_count, 10),
+        onlineBookingRate:
+          parseInt(row.consultation_count, 10) > 0
+            ? Math.round(
+                (parseInt(row.online_booking_count, 10) /
+                  parseInt(row.consultation_count, 10)) *
+                  100
+              )
+            : 0,
+      }))
+
+      const totalConsultations = data.reduce(
+        (acc, cur) => acc + cur.consultationCount,
+        0
+      )
+      const consultationWithOnlineBooking = data.reduce(
+        (acc, cur) => acc + cur.onlineBookingCount,
+        0
+      )
+      const onlineBookingRate =
+        totalConsultations > 0
+          ? Math.round(
+              (consultationWithOnlineBooking / totalConsultations) * 100
+            )
+          : 0
+      return {
+        totalConsultations,
+        consultationWithOnlineBooking,
+        onlineBookingRate,
+        data,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository getDurationBookingByGranularity error',
         e as Error
       )
     }

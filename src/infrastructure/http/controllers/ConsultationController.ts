@@ -9,7 +9,7 @@ import { GetAverageConsultationCountUseCase } from '../../../application/consult
 import { GetDifferentTreatmentConsultationUseCase } from '../../../application/consultation/GetDifferentTreatmentConsultationUseCase'
 import { User } from '../../../domain/user/User'
 import { GenderType, Granularity } from '../../../domain/common'
-import { GetConsultationOnsiteCanceledAndBookingUseCase } from '../../../application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
+import { GetConsultationOnsiteCanceledCountAndRateUseCase } from '../../../application/consultation/GetConsultationOnsiteCanceledCountAndRateUseCase'
 import { CreateConsultationUseCase } from '../../../application/consultation/CreateConsultationUseCase'
 import { UpdateConsultationCheckOutAtUseCase } from '../../../application/consultation/UpdateConsultationCheckOutAtUseCase'
 import { UpdateConsultationStartAtUseCase } from '../../../application/consultation/UpdateConsultationStartAtUseCase'
@@ -29,11 +29,16 @@ import {
   GetConsultationSocketRealTimeListUseCase,
 } from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
 import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+import { GetConsultationBookingCountAndRateUseCase } from 'application/consultation/GetConsultationBookingCountAndRateUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>
   getSingleConsultation: (req: Request, res: Response) => Promise<Response>
-  getConsultationOnsiteCanceledAndBooking: (
+  getConsultationOnsiteCanceledCountAndRate: (
+    req: Request,
+    res: Response
+  ) => Promise<Response>
+  getConsultationBookingCountAndRate: (
     req: Request,
     res: Response
   ) => Promise<Response>
@@ -75,7 +80,8 @@ export class ConsultationController implements IConsultationController {
     private readonly realTimeUpdateHelper: IRealTimeUpdateHelper,
     private readonly getConsultationListUseCase: GetConsultationListUseCase,
     private readonly getSingleConsultationUseCase: GetSingleConsultationUseCase,
-    private readonly getConsultationOnsiteCanceledAndBookingUseCase: GetConsultationOnsiteCanceledAndBookingUseCase,
+    private readonly getConsultationOnsiteCanceledCountAndRateUseCase: GetConsultationOnsiteCanceledCountAndRateUseCase,
+    private readonly getConsultationBookingCountAndRateUseCase: GetConsultationBookingCountAndRateUseCase,
     private readonly getConsultationRealTimeCountUseCase: GetConsultationRealTimeCountUseCase,
     private readonly getAverageWaitingTimeUseCase: GetAverageWaitingTimeUseCase,
     private readonly getFirstTimeConsultationCountAndRateUseCase: GetFirstTimeConsultationCountAndRateUseCase,
@@ -130,7 +136,7 @@ export class ConsultationController implements IConsultationController {
     return res.status(200).json(result)
   }
 
-  public getConsultationOnsiteCanceledAndBooking = async (
+  public getConsultationOnsiteCanceledCountAndRate = async (
     req: Request,
     res: Response
   ): Promise<Response> => {
@@ -144,7 +150,29 @@ export class ConsultationController implements IConsultationController {
       currentUser: req.user as User,
     }
     const result =
-      await this.getConsultationOnsiteCanceledAndBookingUseCase.execute(request)
+      await this.getConsultationOnsiteCanceledCountAndRateUseCase.execute(
+        request
+      )
+
+    return res.status(200).json(result)
+  }
+
+  public getConsultationBookingCountAndRate = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      startDate: req.query.startDate as string,
+      endDate: req.query.endDate as string,
+      clinicId: req.query.clinicId as string,
+      timePeriod: req.query.timePeriod as TimePeriodType,
+      doctorId: req.query.doctorId as string,
+      granularity: req.query.granularity as Granularity,
+      currentUser: req.user as User,
+    }
+    const result = await this.getConsultationBookingCountAndRateUseCase.execute(
+      request
+    )
 
     return res.status(200).json(result)
   }
@@ -197,6 +225,8 @@ export class ConsultationController implements IConsultationController {
       clinicId: req.query.clinicId as string,
       timePeriod: req.query.timePeriod as TimePeriodType,
       doctorId: req.query.doctorId as string,
+      granularity: req.query.granularity as Granularity,
+      currentUser: req.user as User,
     }
     const result =
       await this.getFirstTimeConsultationCountAndRateUseCase.execute(request)
