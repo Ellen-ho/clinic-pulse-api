@@ -252,7 +252,7 @@ export class ConsultationController implements IConsultationController {
     const consultation = await this.createConsultationUseCase.execute(request)
     const getConsultationSocketRealTimeListRequest: GetConsultationSocketRealTimeListRequest =
       {
-        consultationId: request.consultationId,
+        consultationId: consultation.id,
       }
 
     const listResult =

@@ -1345,7 +1345,7 @@ export class ConsultationRepository
       }
     } catch (e) {
       throw new RepositoryError(
-        'ConsultAppointmentEntity getSocketUpdatedData error',
+        'ConsultationEntity getSocketUpdatedData error',
         e as Error
       )
     }
