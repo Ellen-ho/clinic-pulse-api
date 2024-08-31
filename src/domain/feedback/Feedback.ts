@@ -1,7 +1,7 @@
 export interface IFeedbackProps {
   id: string
   feedbackRating: number
-  selectedContent: SelectedContent
+  selectedContent: SelectedContent | null
   detailedContent: string | null
   receivedAt: Date
   consultationId: string
@@ -26,7 +26,7 @@ export class Feedback {
     return this.props.feedbackRating
   }
 
-  public get selectedContent(): SelectedContent {
+  public get selectedContent(): SelectedContent | null {
     return this.props.selectedContent
   }
 
