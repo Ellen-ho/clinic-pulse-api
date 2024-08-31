@@ -4,6 +4,7 @@ import { User, UserRoleType } from '../../../domain/user/User'
 import jwt from 'jsonwebtoken'
 import { CreateDoctorUseCase } from '../../../application/doctor/CreateDoctorUseCase'
 import { DoctorRepository } from '../../../infrastructure/entities/doctor/DoctorRepository'
+import { getAvatarUrl } from '../../../application/helper/AvatarHelper'
 
 export interface IUserController {
   signin: (req: Request, res: Response) => Promise<Response>
@@ -28,7 +29,7 @@ export class UserController implements IUserController {
     let avatar
     if (role === UserRoleType.DOCTOR) {
       signinDoctor = await this.doctorRepository.findByUserId(id)
-      avatar = signinDoctor?.avatar
+      avatar = getAvatarUrl(signinDoctor?.avatar ?? null)
     }
 
     return res.status(200).json({

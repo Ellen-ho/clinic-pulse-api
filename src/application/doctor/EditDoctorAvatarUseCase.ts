@@ -1,4 +1,4 @@
-import { S3 } from 'aws-sdk'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { IUuidService } from '../../domain/utils/IUuidService'
 import path from 'path'
 import { DoctorRepository } from 'infrastructure/entities/doctor/DoctorRepository'
@@ -15,7 +15,7 @@ interface EditDoctorAvatarResponse {
 
 export class EditDoctorAvatarUseCase {
   constructor(
-    private readonly s3: S3,
+    private readonly s3Client: S3Client,
     private readonly uuidService: IUuidService,
     private readonly doctorRepository: DoctorRepository
   ) {}
@@ -39,14 +39,14 @@ export class EditDoctorAvatarUseCase {
       process.env.OBJECT_NAME_PREFIX as string
     }/${uniqueFilename}`
 
-    await this.s3
-      .upload({
-        Bucket: bucketName,
-        Key: objectKey,
-        Body: file.buffer, // Using the file buffer here
-        ContentType: file.mimetype, // Set the content type
-      })
-      .promise()
+    const uploadCommand = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: objectKey,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    })
+
+    await this.s3Client.send(uploadCommand)
 
     existingDoctor.updateAvatar({
       avatar: uniqueFilename,

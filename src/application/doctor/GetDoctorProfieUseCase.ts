@@ -1,8 +1,9 @@
-import { GenderType } from 'domain/common'
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
-import { User, UserRoleType } from 'domain/user/User'
-import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { getAvatarUrl } from '../../application/helper/AvatarHelper'
+import { GenderType } from '../../domain/common'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
+import { User, UserRoleType } from '../../domain/user/User'
+import { AuthorizationError } from '../../infrastructure/error/AuthorizationError'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface GetDoctorProfileRequest {
   doctorId: string
@@ -46,7 +47,7 @@ export class GetDoctorProfileUseCase {
 
       return {
         id: existingDoctor.id,
-        avatar: existingDoctor.avatar,
+        avatar: getAvatarUrl(existingDoctor.avatar),
         firstName: existingDoctor.firstName,
         lastName: existingDoctor.lastName,
         gender: existingDoctor.gender,
@@ -66,7 +67,7 @@ export class GetDoctorProfileUseCase {
 
       return {
         id: existingDoctor.id,
-        avatar: existingDoctor.avatar,
+        avatar: getAvatarUrl(existingDoctor.avatar),
         firstName: existingDoctor.firstName,
         lastName: existingDoctor.lastName,
         gender: existingDoctor.gender,
