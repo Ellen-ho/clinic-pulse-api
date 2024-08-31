@@ -38,7 +38,6 @@ import { GetPatientNameAutoCompleteUseCase } from './application/patient/getPati
 import { PatientRoutes } from './infrastructure/http/routes/PatientRoutes'
 import { errorHandler } from './infrastructure/http/middlewares/ErrorHandler'
 import { TimeSlotRepository } from './infrastructure/entities/timeSlot/TimeSlotRepository'
-import { GetConsultationOnsiteCanceledAndBookingUseCase } from './application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
 import { CreateConsultationUseCase } from './application/consultation/CreateConsultationUseCase'
 import { GetAllDoctorsUseCase } from './application/doctor/GetAllDoctorsUseCase'
 import { DoctorController } from './infrastructure/http/controllers/DoctorController'
@@ -103,6 +102,8 @@ import { TimeSlotRoutes } from './infrastructure/http/routes/TimeSlotRoutes'
 import { GetReviewCountAndRateUseCase } from './application/review/GetReviewCountAndRateUseCase'
 import { QueueService } from './infrastructure/network/QueueService'
 import { ConsultationQueueService } from './application/queue/ConsultationQueueService'
+import { GetConsultationOnsiteCanceledCountAndRateUseCase } from 'application/consultation/GetConsultationOnsiteCanceledCountAndRateUseCase'
+import { GetConsultationBookingCountAndRateUseCase } from 'application/consultation/GetConsultationBookingCountAndRateUseCase'
 
 void main()
 
@@ -249,10 +250,18 @@ async function main(): Promise<void> {
     doctorRepository
   )
 
-  const getConsultationOnsiteCanceledAndBookingUseCase =
-    new GetConsultationOnsiteCanceledAndBookingUseCase(
+  const getConsultationOnsiteCanceledCountAndRateUseCase =
+    new GetConsultationOnsiteCanceledCountAndRateUseCase(
       consultationRepository,
-      doctorRepository
+      doctorRepository,
+      redis
+    )
+
+  const getConsultationBookingCountAndRateUseCase =
+    new GetConsultationBookingCountAndRateUseCase(
+      consultationRepository,
+      doctorRepository,
+      redis
     )
 
   const getConsultationRealTimeCountUseCase =
@@ -268,7 +277,11 @@ async function main(): Promise<void> {
     redis
   )
   const getFirstTimeConsultationCountAndRateUseCase =
-    new GetFirstTimeConsultationCountAndRateUseCase(consultationRepository)
+    new GetFirstTimeConsultationCountAndRateUseCase(
+      consultationRepository,
+      doctorRepository,
+      redis
+    )
 
   const getAverageConsultationCountUseCase =
     new GetAverageConsultationCountUseCase(
@@ -489,7 +502,8 @@ async function main(): Promise<void> {
     realTimeUpdateHelper,
     getConsultationListUseCase,
     getSingleConsultationUseCase,
-    getConsultationOnsiteCanceledAndBookingUseCase,
+    getConsultationOnsiteCanceledCountAndRateUseCase,
+    getConsultationBookingCountAndRateUseCase,
     getConsultationRealTimeCountUseCase,
     getAverageWaitingTimeUseCase,
     getFirstTimeConsultationCountAndRateUseCase,
