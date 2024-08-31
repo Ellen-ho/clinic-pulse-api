@@ -1,5 +1,6 @@
 import { Review } from 'domain/review/Review'
 import { IBaseRepository } from '../../../shared/IBaseRepository'
+import { Granularity } from 'domain/common'
 
 export interface IReviewRepository extends IBaseRepository<Review> {
   findLatestReview: () => Promise<Review | null>
@@ -48,4 +49,36 @@ export interface IReviewRepository extends IBaseRepository<Review> {
     responseExtractedSnippet: string | null
     clinicId: string
   } | null>
+  getStarReview: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    granularity?: Granularity
+  ) => Promise<{
+    totalReviews: number
+    oneStarReviewCount: number
+    twoStarReviewCount: number
+    threeStarReviewCount: number
+    fourStarReviewCount: number
+    fiveStarReviewCount: number
+    oneStarReviewRate: number
+    twoStarReviewRate: number
+    threeStarReviewRate: number
+    fourStarReviewRate: number
+    fiveStarReviewRate: number
+    data: Array<{
+      date: string
+      reviewCount: number
+      oneStarReviewCount: number
+      twoStarReviewCount: number
+      threeStarReviewCount: number
+      fourStarReviewCount: number
+      fiveStarReviewCount: number
+      oneStarReviewRate: number
+      twoStarReviewRate: number
+      threeStarReviewRate: number
+      fourStarReviewRate: number
+      fiveStarReviewRate: number
+    }>
+  }>
 }

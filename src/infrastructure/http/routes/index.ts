@@ -9,6 +9,7 @@ import { MedicineRoutes } from './MedicineRoutes'
 import { CommonRoutes } from './CommonRoutes'
 import { NotificationRoutes } from './NotificationRoutes'
 import { ReviewRoutes } from './ReviewRoutes'
+import { TimeSlotRoutes } from './TimeSlotRoutes'
 
 export class MainRoutes {
   private readonly routes: Router
@@ -22,7 +23,8 @@ export class MainRoutes {
     private readonly medicineRoutes: MedicineRoutes,
     private readonly notificationRoutes: NotificationRoutes,
     private readonly reviewRoutes: ReviewRoutes,
-    private readonly commonRoutes: CommonRoutes
+    private readonly commonRoutes: CommonRoutes,
+    private readonly timeSlotRoutes: TimeSlotRoutes
   ) {
     this.routes = Router()
     this.routes.use('/commons', this.commonRoutes.createRouter())
@@ -38,6 +40,7 @@ export class MainRoutes {
     this.routes.use('/medicine-treatments', this.medicineRoutes.createRouter())
     this.routes.use('/notifications', this.notificationRoutes.createRouter())
     this.routes.use('/reviews', this.reviewRoutes.createRouter())
+    this.routes.use('/time-slots', this.timeSlotRoutes.createRouter())
   }
 
   public createRouter(): Router {

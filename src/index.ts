@@ -91,9 +91,16 @@ import { GetConsultationSocketRealTimeCountUseCase } from './application/consult
 import { GetConsultationRealTimeListUseCase } from './application/consultation/GetConsultationRealTimeListUseCase'
 import { GetConsultationSocketRealTimeListUseCase } from './application/consultation/GetConsultationSocketRealTimeListUseCase'
 import { CreateFeedbackUseCase } from './application/feedback/CreateFeedbackUseCase'
-import { S3 } from 'aws-sdk'
+import { S3Client } from '@aws-sdk/client-s3'
 import { EditDoctorAvatarUseCase } from './application/doctor/EditDoctorAvatarUseCase'
 import { RedisServer } from './infrastructure/database/RedisServer'
+import { GoogleReviewCronJob } from 'application/cronjob/GoogleReviewCronJob'
+import GoogleReviewService from 'infrastructure/network/GoogleReviewService'
+import { Scheduler } from 'infrastructure/network/Scheduler'
+import { TimeSlotController } from 'infrastructure/http/controllers/TimeSlotController'
+import { GetTimeSlotUseCase } from 'application/time-slot/GetTimeSlotUseCase'
+import { TimeSlotRoutes } from 'infrastructure/http/routes/TimeSlotRoutes'
+import { GetReviewCountAndRateUseCase } from 'application/review/GetReviewCountAndRateUseCase'
 
 void main()
 
@@ -141,13 +148,14 @@ async function main(): Promise<void> {
   const dataSource = postgresDatabase.getDataSource()
 
   const redis = new RedisServer({
-    host: env.REDIS_HOST as string,
-    port: Number(env.REDIS_PORT as string),
-    authToken: env.REDIS_AUTH_TOKEN as string,
-    retryAttempts: Number(env.REDIS_RECONNECT_ATTEMPTS as string),
-    retryDelayMS: Number(env.REDIS_RECONNECT_DELAY_MS as string),
-    awsTlsEnabled: Boolean(env.REDIS_AWS_TLS_ENABLED as string),
+    host: process.env.REDIS_HOST as string,
+    port: Number(process.env.REDIS_PORT as string),
+    authToken: process.env.REDIS_AUTH_TOKEN as string,
+    retryAttempts: Number(process.env.REDIS_RECONNECT_ATTEMPTS as string),
+    retryDelayMS: Number(process.env.REDIS_RECONNECT_DELAY_MS as string),
+    awsTlsEnabled: process.env.REDIS_AWS_TLS_ENABLED === 'true',
   })
+
   await redis.connect()
 
   /**
@@ -155,6 +163,7 @@ async function main(): Promise<void> {
    */
   const uuidService = new UuidService()
   const hashGenerator = new BcryptHashGenerator()
+  const scheduler = new Scheduler()
 
   // Repository
   const userRepository = new UserRepository(dataSource)
@@ -173,10 +182,12 @@ async function main(): Promise<void> {
   const notificationRepository = new NotificationRepository(dataSource)
   const reviewRepository = new ReviewRepository(dataSource)
 
-  const s3 = new S3({
-    accessKeyId: process.env.ACCESS_KEY,
-    secretAccessKey: process.env.SECRET_ACCESS_KEY,
-    region: process.env.BUCKET_REGION,
+  const s3Client = new S3Client({
+    credentials: {
+      accessKeyId: process.env.ACCESS_KEY as string,
+      secretAccessKey: process.env.SECRET_ACCESS_KEY as string,
+    },
+    region: process.env.BUCKET_REGION as string,
   })
 
   /**
@@ -204,7 +215,7 @@ async function main(): Promise<void> {
   )
 
   const editDoctorAvatarUseCase = new EditDoctorAvatarUseCase(
-    s3,
+    s3Client,
     uuidService,
     doctorRepository
   )
@@ -393,11 +404,37 @@ async function main(): Promise<void> {
 
   const getSingleReviewUseCase = new GetSingleReviewUseCase(reviewRepository)
 
+  const getReviewCountAndRateUseCase = new GetReviewCountAndRateUseCase(
+    reviewRepository
+  )
+
   const getConsultationSocketRealTimeCountUseCase =
     new GetConsultationSocketRealTimeCountUseCase(consultationRepository)
 
   const getConsultationSocketRealTimeListUseCase =
     new GetConsultationSocketRealTimeListUseCase(consultationRepository)
+
+  const getTimeSlotUseCase = new GetTimeSlotUseCase(
+    timeSlotRepository,
+    doctorRepository
+  )
+
+  const googleReviewService = new GoogleReviewService(
+    reviewRepository,
+    uuidService,
+    notificationHelper,
+    redis,
+    userRepository
+  )
+
+  /**
+   * Cron Job
+   */
+  const googleReviewCronJob = new GoogleReviewCronJob(
+    googleReviewService,
+    scheduler
+  )
+  await googleReviewCronJob.init()
 
   // Controller
   const commonController = new CommonController(
@@ -487,8 +524,11 @@ async function main(): Promise<void> {
 
   const reviewController = new ReviewController(
     getReviewListUseCase,
-    getSingleReviewUseCase
+    getSingleReviewUseCase,
+    getReviewCountAndRateUseCase
   )
+
+  const timeSlotController = new TimeSlotController(getTimeSlotUseCase)
 
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
@@ -518,6 +558,7 @@ async function main(): Promise<void> {
   const notificationRoutes = new NotificationRoutes(notificationController)
   const reviewRoutes = new ReviewRoutes(reviewController)
   const commonRoutes = new CommonRoutes(commonController)
+  const timeSlotRoutes = new TimeSlotRoutes(timeSlotController)
 
   const mainRoutes = new MainRoutes(
     userRoutes,
@@ -529,13 +570,10 @@ async function main(): Promise<void> {
     medicineRoutes,
     notificationRoutes,
     reviewRoutes,
-    commonRoutes
+    commonRoutes,
+    timeSlotRoutes
   )
 
-  // const googleReviewService = new GoogleReviewService(
-  //   reviewRepository,
-  //   uuidService
-  // )
   // await googleReviewService.fetchAllGoogleReviews()
 
   app.use('/upload', express.static(path.join(__dirname, 'upload')))

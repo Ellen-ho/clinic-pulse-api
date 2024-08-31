@@ -4,6 +4,7 @@ import { authenticated } from '../middlewares/Auth'
 import { validator } from '../middlewares/Validator'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import {
+  getReviewCountAndRateSchema,
   getReviewListSchema,
   getSingleReviewSchema,
 } from 'application/review/ReviewValidator'
@@ -11,7 +12,12 @@ import {
 export class ReviewRoutes {
   private readonly routes: Router
   constructor(private readonly reviewController: IReviewController) {
-    this.routes = Router()
+    this.routes = Router().get(
+      '/related_ratios',
+      authenticated,
+      validator(getReviewCountAndRateSchema),
+      asyncHandler(this.reviewController.getReviewCountAndRate)
+    )
     this.routes.get(
       '/:id',
       authenticated,
