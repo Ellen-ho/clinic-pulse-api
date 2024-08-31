@@ -43,7 +43,6 @@ export class NotificationHelper implements INotificationHelper {
     })
     await this.notificationRepository.save(notification)
 
-    // Send notification to client
     this.socketService.sendToUser(user.id, 'notification', {
       hasUnReadNotification: true,
     })

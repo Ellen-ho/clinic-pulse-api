@@ -18,10 +18,12 @@ export class GoogleReviewCronJob implements IGoogleReviewCronJob {
 
   private createGoogleReviewCronJob(): void {
     const rule = new schedule.RecurrenceRule()
+    rule.tz = 'Asia/Taipei'
     rule.hour = 1
     rule.minute = 0
 
     const jobCallback = async (): Promise<void> => {
+      console.log('Job is executing at:', new Date().toLocaleString())
       await this.googleReviewService.fetchNewGoogleReviews()
     }
 
