@@ -80,7 +80,7 @@ export class GetFeedbackCountAndRateUseCase {
       currentDoctorId = doctor?.id
     }
 
-    const redisKey = `feedback_counts_and_rate${
+    const redisKey = `feedback_counts_and_rate_${
       currentDoctorId ?? 'allDoctors'
     }_${granularity ?? 'allGranularity'}_${startDate}_${endDate}`
 
