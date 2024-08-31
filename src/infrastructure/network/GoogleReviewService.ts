@@ -7,7 +7,9 @@ import { Review } from 'domain/review/Review'
 import { IUuidService } from 'domain/utils/IUuidService'
 import { NotificationHelper } from 'application/notification/NotificationHelper'
 import { NotificationType } from 'domain/notification/Notification'
-import { UserRoleType } from 'domain/user/User'
+import { RedisServer } from 'infrastructure/database/RedisServer'
+import { UserRepository } from 'infrastructure/entities/user/UserRepository'
+import { NotFoundError } from 'infrastructure/error/NotFoundError'
 
 dotenv.config()
 
@@ -15,7 +17,9 @@ class GoogleReviewService implements IGoogleReviewService {
   constructor(
     private readonly reviewRepository: IReviewRepository,
     private readonly uuidService: IUuidService,
-    private readonly notificationHelper: NotificationHelper
+    private readonly notificationHelper: NotificationHelper,
+    private readonly redis: RedisServer,
+    private readonly userRepository: UserRepository
   ) {}
 
   private async getLastFetchDate(): Promise<dayjs.Dayjs> {
@@ -28,7 +32,15 @@ class GoogleReviewService implements IGoogleReviewService {
   }
 
   private async updateLastFetchDate(): Promise<void> {
-    console.log('Last fetch date updated')
+    try {
+      const currentDate = dayjs().toISOString()
+      await this.redis.set('lastFetchDate', currentDate, {
+        expiresInSec: 86400,
+      })
+      console.log('Last fetch date updated in Redis')
+    } catch (error) {
+      console.error('Failed to update last fetch date in Redis:', error)
+    }
   }
 
   async fetchAllGoogleReviews(): Promise<void> {
@@ -142,7 +154,6 @@ class GoogleReviewService implements IGoogleReviewService {
   }
 
   async fetchNewGoogleReviews(): Promise<void> {
-    const { user } = useUserContext()
     try {
       const lastFetchDate = await this.getLastFetchDate()
 
@@ -242,15 +253,18 @@ class GoogleReviewService implements IGoogleReviewService {
 
             await this.reviewRepository.save(newReview)
 
-            if (user?.role === UserRoleType.ADMIN) {
-              await this.notificationHelper.createNotification({
-                title: '低於五星的評論',
-                content: 'A new review with a rating below 5 has been posted.',
-                notificationType: NotificationType.NEGATIVE_REVIEW,
-                referenceId: newReview.id,
-                user,
-              })
+            const admin = await this.userRepository.findAdmin()
+            if (admin === null) {
+              throw new NotFoundError('Can not find admin.')
             }
+
+            await this.notificationHelper.createNotification({
+              title: '低於五星的評論',
+              content: 'A new review with a rating below 5 has been posted.',
+              notificationType: NotificationType.NEGATIVE_REVIEW,
+              referenceId: newReview.id,
+              user: admin,
+            })
           }
         }
 
@@ -270,6 +284,3 @@ class GoogleReviewService implements IGoogleReviewService {
 }
 
 export default GoogleReviewService
-function useUserContext(): { user: any } {
-  throw new Error('Function not implemented.')
-}
