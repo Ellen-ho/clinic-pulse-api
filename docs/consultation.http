@@ -77,8 +77,8 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 
 {
-  "patientId":"da3ab31e-fa43-4162-aaf1-71ab66a8f3e6",
-  "timeSlotId": "02ec4442-dc2f-4ee4-aa9c-1cfb1d662589"
+  "patientId":"00005428-bee6-4a24-bf73-19e6ddc1b3d3",
+  "timeSlotId": "74f51241-7d87-4112-89a5-1dba770c73fb"
 }
 ###
 
