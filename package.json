@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.637.0",
     "@types/socket.io": "^3.0.2",
     "aws-sdk": "^2.1684.0",
     "axios": "^1.7.4",
