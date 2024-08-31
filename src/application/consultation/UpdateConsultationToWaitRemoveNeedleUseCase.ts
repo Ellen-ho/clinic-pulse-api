@@ -1,3 +1,7 @@
+import {
+  CONSULTATION_JOB_NAME,
+  IConsultationQueueService,
+} from 'application/queue/ConsultationQueueService'
 import { ConsultationStatus } from '../../domain/consultation/Consultation'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { NotFoundError } from '../../infrastructure/error/NotFoundError'
@@ -8,7 +12,8 @@ interface UpdateConsultationToWaitRemoveNeedleRequest {
 
 export class UpdateConsultationToWaitRemoveNeedleUseCase {
   constructor(
-    private readonly consultationRepository: IConsultationRepository
+    private readonly consultationRepository: IConsultationRepository,
+    private readonly consultationQueueService: IConsultationQueueService
   ) {}
 
   public async execute(
@@ -29,5 +34,11 @@ export class UpdateConsultationToWaitRemoveNeedleUseCase {
     })
 
     await this.consultationRepository.save(existingConsultation)
+
+    await this.consultationQueueService.addConsultationJob(
+      CONSULTATION_JOB_NAME.CHECK_NEEDLE_REMOVED_WAITING_TIME,
+      { consultationId: existingConsultation.id },
+      { delay: 1800 * 1000 }
+    )
   }
 }

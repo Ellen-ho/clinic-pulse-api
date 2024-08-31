@@ -94,13 +94,15 @@ import { CreateFeedbackUseCase } from './application/feedback/CreateFeedbackUseC
 import { S3Client } from '@aws-sdk/client-s3'
 import { EditDoctorAvatarUseCase } from './application/doctor/EditDoctorAvatarUseCase'
 import { RedisServer } from './infrastructure/database/RedisServer'
-import { GoogleReviewCronJob } from 'application/cronjob/GoogleReviewCronJob'
-import GoogleReviewService from 'infrastructure/network/GoogleReviewService'
-import { Scheduler } from 'infrastructure/network/Scheduler'
-import { TimeSlotController } from 'infrastructure/http/controllers/TimeSlotController'
-import { GetTimeSlotUseCase } from 'application/time-slot/GetTimeSlotUseCase'
-import { TimeSlotRoutes } from 'infrastructure/http/routes/TimeSlotRoutes'
-import { GetReviewCountAndRateUseCase } from 'application/review/GetReviewCountAndRateUseCase'
+import { GoogleReviewCronJob } from './application/cronjob/GoogleReviewCronJob'
+import GoogleReviewService from './infrastructure/network/GoogleReviewService'
+import { Scheduler } from './infrastructure/network/Scheduler'
+import { TimeSlotController } from './infrastructure/http/controllers/TimeSlotController'
+import { GetTimeSlotUseCase } from './application/time-slot/GetTimeSlotUseCase'
+import { TimeSlotRoutes } from './infrastructure/http/routes/TimeSlotRoutes'
+import { GetReviewCountAndRateUseCase } from './application/review/GetReviewCountAndRateUseCase'
+import { QueueService } from './infrastructure/network/QueueService'
+import { ConsultationQueueService } from './application/queue/ConsultationQueueService'
 
 void main()
 
@@ -164,6 +166,10 @@ async function main(): Promise<void> {
   const uuidService = new UuidService()
   const hashGenerator = new BcryptHashGenerator()
   const scheduler = new Scheduler()
+  const queueService = new QueueService({
+    redisPort: Number(process.env.REDIS_PORT as string),
+    redisUrl: process.env.REDIS_HOST as string,
+  })
 
   // Repository
   const userRepository = new UserRepository(dataSource)
@@ -201,6 +207,14 @@ async function main(): Promise<void> {
   )
 
   const realTimeUpdateHelper = new RealTimeUpdateHelper(realTimeSocketService)
+
+  const consultationQueueService = new ConsultationQueueService(
+    consultationRepository,
+    userRepository,
+    queueService,
+    notificationHelper
+  )
+  await consultationQueueService.init()
 
   // Domain
   const createUserUseCase = new CreateUserUseCase(
@@ -294,7 +308,8 @@ async function main(): Promise<void> {
 
   const createConsultationUseCase = new CreateConsultationUseCase(
     consultationRepository,
-    uuidService
+    uuidService,
+    consultationQueueService
   )
 
   const updateConsultationStartAtUseCase = new UpdateConsultationStartAtUseCase(
@@ -320,10 +335,16 @@ async function main(): Promise<void> {
     )
 
   const updateConsultationToAcupunctureUseCase =
-    new UpdateConsultationToAcupunctureUseCase(consultationRepository)
+    new UpdateConsultationToAcupunctureUseCase(
+      consultationRepository,
+      consultationQueueService
+    )
 
   const updateConsultationToMedicineUseCase =
-    new UpdateConsultationToMedicineUseCase(consultationRepository)
+    new UpdateConsultationToMedicineUseCase(
+      consultationRepository,
+      consultationQueueService
+    )
 
   const updateConsultationCheckOutAtUseCase =
     new UpdateConsultationCheckOutAtUseCase(consultationRepository)
@@ -342,10 +363,16 @@ async function main(): Promise<void> {
     )
 
   const updateConsultationToWaitAcupunctureUseCase =
-    new UpdateConsultationToWaitAcupunctureUseCase(consultationRepository)
+    new UpdateConsultationToWaitAcupunctureUseCase(
+      consultationRepository,
+      consultationQueueService
+    )
 
   const updateConsultationToWaitRemoveNeedleUseCase =
-    new UpdateConsultationToWaitRemoveNeedleUseCase(consultationRepository)
+    new UpdateConsultationToWaitRemoveNeedleUseCase(
+      consultationRepository,
+      consultationQueueService
+    )
 
   const updateConsultationOnsiteCancelAtUseCase =
     new UpdateConsultationOnsiteCancelAtUseCase(

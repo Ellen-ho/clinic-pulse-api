@@ -1,3 +1,7 @@
+import {
+  CONSULTATION_JOB_NAME,
+  IConsultationQueueService,
+} from 'application/queue/ConsultationQueueService'
 import { ConsultationStatus } from '../../domain/consultation/Consultation'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { AcupunctureTreatment } from '../../domain/treatment/AcupunctureTreatment'
@@ -10,7 +14,8 @@ interface UpdateConsultationToAcupunctureRequest {
 
 export class UpdateConsultationToAcupunctureUseCase {
   constructor(
-    private readonly consultationRepository: IConsultationRepository
+    private readonly consultationRepository: IConsultationRepository,
+    private readonly consultationQueueService: IConsultationQueueService
   ) {}
 
   public async execute(
@@ -35,5 +40,11 @@ export class UpdateConsultationToAcupunctureUseCase {
     })
 
     await this.consultationRepository.save(existingConsultation)
+
+    await this.consultationQueueService.addConsultationJob(
+      CONSULTATION_JOB_NAME.CHECK_BED_ASSIGNED_WAITING_TIME,
+      { consultationId: existingConsultation.id },
+      { delay: 1800 * 1000 }
+    )
   }
 }
