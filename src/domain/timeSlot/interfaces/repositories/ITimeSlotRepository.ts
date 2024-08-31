@@ -45,4 +45,40 @@ export interface ITimeSlotRepository extends IBaseRepository<TimeSlot> {
     }>
   >
   getById: (id: string) => Promise<TimeSlot | null>
+  findByClinicId: (clinicId: string) => Promise<
+    Array<{
+      id: string
+      startAt: Date
+      endAt: Date
+      timePeriod: TimePeriodType
+      clinicId: string
+      doctor: {
+        id: string
+        firstName: string
+        lastName: string
+      }
+      consultationRoom: {
+        id: string
+        roomNumber: string
+      }
+    }>
+  >
+  findByDoctorId: (doctorId: string) => Promise<
+    Array<{
+      id: string
+      startAt: Date
+      endAt: Date
+      timePeriod: TimePeriodType
+      clinicId: string
+      doctor: {
+        id: string
+        firstName: string
+        lastName: string
+      }
+      consultationRoom: {
+        id: string
+        roomNumber: string
+      }
+    }>
+  >
 }

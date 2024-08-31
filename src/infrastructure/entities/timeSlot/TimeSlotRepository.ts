@@ -252,4 +252,164 @@ export class TimeSlotRepository
       throw new RepositoryError('TimeSlotRepository findById error', e as Error)
     }
   }
+
+  public async findByClinicId(clinicId: string): Promise<
+    Array<{
+      id: string
+      startAt: Date
+      endAt: Date
+      timePeriod: TimePeriodType
+      clinicId: string
+      doctor: {
+        id: string
+        firstName: string
+        lastName: string
+      }
+      consultationRoom: {
+        id: string
+        roomNumber: string
+      }
+    }>
+  > {
+    const rawQuery = `
+    SELECT 
+      ts.id, 
+      ts.start_at, 
+      ts.end_at, 
+      ts.time_period,
+      ts.clinic_id,
+      d.id AS doctor_id,
+      d.first_name AS doctor_first_name,
+      d.last_name AS doctor_last_name,
+      cr.id AS consultation_room_id,
+      cr.room_number AS consultation_room_number
+    FROM 
+      time_slots ts
+    JOIN 
+      doctors d ON ts.doctor_id = d.id
+    JOIN 
+      consultation_rooms cr ON ts.consultation_room_id = cr.id
+    WHERE 
+      ts.clinic_id = $1
+  `
+
+    try {
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          start_at: Date
+          end_at: Date
+          time_period: TimePeriodType
+          clinic_id: string
+          doctor_id: string
+          doctor_first_name: string
+          doctor_last_name: string
+          consultation_room_id: string
+          consultation_room_number: string
+        }>
+      >(rawQuery, [clinicId])
+
+      return result.map((row) => ({
+        id: row.id,
+        startAt: row.start_at,
+        endAt: row.end_at,
+        timePeriod: row.time_period,
+        clinicId: row.clinic_id,
+        doctor: {
+          id: row.doctor_id,
+          firstName: row.doctor_first_name,
+          lastName: row.doctor_last_name,
+        },
+        consultationRoom: {
+          id: row.consultation_room_id,
+          roomNumber: row.consultation_room_number,
+        },
+      }))
+    } catch (e) {
+      throw new RepositoryError(
+        'TimeSlotRepository findByClinicId error',
+        e as Error
+      )
+    }
+  }
+
+  public async findByDoctorId(doctorId: string): Promise<
+    Array<{
+      id: string
+      startAt: Date
+      endAt: Date
+      timePeriod: TimePeriodType
+      clinicId: string
+      doctor: {
+        id: string
+        firstName: string
+        lastName: string
+      }
+      consultationRoom: {
+        id: string
+        roomNumber: string
+      }
+    }>
+  > {
+    const rawQuery = `
+        SELECT 
+          ts.id, 
+          ts.start_at, 
+          ts.end_at, 
+          ts.time_period,
+          ts.clinic_id,
+          d.id AS doctor_id,
+          d.first_name AS doctor_first_name,
+          d.last_name AS doctor_last_name,
+          cr.id AS consultation_room_id,
+          cr.room_number AS consultation_room_number
+        FROM 
+          time_slots ts
+        JOIN 
+          doctors d ON ts.doctor_id = d.id
+        JOIN 
+          consultation_rooms cr ON ts.consultation_room_id = cr.id
+        WHERE 
+          ts.doctor_id = $1
+      `
+
+    try {
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          start_at: Date
+          end_at: Date
+          time_period: TimePeriodType
+          clinic_id: string
+          doctor_id: string
+          doctor_first_name: string
+          doctor_last_name: string
+          consultation_room_id: string
+          consultation_room_number: string
+        }>
+      >(rawQuery, [doctorId])
+
+      return result.map((row) => ({
+        id: row.id,
+        startAt: row.start_at,
+        endAt: row.end_at,
+        timePeriod: row.time_period,
+        clinicId: row.clinic_id,
+        doctor: {
+          id: row.doctor_id,
+          firstName: row.doctor_first_name,
+          lastName: row.doctor_last_name,
+        },
+        consultationRoom: {
+          id: row.consultation_room_id,
+          roomNumber: row.consultation_room_number,
+        },
+      }))
+    } catch (e) {
+      throw new RepositoryError(
+        'TimeSlotRepository findByDoctorId error',
+        e as Error
+      )
+    }
+  }
 }
