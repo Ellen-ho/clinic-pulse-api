@@ -101,6 +101,17 @@ export interface IFeedbackRepository extends IBaseRepository<Feedback> {
       threeStarFeedbackRate: number
       fourStarFeedbackRate: number
       fiveStarFeedbackRate: number
+      totalReasonsCount: number
+      waitAcupunctureReason: number
+      waitBedReason: number
+      waitConsultationReason: number
+      waitMedicineReason: number
+      doctorPoorAttitude: number
+      waitAcupunctureReasonRate: number
+      waitBedReasonRate: number
+      waitConsultationReasonRate: number
+      waitMedicineReasonRate: number
+      doctorPoorAttitudeRate: number
     }>
   }>
 }

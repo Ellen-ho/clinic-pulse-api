@@ -143,7 +143,6 @@ export class FeedbackRepository
         }
       }
     } catch (e) {
-      console.error(e)
       throw new RepositoryError('FeedbackRepository findById error', e as Error)
     }
   }
@@ -362,6 +361,17 @@ export class FeedbackRepository
       threeStarFeedbackRate: number
       fourStarFeedbackRate: number
       fiveStarFeedbackRate: number
+      totalReasonsCount: number
+      waitAcupunctureReason: number
+      waitBedReason: number
+      waitConsultationReason: number
+      waitMedicineReason: number
+      doctorPoorAttitude: number
+      waitAcupunctureReasonRate: number
+      waitBedReasonRate: number
+      waitConsultationReasonRate: number
+      waitMedicineReasonRate: number
+      doctorPoorAttitudeRate: number
     }>
   }> {
     try {
@@ -389,6 +399,12 @@ export class FeedbackRepository
           threestarfeedbackcount: string
           fourstarfeedbackcount: string
           fivestarfeedbackcount: string
+          totalreasonscount: string
+          waitacupuncturereason: string
+          waitbedreason: string
+          waitconsultationreason: string
+          waitmedicinereason: string
+          doctorpoorattitude: string
         }>
       >(
         `SELECT 
@@ -398,7 +414,13 @@ export class FeedbackRepository
         COUNT(CASE WHEN f.feedback_rating = 2 THEN 1 END) AS twostarfeedbackcount,
         COUNT(CASE WHEN f.feedback_rating = 3 THEN 1 END) AS threestarfeedbackcount,
         COUNT(CASE WHEN f.feedback_rating = 4 THEN 1 END) AS fourstarfeedbackcount,
-        COUNT(CASE WHEN f.feedback_rating = 5 THEN 1 END) AS fivestarfeedbackcount
+        COUNT(CASE WHEN f.feedback_rating = 5 THEN 1 END) AS fivestarfeedbackcount,
+        COUNT(CASE WHEN f.selected_content IS NOT NULL THEN 1 END) AS totalreasonscount,
+        COUNT(CASE WHEN f.selected_content = '${SelectedContent.LONG_WAIT_TIME_FOR_ACUPUNCTURE}' THEN 1 END) AS waitacupuncturereason,
+        COUNT(CASE WHEN f.selected_content = '${SelectedContent.LONG_WAIT_TIME_FOR_BED_ASSIGNED}' THEN 1 END) AS waitbedreason,
+        COUNT(CASE WHEN f.selected_content = '${SelectedContent.LONG_WAIT_TIME_FOR_CONSULTATION}' THEN 1 END) AS waitconsultationreason,
+        COUNT(CASE WHEN f.selected_content = '${SelectedContent.LONG_WAIT_TIME_FOR_MEDICATION}' THEN 1 END) AS waitmedicinereason,
+        COUNT(CASE WHEN f.selected_content = '${SelectedContent.POOR_DOCTOR_ATTITUDE}' THEN 1 END) AS doctorpoorattitude
         FROM feedbacks f
         JOIN consultations c ON f.consultation_id = c.id
         JOIN time_slots ts ON c.time_slot_id = ts.id
@@ -498,6 +520,52 @@ export class FeedbackRepository
               parseInt(row.feedbackcount, 10)) *
               100
           ),
+          totalReasonsCount: parseInt(row.totalreasonscount, 10),
+          waitAcupunctureReason: parseInt(row.waitacupuncturereason, 10),
+          waitBedReason: parseInt(row.waitbedreason, 10),
+          waitConsultationReason: parseInt(row.waitconsultationreason, 10),
+          waitMedicineReason: parseInt(row.waitmedicinereason, 10),
+          doctorPoorAttitude: parseInt(row.doctorpoorattitude, 10),
+          waitAcupunctureReasonRate:
+            parseInt(row.totalreasonscount, 10) > 0
+              ? Math.round(
+                  (parseInt(row.waitacupuncturereason, 10) /
+                    parseInt(row.totalreasonscount, 10)) *
+                    100
+                )
+              : 0,
+          waitBedReasonRate:
+            parseInt(row.totalreasonscount, 10) > 0
+              ? Math.round(
+                  (parseInt(row.waitbedreason, 10) /
+                    parseInt(row.totalreasonscount, 10)) *
+                    100
+                )
+              : 0,
+          waitConsultationReasonRate:
+            parseInt(row.totalreasonscount, 10) > 0
+              ? Math.round(
+                  (parseInt(row.waitconsultationreason, 10) /
+                    parseInt(row.totalreasonscount, 10)) *
+                    100
+                )
+              : 0,
+          waitMedicineReasonRate:
+            parseInt(row.totalreasonscount, 10) > 0
+              ? Math.round(
+                  (parseInt(row.waitmedicinereason, 10) /
+                    parseInt(row.totalreasonscount, 10)) *
+                    100
+                )
+              : 0,
+          doctorPoorAttitudeRate:
+            parseInt(row.totalreasonscount, 10) > 0
+              ? Math.round(
+                  (parseInt(row.doctorpoorattitude, 10) /
+                    parseInt(row.totalreasonscount, 10)) *
+                    100
+                )
+              : 0,
         })),
       }
     } catch (e) {
