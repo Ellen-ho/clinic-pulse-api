@@ -18,17 +18,19 @@ export interface IQueueService {
 interface IQueueServiceOptions {
   redisUrl: string
   redisPort: number
+  redisPassword: string
 }
 
 export class QueueService implements IQueueService {
   private readonly queues = new Map<string, Queue.Queue>()
   private readonly redisConfig: Queue.QueueOptions
 
-  constructor({ redisPort, redisUrl }: IQueueServiceOptions) {
+  constructor({ redisPort, redisUrl, redisPassword }: IQueueServiceOptions) {
     this.redisConfig = {
       redis: {
         port: redisPort,
         host: redisUrl,
+        password: redisPassword,
       },
     }
   }
