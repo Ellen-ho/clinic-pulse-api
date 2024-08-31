@@ -20,9 +20,15 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
-### get single feedback
+### get single review
 @reviewId = e21b58e7-dd60-4ec0-8d3a-b4c46e89d30b
 GET {{reviewsPath}}/{{reviewId}}
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### get review rations
+GET {{reviewsPath}}/related_ratios?granularity=WEEK&startDate=2024-05-01&endDate=2024-08-31
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###

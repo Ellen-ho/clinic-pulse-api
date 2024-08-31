@@ -14,18 +14,10 @@ Content-Type: application/json
 ###
 @accessToken = Bearer {{signin.response.body.token}}
 
-@doctorsPath = {{hostname}}/api/doctors
+@timeslotsPath = {{hostname}}/api/time-slots
 
-### get all doctors
-GET {{doctorsPath}}
-Authorization: {{accessToken}}
-Content-Type: application/json
-###
-
-
-### get doctor profile
-@doctorId = 8545ef60-a94d-4160-829f-f4fd7ed77551
-GET {{doctorsPath}}/{{doctorId}}
+### get time slots
+GET {{timeslotsPath}}?clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9bs
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
