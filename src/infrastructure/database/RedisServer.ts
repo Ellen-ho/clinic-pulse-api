@@ -48,13 +48,20 @@ export class RedisServer implements IRedisServer {
       retryAttempts,
       awsTlsEnabled,
     } = this.options
+
     this.redis = redis.createClient(port, host, {
       retry_strategy: function (options) {
         if (options.attempt > retryAttempts) {
           // End reconnecting with built in error
-          return undefined
+          // return undefined
+          console.error('Max retry attempts reached. Exiting.')
+          return new Error('Retry attempts exceeded')
         }
-
+        console.log(
+          `Attempt ${options.attempt}: retrying in ${
+            retryDelayMS * retryAttempts
+          }ms`
+        )
         return retryDelayMS * retryAttempts
       },
       auth_pass: authToken,
@@ -63,9 +70,15 @@ export class RedisServer implements IRedisServer {
 
     const client = this.redis
 
-    await new Promise((resolve) => {
+    await new Promise((resolve, reject) => {
       client.on('ready', () => {
+        console.log('Redis is ready')
         resolve({})
+      })
+
+      client.on('error', (err) => {
+        console.error('Redis connection error:', err)
+        reject(err)
       })
     })
   }
