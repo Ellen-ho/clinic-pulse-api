@@ -17,7 +17,7 @@ export interface IRedisServer {
       | string,
     options?: IRedisServerSetOptions
   ) => Promise<string | undefined>
-  get: (key: string) => Promise<string>
+  get: (key: string) => Promise<string | null>
   isConnected: () => boolean
   getClient: () => redis.RedisClient | null
   disconnect: () => Promise<void>
@@ -101,7 +101,7 @@ export class RedisServer implements IRedisServer {
     return this.redis
   }
 
-  public async get(key: string): Promise<string> {
+  public async get(key: string): Promise<string | null> {
     if (this.redis == null) {
       throw new Error('redis not initialized')
     }
@@ -112,11 +112,6 @@ export class RedisServer implements IRedisServer {
       client.get(key, (error, response: string | null) => {
         if (error != null) {
           reject(error)
-          return
-        }
-
-        if (response == null) {
-          reject(RedisServer.createRedisError('entity not found', 'NOT_FOUND'))
           return
         }
 

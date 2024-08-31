@@ -1,3 +1,4 @@
+import { RedisServer } from 'infrastructure/database/RedisServer'
 import { Granularity } from '../../domain/common'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
@@ -32,7 +33,8 @@ export class GetAverageConsultationCountUseCase {
   constructor(
     private readonly consultationRepository: IConsultationRepository,
     private readonly timeSlotRepository: ITimeSlotRepository,
-    private readonly doctorRepository: IDoctorRepository
+    private readonly doctorRepository: IDoctorRepository,
+    private readonly redis: RedisServer
   ) {}
 
   public async execute(
@@ -48,10 +50,19 @@ export class GetAverageConsultationCountUseCase {
       currentUser,
     } = request
 
-    let currentDoctorId
+    let currentDoctorId = doctorId
     if (currentUser.role === UserRoleType.DOCTOR) {
       const doctor = await this.doctorRepository.findByUserId(currentUser.id)
       currentDoctorId = doctor?.id
+    }
+
+    const redisKey = `average_counts_${currentDoctorId ?? 'allDoctors'}_${
+      granularity ?? 'allGranularity'
+    }_${startDate}_${endDate}`
+
+    const cachedData = await this.redis.get(redisKey)
+    if (cachedData !== null) {
+      return JSON.parse(cachedData)
     }
 
     const consultaionResult =
@@ -59,7 +70,7 @@ export class GetAverageConsultationCountUseCase {
         startDate,
         endDate,
         clinicId,
-        currentDoctorId !== undefined ? currentDoctorId : doctorId,
+        currentDoctorId,
         timePeriod,
         granularity
       )
@@ -108,7 +119,7 @@ export class GetAverageConsultationCountUseCase {
       }
     })
 
-    return {
+    const response = {
       totalConsultations: consultaionResult.totalConsultations,
       totalSlots: timeSlotResult.totalTimeSlots,
       averagePatientPerSlot: Math.round(
@@ -116,5 +127,11 @@ export class GetAverageConsultationCountUseCase {
       ),
       data: mergedData,
     }
+
+    await this.redis.set(redisKey, JSON.stringify(response), {
+      expiresInSec: 31_536_000,
+    })
+
+    return response
   }
 }

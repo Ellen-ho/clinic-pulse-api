@@ -1,3 +1,4 @@
+import { RedisServer } from 'infrastructure/database/RedisServer'
 import { Granularity } from '../../domain/common'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
@@ -45,7 +46,8 @@ interface GetDifferentTreatmentConsultationResponse {
 export class GetDifferentTreatmentConsultationUseCase {
   constructor(
     private readonly consultationRepository: IConsultationRepository,
-    private readonly doctorRepository: IDoctorRepository
+    private readonly doctorRepository: IDoctorRepository,
+    private readonly redis: RedisServer
   ) {}
 
   public async execute(
@@ -61,10 +63,19 @@ export class GetDifferentTreatmentConsultationUseCase {
       currentUser,
     } = request
 
-    let currentDoctorId
+    let currentDoctorId = doctorId
     if (currentUser.role === UserRoleType.DOCTOR) {
       const doctor = await this.doctorRepository.findByUserId(currentUser.id)
       currentDoctorId = doctor?.id
+    }
+
+    const redisKey = `different_treatments_${currentDoctorId ?? 'allDoctors'}_${
+      granularity ?? 'allGranularity'
+    }_${startDate}_${endDate}`
+
+    const cachedData = await this.redis.get(redisKey)
+    if (cachedData !== null) {
+      return JSON.parse(cachedData)
     }
 
     const result =
@@ -72,7 +83,7 @@ export class GetDifferentTreatmentConsultationUseCase {
         startDate,
         endDate,
         clinicId,
-        currentDoctorId !== undefined ? currentDoctorId : doctorId,
+        currentDoctorId,
         timePeriod,
         granularity
       )
@@ -115,8 +126,7 @@ export class GetDifferentTreatmentConsultationUseCase {
     const totalOnlyMedicineRate = Math.round(
       (result.totalOnlyMedicineCount / result.totalConsultations) * 100
     )
-
-    return {
+    const response = {
       totalConsultations: result.totalConsultations,
       totalConsultationWithAcupuncture: result.totalConsultationWithAcupuncture,
       totalConsultationWithMedicine: result.totalConsultationWithMedicine,
@@ -168,5 +178,11 @@ export class GetDifferentTreatmentConsultationUseCase {
             : 0,
       })),
     }
+
+    await this.redis.set(redisKey, JSON.stringify(response), {
+      expiresInSec: 31_536_000,
+    })
+
+    return response
   }
 }

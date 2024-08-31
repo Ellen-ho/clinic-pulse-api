@@ -1,6 +1,7 @@
 import { Granularity } from 'domain/common'
 import { IReviewRepository } from 'domain/review/interfaces/repositories/IReviewRepository'
 import { User, UserRoleType } from 'domain/user/User'
+import { RedisServer } from 'infrastructure/database/RedisServer'
 import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
 
 interface GetReviewCountAndRateRequest {
@@ -40,7 +41,11 @@ interface GetReviewCountAndRateResponse {
 }
 
 export class GetReviewCountAndRateUseCase {
-  constructor(private readonly reviewRepository: IReviewRepository) {}
+  constructor(
+    private readonly reviewRepository: IReviewRepository,
+    private readonly redis: RedisServer
+  ) {}
+
   public async execute(
     request: GetReviewCountAndRateRequest
   ): Promise<GetReviewCountAndRateResponse> {
@@ -48,6 +53,15 @@ export class GetReviewCountAndRateUseCase {
 
     if (currentUser.role !== UserRoleType.ADMIN) {
       throw new AuthorizationError('Only admin can get this report.')
+    }
+
+    const redisKey = `review_counts_and_rate_${
+      granularity ?? 'allGranularity'
+    }_${startDate}_${endDate}`
+
+    const cachedData = await this.redis.get(redisKey)
+    if (cachedData !== null) {
+      return JSON.parse(cachedData)
     }
 
     const result = await this.reviewRepository.getStarReview(
@@ -73,6 +87,10 @@ export class GetReviewCountAndRateUseCase {
         data: [],
       }
     }
+
+    await this.redis.set(redisKey, JSON.stringify(result), {
+      expiresInSec: 31_536_000,
+    })
 
     return result
   }

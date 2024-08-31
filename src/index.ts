@@ -169,6 +169,7 @@ async function main(): Promise<void> {
   const queueService = new QueueService({
     redisPort: Number(process.env.REDIS_PORT as string),
     redisUrl: process.env.REDIS_HOST as string,
+    redisPassword: process.env.REDIS_AUTH_TOKEN as string,
   })
 
   // Repository
@@ -263,7 +264,8 @@ async function main(): Promise<void> {
 
   const getAverageWaitingTimeUseCase = new GetAverageWaitingTimeUseCase(
     consultationRepository,
-    doctorRepository
+    doctorRepository,
+    redis
   )
   const getFirstTimeConsultationCountAndRateUseCase =
     new GetFirstTimeConsultationCountAndRateUseCase(consultationRepository)
@@ -272,13 +274,15 @@ async function main(): Promise<void> {
     new GetAverageConsultationCountUseCase(
       consultationRepository,
       timeSlotRepository,
-      doctorRepository
+      doctorRepository,
+      redis
     )
 
   const getDifferentTreatmentConsultationUseCase =
     new GetDifferentTreatmentConsultationUseCase(
       consultationRepository,
-      doctorRepository
+      doctorRepository,
+      redis
     )
 
   const createFeedbackUseCase = new CreateFeedbackUseCase(
@@ -300,7 +304,8 @@ async function main(): Promise<void> {
 
   const getFeedbackCountAndRateUseCase = new GetFeedbackCountAndRateUseCase(
     feedbackRepository,
-    doctorRepository
+    doctorRepository,
+    redis
   )
 
   const getPatientNameAutoCompleteUseCase =
@@ -432,7 +437,8 @@ async function main(): Promise<void> {
   const getSingleReviewUseCase = new GetSingleReviewUseCase(reviewRepository)
 
   const getReviewCountAndRateUseCase = new GetReviewCountAndRateUseCase(
-    reviewRepository
+    reviewRepository,
+    redis
   )
 
   const getConsultationSocketRealTimeCountUseCase =
