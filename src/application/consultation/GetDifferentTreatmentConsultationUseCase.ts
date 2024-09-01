@@ -16,6 +16,17 @@ interface GetDifferentTreatmentConsultationRequest {
 }
 
 interface GetDifferentTreatmentConsultationResponse {
+  lastTotalConsultations: number
+  lastTotalConsultationWithAcupuncture: number
+  lastTotalConsultationWithMedicine: number
+  lastTotalConsultationWithBothTreatment: number
+  lastTotalOnlyAcupunctureCount: number
+  lastTotalOnlyMedicineCount: number
+  lastTotalAcupunctureRate: number
+  lastTotalMedicineRate: number
+  lastOnlyAcupunctureRate: number
+  lastOnlyMedicineRate: number
+  lastBothTreatmentRate: number
   totalConsultations: number
   totalConsultationWithAcupuncture: number
   totalConsultationWithMedicine: number
@@ -27,6 +38,22 @@ interface GetDifferentTreatmentConsultationResponse {
   totalOnlyAcupunctureRate: number
   totalOnlyMedicineRate: number
   totalBothTreatmentRate: number
+  compareTotalConsultations: number
+  compareTotalConsultationWithAcupuncture: number
+  compareTotalConsultationWithMedicine: number
+  compareTotalConsultationWithBothTreatment: number
+  compareTotalOnlyAcupunctureCount: number
+  compareTotalOnlyMedicineCount: number
+  compareTotalAcupunctureRate: number
+  compareTotalMedicineRate: number
+  compareTotalOnlyAcupunctureRate: number
+  compareTotalOnlyMedicineRate: number
+  compareTotalBothTreatmentRate: number
+  isWithAcupunctureGetMore: boolean
+  isWithMedicineGetMore: boolean
+  isWithBothGetMore: boolean
+  isOnlyAcupunctureGetMore: boolean
+  isOnlyMedicineGetMore: boolean
   data: Array<{
     date: string
     consultationCount: number
@@ -88,45 +115,92 @@ export class GetDifferentTreatmentConsultationUseCase {
         granularity
       )
 
-    if (result.totalConsultations === 0) {
-      return {
-        totalConsultations: 0,
-        totalConsultationWithAcupuncture: 0,
-        totalConsultationWithMedicine: 0,
-        totalConsultationWithBothTreatment: 0,
-        totalOnlyAcupunctureCount: 0,
-        totalOnlyMedicineCount: 0,
-        totalAcupunctureRate: 0,
-        totalMedicineRate: 0,
-        totalOnlyAcupunctureRate: 0,
-        totalOnlyMedicineRate: 0,
-        totalBothTreatmentRate: 0,
-        data: [],
-      }
-    }
+    const { lastStartDate, lastEndDate } =
+      await this.consultationRepository.getPreviousPeriodDates(
+        startDate,
+        endDate,
+        granularity
+      )
 
-    const totalAcupunctureRate = Math.round(
-      (result.totalConsultationWithAcupuncture / result.totalConsultations) *
-        100
-    )
+    const lastResult =
+      await this.consultationRepository.getDifferentTreatmentConsultation(
+        lastStartDate,
+        lastEndDate,
+        clinicId,
+        currentDoctorId,
+        timePeriod,
+        granularity
+      )
 
-    const totalMedicineRate = Math.round(
-      (result.totalConsultationWithMedicine / result.totalConsultations) * 100
-    )
+    const compareTotalConsultations =
+      result.totalConsultations - lastResult.totalConsultations
+    const compareTotalConsultationWithAcupuncture =
+      result.totalConsultationWithAcupuncture -
+      lastResult.totalConsultationWithAcupuncture
+    const compareTotalConsultationWithMedicine =
+      result.totalConsultationWithMedicine -
+      lastResult.totalConsultationWithMedicine
+    const compareTotalConsultationWithBothTreatment =
+      result.totalConsultationWithBothTreatment -
+      lastResult.totalConsultationWithBothTreatment
+    const compareTotalOnlyAcupunctureCount =
+      result.totalOnlyAcupunctureCount - lastResult.totalOnlyAcupunctureCount
+    const compareTotalOnlyMedicineCount =
+      result.totalOnlyMedicineCount - lastResult.totalOnlyMedicineCount
 
-    const totalBothTreatmentRate = Math.round(
-      (result.totalConsultationWithBothTreatment / result.totalConsultations) *
-        100
-    )
+    const compareTotalAcupunctureRate =
+      lastResult.totalAcupunctureRate !== 0
+        ? ((result.totalAcupunctureRate - lastResult.totalAcupunctureRate) /
+            lastResult.totalAcupunctureRate) *
+          100
+        : 0
+    const compareTotalMedicineRate =
+      lastResult.totalMedicineRate !== 0
+        ? ((result.totalMedicineRate - lastResult.totalMedicineRate) /
+            lastResult.totalMedicineRate) *
+          100
+        : 0
+    const compareTotalOnlyAcupunctureRate =
+      lastResult.totalOnlyAcupunctureRate !== 0
+        ? ((result.totalOnlyAcupunctureRate -
+            lastResult.totalOnlyAcupunctureRate) /
+            lastResult.totalOnlyAcupunctureRate) *
+          100
+        : 0
+    const compareTotalOnlyMedicineRate =
+      lastResult.totalOnlyMedicineRate !== 0
+        ? ((result.totalOnlyMedicineRate - lastResult.totalOnlyMedicineRate) /
+            lastResult.totalOnlyMedicineRate) *
+          100
+        : 0
+    const compareTotalBothTreatmentRate =
+      lastResult.totalBothTreatmentRate !== 0
+        ? ((result.totalBothTreatmentRate - lastResult.totalBothTreatmentRate) /
+            lastResult.totalBothTreatmentRate) *
+          100
+        : 0
 
-    const totalOnlyAcupunctureRate = Math.round(
-      (result.totalOnlyAcupunctureCount / result.totalConsultations) * 100
-    )
+    const isWithAcupunctureGetMore = compareTotalConsultationWithAcupuncture > 0
+    const isWithMedicineGetMore = compareTotalConsultationWithMedicine > 0
+    const isWithBothGetMore = compareTotalConsultationWithBothTreatment > 0
+    const isOnlyAcupunctureGetMore = compareTotalOnlyAcupunctureCount > 0
+    const isOnlyMedicineGetMore = compareTotalOnlyMedicineCount > 0
 
-    const totalOnlyMedicineRate = Math.round(
-      (result.totalOnlyMedicineCount / result.totalConsultations) * 100
-    )
-    const response = {
+    const response: GetDifferentTreatmentConsultationResponse = {
+      lastTotalConsultations: lastResult.totalConsultations,
+      lastTotalConsultationWithAcupuncture:
+        lastResult.totalConsultationWithAcupuncture,
+      lastTotalConsultationWithMedicine:
+        lastResult.totalConsultationWithMedicine,
+      lastTotalConsultationWithBothTreatment:
+        lastResult.totalConsultationWithBothTreatment,
+      lastTotalOnlyAcupunctureCount: lastResult.totalOnlyAcupunctureCount,
+      lastTotalOnlyMedicineCount: lastResult.totalOnlyMedicineCount,
+      lastTotalAcupunctureRate: lastResult.totalAcupunctureRate,
+      lastTotalMedicineRate: lastResult.totalMedicineRate,
+      lastOnlyAcupunctureRate: lastResult.totalOnlyAcupunctureRate,
+      lastOnlyMedicineRate: lastResult.totalOnlyMedicineRate,
+      lastBothTreatmentRate: lastResult.totalBothTreatmentRate,
       totalConsultations: result.totalConsultations,
       totalConsultationWithAcupuncture: result.totalConsultationWithAcupuncture,
       totalConsultationWithMedicine: result.totalConsultationWithMedicine,
@@ -134,49 +208,28 @@ export class GetDifferentTreatmentConsultationUseCase {
         result.totalConsultationWithBothTreatment,
       totalOnlyAcupunctureCount: result.totalOnlyAcupunctureCount,
       totalOnlyMedicineCount: result.totalOnlyMedicineCount,
-      totalAcupunctureRate,
-      totalMedicineRate,
-      totalOnlyAcupunctureRate,
-      totalOnlyMedicineRate,
-      totalBothTreatmentRate,
-      data: result.data.map((day) => ({
-        date: day.date,
-        consultationCount: day.consultationCount,
-        consultationWithAcupuncture: day.consultationWithAcupuncture,
-        consultationWithMedicine: day.consultationWithMedicine,
-        consultationWithBothTreatment: day.consultationWithBothTreatment,
-        onlyAcupunctureCount: day.onlyAcupunctureCount,
-        onlyMedicineCount: day.onlyMedicineCount,
-        acupunctureRate:
-          day.consultationCount > 0
-            ? Math.round(
-                (day.consultationWithAcupuncture / day.consultationCount) * 100
-              )
-            : 0,
-        medicineRate:
-          day.consultationCount > 0
-            ? Math.round(
-                (day.consultationWithMedicine / day.consultationCount) * 100
-              )
-            : 0,
-        onlyAcupunctureRate:
-          day.consultationCount > 0
-            ? Math.round(
-                (day.onlyAcupunctureCount / day.consultationCount) * 100
-              )
-            : 0,
-        onlyMedicineRate:
-          day.consultationCount > 0
-            ? Math.round((day.onlyMedicineCount / day.consultationCount) * 100)
-            : 0,
-        bothTreatmentRate:
-          day.consultationCount > 0
-            ? Math.round(
-                (day.consultationWithBothTreatment / day.consultationCount) *
-                  100
-              )
-            : 0,
-      })),
+      totalAcupunctureRate: result.totalAcupunctureRate,
+      totalMedicineRate: result.totalMedicineRate,
+      totalOnlyAcupunctureRate: result.totalOnlyAcupunctureRate,
+      totalOnlyMedicineRate: result.totalOnlyMedicineRate,
+      totalBothTreatmentRate: result.totalBothTreatmentRate,
+      compareTotalConsultations,
+      compareTotalConsultationWithAcupuncture,
+      compareTotalConsultationWithMedicine,
+      compareTotalConsultationWithBothTreatment,
+      compareTotalOnlyAcupunctureCount,
+      compareTotalOnlyMedicineCount,
+      compareTotalAcupunctureRate,
+      compareTotalMedicineRate,
+      compareTotalOnlyAcupunctureRate,
+      compareTotalOnlyMedicineRate,
+      compareTotalBothTreatmentRate,
+      isWithAcupunctureGetMore,
+      isWithMedicineGetMore,
+      isWithBothGetMore,
+      isOnlyAcupunctureGetMore,
+      isOnlyMedicineGetMore,
+      data: result.data,
     }
 
     await this.redis.set(redisKey, JSON.stringify(response), {
