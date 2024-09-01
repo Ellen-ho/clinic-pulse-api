@@ -17,11 +17,31 @@ interface GetAverageWaitingTimeRequest {
 }
 
 interface GetAverageWaitingTimeResponse {
+  lastAverageConsultationWait: number
+  lastAverageBedAssignmentWait: number
+  lastAverageAcupunctureWait: number
+  lastAverageNeedleRemovalWait: number
+  lastAverageMedicationWait: number
   totalAverageConsultationWait: number
   totalAverageBedAssignmentWait: number
   totalAverageAcupunctureWait: number
   totalAverageNeedleRemovalWait: number
   totalAverageMedicationWait: number
+  compareAverageConsultationWait: number
+  compareAverageBedAssignmentWait: number
+  compareAverageAcupunctureWait: number
+  compareAverageNeedleRemovalWait: number
+  compareAverageMedicationWait: number
+  isAverageConsultationWaitCutDown: boolean
+  isAverageBedAssignmentWaitCutDown: boolean
+  isAverageAcupunctureWaitCutDown: boolean
+  isAverageNeedleRemovalWaitCutDown: boolean
+  isAverageMedicationWaitCutDown: boolean
+  compareAverageConsultationWaitRate: number
+  compareAverageBedAssignmentWaitRate: number
+  compareAverageAcupunctureWaitRate: number
+  compareAverageNeedleRemovalWaitRate: number
+  compareAverageMedicationWaitRate: number
   data: Array<{
     date: string
     averageConsultationWait: number
@@ -78,10 +98,112 @@ export class GetAverageWaitingTimeUseCase {
       granularity
     )
 
-    await this.redis.set(redisKey, JSON.stringify(result), {
+    const { lastStartDate, lastEndDate } =
+      await this.consultationRepository.getPreviousPeriodDates(
+        startDate,
+        endDate,
+        granularity
+      )
+
+    const lastResult = await this.consultationRepository.getAverageWaitingTime(
+      lastStartDate,
+      lastEndDate,
+      clinicId,
+      timePeriod,
+      currentDoctorId,
+      patientId,
+      granularity
+    )
+
+    const {
+      totalAverageConsultationWait,
+      totalAverageBedAssignmentWait,
+      totalAverageAcupunctureWait,
+      totalAverageNeedleRemovalWait,
+      totalAverageMedicationWait,
+    } = result
+
+    const {
+      totalAverageConsultationWait: lastAverageConsultationWait,
+      totalAverageBedAssignmentWait: lastAverageBedAssignmentWait,
+      totalAverageAcupunctureWait: lastAverageAcupunctureWait,
+      totalAverageNeedleRemovalWait: lastAverageNeedleRemovalWait,
+      totalAverageMedicationWait: lastAverageMedicationWait,
+    } = lastResult
+
+    const compareAverageConsultationWait =
+      totalAverageConsultationWait - lastAverageConsultationWait
+    const compareAverageBedAssignmentWait =
+      totalAverageBedAssignmentWait - lastAverageBedAssignmentWait
+    const compareAverageAcupunctureWait =
+      totalAverageAcupunctureWait - lastAverageAcupunctureWait
+    const compareAverageNeedleRemovalWait =
+      totalAverageNeedleRemovalWait - lastAverageNeedleRemovalWait
+    const compareAverageMedicationWait =
+      totalAverageMedicationWait - lastAverageMedicationWait
+
+    const isAverageConsultationWaitCutDown = compareAverageConsultationWait < 0
+    const isAverageBedAssignmentWaitCutDown =
+      compareAverageBedAssignmentWait < 0
+    const isAverageAcupunctureWaitCutDown = compareAverageAcupunctureWait < 0
+    const isAverageNeedleRemovalWaitCutDown =
+      compareAverageNeedleRemovalWait < 0
+    const isAverageMedicationWaitCutDown = compareAverageMedicationWait < 0
+
+    const compareAverageConsultationWaitRate =
+      lastAverageConsultationWait === 0
+        ? 0
+        : (compareAverageConsultationWait / lastAverageConsultationWait) * 100
+    const compareAverageBedAssignmentWaitRate =
+      lastAverageBedAssignmentWait === 0
+        ? 0
+        : (compareAverageBedAssignmentWait / lastAverageBedAssignmentWait) * 100
+    const compareAverageAcupunctureWaitRate =
+      lastAverageAcupunctureWait === 0
+        ? 0
+        : (compareAverageAcupunctureWait / lastAverageAcupunctureWait) * 100
+    const compareAverageNeedleRemovalWaitRate =
+      lastAverageNeedleRemovalWait === 0
+        ? 0
+        : (compareAverageNeedleRemovalWait / lastAverageNeedleRemovalWait) * 100
+    const compareAverageMedicationWaitRate =
+      lastAverageMedicationWait === 0
+        ? 0
+        : (compareAverageMedicationWait / lastAverageMedicationWait) * 100
+
+    const finalResponse = {
+      lastAverageConsultationWait,
+      lastAverageBedAssignmentWait,
+      lastAverageAcupunctureWait,
+      lastAverageNeedleRemovalWait,
+      lastAverageMedicationWait,
+      totalAverageConsultationWait,
+      totalAverageBedAssignmentWait,
+      totalAverageAcupunctureWait,
+      totalAverageNeedleRemovalWait,
+      totalAverageMedicationWait,
+      compareAverageConsultationWait,
+      compareAverageBedAssignmentWait,
+      compareAverageAcupunctureWait,
+      compareAverageNeedleRemovalWait,
+      compareAverageMedicationWait,
+      isAverageConsultationWaitCutDown,
+      isAverageBedAssignmentWaitCutDown,
+      isAverageAcupunctureWaitCutDown,
+      isAverageNeedleRemovalWaitCutDown,
+      isAverageMedicationWaitCutDown,
+      compareAverageConsultationWaitRate,
+      compareAverageBedAssignmentWaitRate,
+      compareAverageAcupunctureWaitRate,
+      compareAverageNeedleRemovalWaitRate,
+      compareAverageMedicationWaitRate,
+      data: result.data,
+    }
+
+    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
       expiresInSec: 31_536_000,
     })
 
-    return result
+    return finalResponse
   }
 }

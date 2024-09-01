@@ -16,9 +16,16 @@ interface GetFirstTimeConsultationCountAndRateRequest {
 }
 
 interface GetFirstTimeConsultationCountAndRateResponse {
+  lastConsultations: number
+  lastFirstTimeConsultationCount: number
+  lastFirstTimeConsultationRate: number
   firstTimeConsultationCount: number
   firstTimeConsultationRate: number
   totalConsultations: number
+  compareConsultations: number
+  compareFirstTimeConsultation: number
+  compareFirstTimeRates: number
+  isGetMore: boolean
   data: Array<{
     date: string
     firstTimeCount: number
@@ -72,19 +79,54 @@ export class GetFirstTimeConsultationCountAndRateUseCase {
         granularity
       )
 
-    if (result.totalConsultations === 0) {
-      return {
-        firstTimeConsultationCount: 0,
-        firstTimeConsultationRate: 0,
-        totalConsultations: 0,
-        data: [],
-      }
+    const { lastStartDate, lastEndDate } =
+      await this.consultationRepository.getPreviousPeriodDates(
+        startDate,
+        endDate,
+        granularity
+      )
+
+    const lastResult =
+      await this.consultationRepository.getDurationFirstTimeByGranularity(
+        lastStartDate,
+        lastEndDate,
+        clinicId,
+        timePeriod,
+        currentDoctorId,
+        granularity
+      )
+
+    const compareConsultations =
+      result.totalConsultations - lastResult.totalConsultations
+    const compareFirstTimeConsultation =
+      result.firstTimeConsultationCount - lastResult.firstTimeConsultationCount
+    const compareFirstTimeRates =
+      lastResult.firstTimeConsultationRate === 0
+        ? 0
+        : ((result.firstTimeConsultationRate -
+            lastResult.firstTimeConsultationRate) /
+            lastResult.firstTimeConsultationRate) *
+          100
+    const isGetMore = compareFirstTimeRates > 0
+
+    const finalResponse: GetFirstTimeConsultationCountAndRateResponse = {
+      lastConsultations: lastResult.totalConsultations,
+      lastFirstTimeConsultationCount: lastResult.firstTimeConsultationCount,
+      lastFirstTimeConsultationRate: lastResult.firstTimeConsultationRate,
+      firstTimeConsultationCount: result.firstTimeConsultationCount,
+      firstTimeConsultationRate: result.firstTimeConsultationRate,
+      totalConsultations: result.totalConsultations,
+      compareConsultations,
+      compareFirstTimeConsultation,
+      compareFirstTimeRates,
+      isGetMore,
+      data: result.data,
     }
 
-    await this.redis.set(redisKey, JSON.stringify(result), {
+    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
       expiresInSec: 31_536_000,
     })
 
-    return result
+    return finalResponse
   }
 }

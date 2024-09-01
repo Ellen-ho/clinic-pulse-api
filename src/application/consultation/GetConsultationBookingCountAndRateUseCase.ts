@@ -16,9 +16,16 @@ interface GetConsultationBookingCountAndRateRequest {
 }
 
 interface GetConsultationBookingCountAndRateResponse {
+  lastConsultations: number
+  lastConsultationWithBooking: number
+  lastConsiteBookingRate: number
   totalConsultations: number
   consultationWithOnlineBooking: number
   onlineBookingRate: number
+  compareConsultations: number
+  compareConsultationWithBooking: number
+  compareBookingRates: number
+  isGetMore: boolean
   data: Array<{
     date: string
     onlineBookingCount: number
@@ -72,10 +79,54 @@ export class GetConsultationBookingCountAndRateUseCase {
         granularity
       )
 
-    await this.redis.set(redisKey, JSON.stringify(result), {
+    const { lastStartDate, lastEndDate } =
+      await this.consultationRepository.getPreviousPeriodDates(
+        startDate,
+        endDate,
+        granularity
+      )
+
+    const lastResult =
+      await this.consultationRepository.getDurationBookingByGranularity(
+        lastStartDate,
+        lastEndDate,
+        clinicId,
+        currentDoctorId,
+        timePeriod,
+        granularity
+      )
+
+    const compareConsultations =
+      result.totalConsultations - lastResult.totalConsultations
+    const compareConsultationWithBooking =
+      result.consultationWithOnlineBooking -
+      lastResult.consultationWithOnlineBooking
+    const compareBookingRates =
+      lastResult.onlineBookingRate === 0
+        ? 0
+        : ((result.onlineBookingRate - lastResult.onlineBookingRate) /
+            lastResult.onlineBookingRate) *
+          100
+    const isGetMore = compareBookingRates < 0
+
+    const finalResponse: GetConsultationBookingCountAndRateResponse = {
+      lastConsultations: lastResult.totalConsultations,
+      lastConsultationWithBooking: lastResult.consultationWithOnlineBooking,
+      lastConsiteBookingRate: lastResult.onlineBookingRate,
+      totalConsultations: result.totalConsultations,
+      consultationWithOnlineBooking: result.consultationWithOnlineBooking,
+      onlineBookingRate: result.onlineBookingRate,
+      compareConsultations,
+      compareConsultationWithBooking,
+      compareBookingRates,
+      isGetMore,
+      data: result.data,
+    }
+
+    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
       expiresInSec: 31_536_000,
     })
 
-    return result
+    return finalResponse
   }
 }

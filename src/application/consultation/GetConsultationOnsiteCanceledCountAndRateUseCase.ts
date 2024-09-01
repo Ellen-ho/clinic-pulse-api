@@ -16,9 +16,16 @@ interface GetConsultationOnsiteCanceledCountAndRateRequest {
 }
 
 interface GetConsultationOnsiteCanceledCountAndRateResponse {
+  lastConsultations: number
+  lastConsultationWithOnsiteCancel: number
+  lastOnsiteCancelRate: number
   totalConsultations: number
   consultationWithOnsiteCancel: number
   onsiteCancelRate: number
+  compareConsultations: number
+  compareConsultationWithOnsiteCancel: number
+  compareOsiteCancelRates: number
+  isCutDown: boolean
   data: Array<{
     date: string
     onsiteCancelCount: number
@@ -26,7 +33,6 @@ interface GetConsultationOnsiteCanceledCountAndRateResponse {
     onsiteCancelRate: number
   }>
 }
-
 export class GetConsultationOnsiteCanceledCountAndRateUseCase {
   constructor(
     private readonly consultationRepository: IConsultationRepository,
@@ -72,10 +78,54 @@ export class GetConsultationOnsiteCanceledCountAndRateUseCase {
         granularity
       )
 
-    await this.redis.set(redisKey, JSON.stringify(result), {
+    const { lastStartDate, lastEndDate } =
+      await this.consultationRepository.getPreviousPeriodDates(
+        startDate,
+        endDate,
+        granularity
+      )
+
+    const lastResult =
+      await this.consultationRepository.getDurationCanceledByGranularity(
+        lastStartDate,
+        lastEndDate,
+        clinicId,
+        currentDoctorId,
+        timePeriod,
+        granularity
+      )
+
+    const compareConsultations =
+      result.totalConsultations - lastResult.totalConsultations
+    const compareConsultationWithOnsiteCancel =
+      result.consultationWithOnsiteCancel -
+      lastResult.consultationWithOnsiteCancel
+    const compareOsiteCancelRates =
+      lastResult.onsiteCancelRate === 0
+        ? 0
+        : ((result.onsiteCancelRate - lastResult.onsiteCancelRate) /
+            lastResult.onsiteCancelRate) *
+          100
+    const isCutDown = compareOsiteCancelRates < 0
+
+    const finalResponse: GetConsultationOnsiteCanceledCountAndRateResponse = {
+      lastConsultations: lastResult.totalConsultations,
+      lastConsultationWithOnsiteCancel: lastResult.consultationWithOnsiteCancel,
+      lastOnsiteCancelRate: lastResult.onsiteCancelRate,
+      totalConsultations: result.totalConsultations,
+      consultationWithOnsiteCancel: result.consultationWithOnsiteCancel,
+      onsiteCancelRate: result.onsiteCancelRate,
+      compareConsultations,
+      compareConsultationWithOnsiteCancel,
+      compareOsiteCancelRates,
+      isCutDown,
+      data: result.data,
+    }
+
+    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
       expiresInSec: 31_536_000,
     })
 
-    return result
+    return finalResponse
   }
 }

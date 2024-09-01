@@ -258,4 +258,9 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       onlineBookingRate: number
     }>
   }>
+  getPreviousPeriodDates: (
+    startDate: string,
+    endDate: string,
+    granularity?: Granularity
+  ) => Promise<{ lastStartDate: string; lastEndDate: string }>
 }

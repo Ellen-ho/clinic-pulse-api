@@ -18,6 +18,16 @@ interface GetAverageConsultationCountRequest {
 }
 
 interface GetAverageConsultationCountResponse {
+  lastTotalCount: number
+  lastAverageCount: number
+  lastTotalSlots: number
+  compareTotalCount: number
+  compareAverageCount: number
+  compareSlots: number
+  isTotalGetMore: boolean
+  isAverageGetMore: boolean
+  compareTotalRate: number
+  compareAverageRate: number
   totalConsultations: number
   totalSlots: number
   averagePatientPerSlot: number
@@ -80,13 +90,23 @@ export class GetAverageConsultationCountUseCase {
         startDate,
         endDate,
         clinicId,
-        currentDoctorId !== undefined ? currentDoctorId : doctorId,
+        currentDoctorId,
         timePeriod,
         granularity
       )
 
     if (timeSlotResult.totalTimeSlots === 0) {
       return {
+        lastTotalCount: 0,
+        lastAverageCount: 0,
+        lastTotalSlots: 0,
+        compareTotalCount: 0,
+        compareAverageCount: 0,
+        compareSlots: 0,
+        isTotalGetMore: false,
+        isAverageGetMore: false,
+        compareTotalRate: 0,
+        compareAverageRate: 0,
         totalConsultations: 0,
         totalSlots: 0,
         averagePatientPerSlot: 0,
@@ -128,10 +148,79 @@ export class GetAverageConsultationCountUseCase {
       data: mergedData,
     }
 
-    await this.redis.set(redisKey, JSON.stringify(response), {
+    const { lastStartDate, lastEndDate } =
+      await this.consultationRepository.getPreviousPeriodDates(
+        startDate,
+        endDate,
+        granularity
+      )
+
+    const lastConsultationResult =
+      await this.consultationRepository.getDurationCountByGranularity(
+        lastStartDate,
+        lastEndDate,
+        clinicId,
+        currentDoctorId,
+        timePeriod,
+        granularity
+      )
+
+    const lastTimeSlotResult =
+      await this.timeSlotRepository.getDurationCountByGranularity(
+        lastStartDate,
+        lastEndDate,
+        clinicId,
+        currentDoctorId,
+        timePeriod,
+        granularity
+      )
+
+    const lastTotalCount = lastConsultationResult.totalConsultations
+    const lastTotalSlots = lastTimeSlotResult.totalTimeSlots
+    const lastAverageCount =
+      lastTotalSlots !== 0 ? Math.round(lastTotalCount / lastTotalSlots) : 0
+
+    const compareTotalCount = response.totalConsultations - lastTotalCount
+    const compareAverageCount =
+      response.averagePatientPerSlot - lastAverageCount
+    const compareSlots = response.totalSlots - lastTotalSlots
+
+    const isTotalGetMore = compareTotalCount > 0
+    const isAverageGetMore = compareAverageCount > 0
+
+    const compareTotalRate =
+      lastTotalCount === 0
+        ? 0
+        : Math.round(
+            ((compareTotalCount - lastTotalCount) / lastTotalCount) * 100 * 100
+          ) / 100
+    const compareAverageRate =
+      lastAverageCount === 0
+        ? 0
+        : Math.round(
+            (compareAverageCount - lastAverageCount / lastAverageCount) *
+              100 *
+              100
+          ) / 100
+
+    const finalResponse = {
+      ...response,
+      lastTotalCount,
+      lastAverageCount,
+      lastTotalSlots,
+      compareTotalCount,
+      compareAverageCount,
+      compareSlots,
+      isTotalGetMore,
+      isAverageGetMore,
+      compareTotalRate,
+      compareAverageRate,
+    }
+
+    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
       expiresInSec: 31_536_000,
     })
 
-    return response
+    return finalResponse
   }
 }

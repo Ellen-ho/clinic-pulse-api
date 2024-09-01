@@ -1579,9 +1579,9 @@ export class ConsultationRepository
       >(
         `
           SELECT 
-            TO_CHAR(c.check_in_at, $6) AS date,
-            COUNT(*) AS consultation_count,
-            COUNT(CASE WHEN c.source = 'ONLINE_BOOKING' THEN 1 END) AS online_booking_count,
+          TO_CHAR(c.check_in_at, $6) AS date,
+          COUNT(*) AS consultation_count,
+          COUNT(CASE WHEN c.source = 'ONLINE_BOOKING' THEN 1 END) AS online_booking_count
           FROM consultations c
           LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
           WHERE c.check_in_at BETWEEN $1 AND $2
@@ -1589,7 +1589,7 @@ export class ConsultationRepository
             AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
             AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)
           GROUP BY TO_CHAR(c.check_in_at, $6)
-          ORDER BY date
+          ORDER BY date;
         `,
         [
           startDateTime,
@@ -1639,6 +1639,52 @@ export class ConsultationRepository
         'ConsultationRepository getDurationBookingByGranularity error',
         e as Error
       )
+    }
+  }
+
+  public async getPreviousPeriodDates(
+    startDate: string,
+    endDate: string,
+    granularity: Granularity = Granularity.WEEK
+  ): Promise<{ lastStartDate: string; lastEndDate: string }> {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    switch (granularity) {
+      case Granularity.DAY: {
+        const lastWeekStart = new Date(start)
+        const lastWeekEnd = new Date(end)
+        lastWeekStart.setDate(
+          lastWeekStart.getDate() - lastWeekStart.getDay() - 7
+        )
+        lastWeekEnd.setDate(lastWeekStart.getDate() + 6)
+        return {
+          lastStartDate: lastWeekStart.toISOString().split('T')[0],
+          lastEndDate: lastWeekEnd.toISOString().split('T')[0],
+        }
+      }
+      case Granularity.WEEK: {
+        start.setMonth(start.getMonth() - 1)
+        end.setMonth(end.getMonth() - 1)
+        break
+      }
+      case Granularity.MONTH: {
+        start.setFullYear(start.getFullYear() - 1)
+        end.setFullYear(end.getFullYear() - 1)
+        break
+      }
+      case Granularity.YEAR: {
+        start.setFullYear(start.getFullYear() - 1)
+        end.setFullYear(end.getFullYear() - 1)
+        break
+      }
+      default:
+        throw new Error('Unsupported granularity')
+    }
+
+    return {
+      lastStartDate: start.toISOString().split('T')[0],
+      lastEndDate: end.toISOString().split('T')[0],
     }
   }
 
