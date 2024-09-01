@@ -117,10 +117,10 @@ export class ConsultationQueueService implements IConsultationQueueService {
 
           if (
             consultation.status ===
-            ConsultationStatus.WAITING_FOR_ACUPUNCTURE_TREATMENT
+            ConsultationStatus.WAITING_FOR_BED_ASSIGNMENT
           ) {
             console.table({
-              title: '等待看診時間超過一小時',
+              title: '等待排床時間超過半小時',
               content: `Consultation ${consultationId} has been waiting for more than one hour.`,
             })
             await this.notificationHelper.createNotification({
