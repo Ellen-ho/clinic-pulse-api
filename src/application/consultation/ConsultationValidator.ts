@@ -1,3 +1,4 @@
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 import { Granularity } from '../../domain/common'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
 import Joi from 'joi'
@@ -26,7 +27,22 @@ export const getSingleConsultationSchema = {
   }),
 }
 
-export const getConsultationOnsiteCanceledAndBookingSchema = {
+export const getConsultationOnsiteCanceledSchema = {
+  query: Joi.object({
+    startDate: Joi.string().required(),
+    endDate: Joi.string().required(),
+    clinicId: Joi.string().optional(),
+    timePeriod: Joi.string()
+      .valid(...Object.values(TimePeriodType))
+      .optional(),
+    granularity: Joi.string()
+      .valid(...Object.values(Granularity))
+      .optional(),
+    doctorId: Joi.string().optional(),
+  }),
+}
+
+export const getConsultationBookingSchema = {
   query: Joi.object({
     startDate: Joi.string().required(),
     endDate: Joi.string().required(),
@@ -44,7 +60,20 @@ export const getConsultationOnsiteCanceledAndBookingSchema = {
 export const getConsultationRealTimeCountSchema = {
   query: Joi.object({
     clinicId: Joi.string().optional(),
-    consultationRoomNumber: Joi.string().optional(),
+    consultationRoomNumber: Joi.string()
+      .valid(...Object.values(RoomNumberType))
+      .optional(),
+  }),
+}
+
+export const getConsultationRealTimeListSchema = {
+  query: Joi.object({
+    clinicId: Joi.string().optional(),
+    consultationRoomNumber: Joi.string()
+      .valid(...Object.values(RoomNumberType))
+      .optional(),
+    limit: Joi.number().required(),
+    page: Joi.number().required(),
   }),
 }
 
@@ -73,6 +102,9 @@ export const getFirstTimeConsultationCountAndRateSchema = {
       .valid(...Object.values(TimePeriodType))
       .optional(),
     doctorId: Joi.string().optional(),
+    granularity: Joi.string()
+      .valid(...Object.values(Granularity))
+      .optional(),
   }),
 }
 
@@ -117,7 +149,9 @@ export const createConsultationSchema = {
 export const getConsultationRealTimeSchema = {
   query: Joi.object({
     clinicId: Joi.string().optional(),
-    consultationRoomNumber: Joi.string().optional(),
+    consultationRoomNumber: Joi.string()
+      .valid(...Object.values(RoomNumberType))
+      .optional(),
     doctorId: Joi.string().optional(),
   }),
 }

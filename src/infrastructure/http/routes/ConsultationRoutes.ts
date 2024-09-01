@@ -7,12 +7,16 @@ import {
   createConsultationSchema,
   getAverageConsultationCountSchema,
   getAverageWaitingTimeSchema,
+  getConsultationBookingSchema,
   getConsultationListSchema,
-  getConsultationOnsiteCanceledAndBookingSchema,
+  getConsultationOnsiteCanceledSchema,
   getConsultationRealTimeCountSchema,
+  getConsultationRealTimeListSchema,
   getDifferentTreatmentConsultationSchema,
   getSingleConsultationSchema,
 } from '../../../application/consultation/ConsultationValidator'
+import { authorized } from '../middlewares/Authorized'
+import { PERMISSION } from 'domain/permission/Permission'
 
 export class ConsultationRoutes {
   private readonly routes: Router
@@ -24,6 +28,7 @@ export class ConsultationRoutes {
       .get(
         '/different_treatments',
         authenticated,
+        authorized(PERMISSION.REPORT_CENTER_READ),
         validator(getDifferentTreatmentConsultationSchema),
         asyncHandler(
           this.consultationController.getDifferentTreatmentConsultation
@@ -32,12 +37,14 @@ export class ConsultationRoutes {
       .get(
         '/average_counts',
         authenticated,
+        authorized(PERMISSION.REPORT_CENTER_READ),
         validator(getAverageConsultationCountSchema),
         asyncHandler(this.consultationController.getAverageConsultationCount)
       )
       .get(
         '/first_time',
         authenticated,
+        authorized(PERMISSION.REPORT_CENTER_READ),
         validator(getAverageWaitingTimeSchema),
         asyncHandler(
           this.consultationController.getFirstTimeConsultationCountAndRate
@@ -46,32 +53,53 @@ export class ConsultationRoutes {
       .get(
         '/average_waiting_time',
         authenticated,
+        authorized(PERMISSION.REPORT_CENTER_READ),
         validator(getAverageWaitingTimeSchema),
         asyncHandler(this.consultationController.getAverageWaitingTime)
       )
       .get(
-        '/canceled_and_booking',
+        '/canceled',
         authenticated,
-        validator(getConsultationOnsiteCanceledAndBookingSchema),
+        authorized(PERMISSION.REPORT_CENTER_READ),
+        validator(getConsultationOnsiteCanceledSchema),
         asyncHandler(
-          this.consultationController.getConsultationOnsiteCanceledAndBooking
+          this.consultationController.getConsultationOnsiteCanceledCountAndRate
+        )
+      )
+      .get(
+        '/booking',
+        authenticated,
+        authorized(PERMISSION.REPORT_CENTER_READ),
+        validator(getConsultationBookingSchema),
+        asyncHandler(
+          this.consultationController.getConsultationBookingCountAndRate
         )
       )
       .get(
         '/real_time_counts',
         authenticated,
+        authorized(PERMISSION.DASHBOARD_READ),
         validator(getConsultationRealTimeCountSchema),
         asyncHandler(this.consultationController.getConsultationRealTimeCount)
       )
       .get(
+        '/real_time_lists',
+        authenticated,
+        authorized(PERMISSION.DASHBOARD_READ),
+        validator(getConsultationRealTimeListSchema),
+        asyncHandler(this.consultationController.getConsultationRealTimeList)
+      )
+      .get(
         '/:id',
         authenticated,
+        authorized(PERMISSION.CONSULTATION_READ),
         validator(getSingleConsultationSchema),
         asyncHandler(this.consultationController.getSingleConsultation)
       )
       .get(
         '/',
         authenticated,
+        authorized(PERMISSION.CONSULTATION_READ),
         validator(getConsultationListSchema),
         asyncHandler(this.consultationController.getConsultationList)
       )

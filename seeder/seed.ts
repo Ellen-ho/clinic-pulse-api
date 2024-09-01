@@ -5,6 +5,7 @@ import TimeSlotSeeder from './timeSlot.seeder'
 import ConsultationNormalFirstSeeder from './consultation.normal.first.seeder'
 import ConsultationNormalNotFirstSeeder from './consultation.normal.not.first.seeder'
 import UserSeeder from './user.seeder'
+import PermissionSeeder from './permission.seeder'
 
 void (async () => {
   const options: DataSourceOptions & SeederOptions = {
@@ -17,8 +18,9 @@ void (async () => {
     synchronize: false,
     // note: do not change the order
     seeds: [
+      // PermissionSeeder,
       // UserSeeder,
-      // TimeSlotSeeder,
+      TimeSlotSeeder,
       ConsultationNormalFirstSeeder,
       // ConsultationNormalNotFirstSeeder,
     ],

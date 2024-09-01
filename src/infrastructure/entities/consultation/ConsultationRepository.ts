@@ -14,6 +14,8 @@ import { GenderType, Granularity } from '../../../domain/common'
 import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 import dayjs from 'dayjs'
+import { MedicineTreatment } from '../../../domain/treatment/MedicineTreatment'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 
 export class ConsultationRepository
   extends BaseRepository<ConsultationEntity, Consultation>
@@ -422,7 +424,7 @@ export class ConsultationRepository
     }
   }
 
-  public async getDurationCanceledAndBookingByGranularity(
+  public async getDurationCanceledByGranularity(
     startDate: string,
     endDate: string,
     clinicId?: string,
@@ -431,16 +433,12 @@ export class ConsultationRepository
     granularity: Granularity = Granularity.DAY
   ): Promise<{
     totalConsultations: number
-    consultationWithOnlineBooking: number
     consultationWithOnsiteCancel: number
-    onlineBookingRate: number
     onsiteCancelRate: number
     data: Array<{
       date: string
-      onlineBookingCount: number
       onsiteCancelCount: number
       consultationCount: number
-      onlineBookingRate: number
       onsiteCancelRate: number
     }>
   }> {
@@ -461,7 +459,6 @@ export class ConsultationRepository
       const result = await this.getQuery<
         Array<{
           date: string
-          online_booking_count: string
           onsite_cancel_count: string
           consultation_count: string
         }>
@@ -470,7 +467,6 @@ export class ConsultationRepository
           SELECT 
             TO_CHAR(c.check_in_at, $6) AS date,
             COUNT(*) AS consultation_count,
-            COUNT(CASE WHEN c.source = 'ONLINE_BOOKING' THEN 1 END) AS online_booking_count,
             COUNT(CASE WHEN c.onsite_cancel_at IS NOT NULL THEN 1 END) AS onsite_cancel_count
           FROM consultations c
           LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
@@ -492,17 +488,8 @@ export class ConsultationRepository
       )
       const data = result.map((row) => ({
         date: row.date,
-        onlineBookingCount: parseInt(row.online_booking_count, 10),
         onsiteCancelCount: parseInt(row.onsite_cancel_count, 10),
         consultationCount: parseInt(row.consultation_count, 10),
-        onlineBookingRate:
-          parseInt(row.consultation_count, 10) > 0
-            ? Math.round(
-                (parseInt(row.online_booking_count, 10) /
-                  parseInt(row.consultation_count, 10)) *
-                  100
-              )
-            : 0,
         onsiteCancelRate:
           parseInt(row.consultation_count, 10) > 0
             ? Math.round(
@@ -517,20 +504,10 @@ export class ConsultationRepository
         (acc, cur) => acc + cur.consultationCount,
         0
       )
-      const consultationWithOnlineBooking = data.reduce(
-        (acc, cur) => acc + cur.onlineBookingCount,
-        0
-      )
       const consultationWithOnsiteCancel = data.reduce(
         (acc, cur) => acc + cur.onsiteCancelCount,
         0
       )
-      const onlineBookingRate =
-        totalConsultations > 0
-          ? Math.round(
-              (consultationWithOnlineBooking / totalConsultations) * 100
-            )
-          : 0
       const onsiteCancelRate =
         totalConsultations > 0
           ? Math.round(
@@ -540,9 +517,7 @@ export class ConsultationRepository
 
       return {
         totalConsultations,
-        consultationWithOnlineBooking,
         consultationWithOnsiteCancel,
-        onlineBookingRate,
         onsiteCancelRate,
         data,
       }
@@ -555,10 +530,7 @@ export class ConsultationRepository
   }
 
   public async getRealTimeCounts(
-    timeSlotId: string | Array<{ id: string }>,
-    clinicId?: string,
-    consultationRoomNumber?: string,
-    doctorId?: string
+    timeSlotId: string | Array<{ id: string }>
   ): Promise<{
     waitForConsultationCount: number
     waitForBedAssignedCount: number
@@ -566,10 +538,14 @@ export class ConsultationRepository
     waitForNeedleRemovedCount: number
     waitForMedicineCount: number
     completedCount: number
+    onsiteCancelCount: number
   }> {
     try {
       let baseQuery = `
-      SELECT status, COUNT(*) as count
+      SELECT 
+        status,
+        COUNT(*) as count,
+        SUM(CASE WHEN onsite_cancel_at IS NOT NULL THEN 1 ELSE 0 END) as onsite_cancel_count
       FROM consultations
       JOIN time_slots ON consultations.time_slot_id = time_slots.id
       WHERE 1=1
@@ -588,31 +564,14 @@ export class ConsultationRepository
         queryParams.push(timeSlotId)
       }
 
-      let paramIndex = queryParams.length + 1
-
-      if (clinicId !== undefined) {
-        baseQuery += ` AND time_slots.clinic_id = $${paramIndex++}`
-        queryParams.push(clinicId)
-      }
-
-      if (consultationRoomNumber !== undefined) {
-        baseQuery += `
-        AND time_slots.consultation_room_id = (
-          SELECT id FROM consultation_rooms WHERE room_number = $${paramIndex++}
-        )
-      `
-        queryParams.push(consultationRoomNumber)
-      }
-
-      if (doctorId !== undefined) {
-        baseQuery += ` AND time_slots.doctor_id = $${paramIndex++}`
-        queryParams.push(doctorId)
-      }
-
       baseQuery += ' GROUP BY status'
 
       const results = await this.getQuery<
-        Array<{ status: ConsultationStatus; count: string }>
+        Array<{
+          status: ConsultationStatus
+          count: string
+          onsite_cancel_count: string
+        }>
       >(baseQuery, queryParams)
 
       const response = {
@@ -623,11 +582,13 @@ export class ConsultationRepository
         waitForNeedleRemovedCount: 0,
         waitForMedicineCount: 0,
         completedCount: 0,
+        onsiteCancelCount: 0,
       }
 
       results.forEach((result) => {
         const statusTrimmed = result.status.trim()
         const count = parseInt(result.count, 10)
+        const onsiteCancelCount = parseInt(result.onsite_cancel_count, 10)
         switch (statusTrimmed) {
           case ConsultationStatus.WAITING_FOR_CONSULTATION:
             response.waitForConsultationCount = count
@@ -648,6 +609,7 @@ export class ConsultationRepository
             response.completedCount = count
             break
         }
+        response.onsiteCancelCount += onsiteCancelCount
       })
 
       return response
@@ -863,66 +825,104 @@ export class ConsultationRepository
     }
   }
 
-  public async getFirstTimeConsultationCounts(
+  public async getDurationFirstTimeByGranularity(
     startDate: string,
     endDate: string,
     clinicId?: string,
     timePeriod?: TimePeriodType,
-    doctorId?: string
+    doctorId?: string,
+    granularity: Granularity = Granularity.DAY
   ): Promise<{
-    totalConsultationCount: number
     firstTimeConsultationCount: number
+    firstTimeConsultationRate: number
+    totalConsultations: number
+    data: Array<{
+      date: string
+      firstTimeCount: number
+      consultationCount: number
+      firstTimeRate: number
+    }>
   }> {
     try {
       const modifiedClinicId =
         clinicId !== undefined && clinicId !== '' ? clinicId : null
       const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
       const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+      const startDateTime = dayjs(startDate)
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const endDateTime = dayjs(endDate)
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const dateFormat = getDateFormat(granularity)
       const result = await this.getQuery<
         Array<{
-          totalConsultationCount: number
-          firstTimeConsultationCount: number
+          date: string
+          first_time_count: string
+          consultation_count: string
         }>
       >(
         `
         SELECT 
-        COUNT(*) AS "totalConsultationCount",
-        COUNT(CASE WHEN c.is_first_time_visit THEN 1 END) AS "firstTimeConsultationCount"
+          TO_CHAR(c.check_in_at, '${dateFormat}') AS date,
+          COUNT(*) AS consultation_count,
+          COUNT(CASE WHEN c.is_first_time_visit = true THEN 1 END) AS first_time_count
         FROM consultations c
-        LEFT JOIN time_slots ts ON c.time_slot_id = ts.id
+        LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
         WHERE c.check_in_at BETWEEN $1 AND $2
           AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
-          AND ($4::varchar IS NULL OR ts.time_period = $4::varchar)
-          AND ($5::uuid IS NULL OR ts.doctor_id = $5::uuid);
+          AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
+          AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)
+        GROUP BY TO_CHAR(c.check_in_at, '${dateFormat}')
+        ORDER BY date
       `,
         [
-          startDate,
-          endDate,
+          startDateTime,
+          endDateTime,
           modifiedClinicId,
-          modifiedTimePeriod,
           modifiedDoctorId,
+          modifiedTimePeriod,
         ]
       )
 
-      const totalConsultationCount = isNaN(
-        Number(result[0].totalConsultationCount)
-      )
-        ? 0
-        : Number(result[0].totalConsultationCount)
+      const data = result.map((row) => {
+        const firstTimeCount = parseInt(row.first_time_count, 10)
+        const consultationCount = parseInt(row.consultation_count, 10)
+        const firstTimeRate =
+          consultationCount > 0
+            ? Math.round((firstTimeCount / consultationCount) * 100)
+            : 0
 
-      const firstTimeConsultationCount = isNaN(
-        Number(result[0].firstTimeConsultationCount)
+        return {
+          date: row.date,
+          firstTimeCount,
+          consultationCount,
+          firstTimeRate,
+        }
+      })
+
+      const totalConsultations = data.reduce(
+        (acc, cur) => acc + cur.consultationCount,
+        0
       )
-        ? 0
-        : Number(result[0].firstTimeConsultationCount)
+      const firstTimeConsultationCount = data.reduce(
+        (acc, cur) => acc + cur.firstTimeCount,
+        0
+      )
+      const firstTimeConsultationRate =
+        totalConsultations > 0
+          ? Math.round((firstTimeConsultationCount / totalConsultations) * 100)
+          : 0
 
       return {
-        totalConsultationCount,
         firstTimeConsultationCount,
+        firstTimeConsultationRate,
+        totalConsultations,
+        data,
       }
     } catch (e) {
       throw new RepositoryError(
-        'ConsultationRepository getFirstTimeConsultationCounts error',
+        'ConsultationRepository getDurationFirstTimeByGranularity error',
         e as Error
       )
     }
@@ -1021,6 +1021,11 @@ export class ConsultationRepository
     totalConsultationWithBothTreatment: number
     totalOnlyAcupunctureCount: number
     totalOnlyMedicineCount: number
+    totalAcupunctureRate: number
+    totalMedicineRate: number
+    totalOnlyAcupunctureRate: number
+    totalOnlyMedicineRate: number
+    totalBothTreatmentRate: number
     data: Array<{
       date: string
       consultationCount: number
@@ -1029,6 +1034,11 @@ export class ConsultationRepository
       consultationWithBothTreatment: number
       onlyAcupunctureCount: number
       onlyMedicineCount: number
+      acupunctureRate: number
+      medicineRate: number
+      onlyAcupunctureRate: number
+      onlyMedicineRate: number
+      bothTreatmentRate: number
     }>
   }> {
     try {
@@ -1148,30 +1158,109 @@ export class ConsultationRepository
         baseQueryParams
       )
 
-      return {
-        totalConsultations: parseInt(totalConsultationsResult[0].count, 10),
-        totalConsultationWithAcupuncture: parseInt(
-          totalWithAcupuncture[0].count,
-          10
-        ),
-        totalConsultationWithMedicine: parseInt(totalWithMedicine[0].count, 10),
-        totalConsultationWithBothTreatment: parseInt(
-          totalWithBoth[0].count,
-          10
-        ),
-        totalOnlyAcupunctureCount: parseInt(totalOnlyAcupuncture[0].count, 10),
-        totalOnlyMedicineCount: parseInt(totalOnlyMedicine[0].count, 10),
-        data: dailyData.map((day) => ({
+      const totalConsultations = parseInt(totalConsultationsResult[0].count, 10)
+      const totalConsultationWithAcupuncture = parseInt(
+        totalWithAcupuncture[0].count,
+        10
+      )
+      const totalConsultationWithMedicine = parseInt(
+        totalWithMedicine[0].count,
+        10
+      )
+      const totalConsultationWithBothTreatment = parseInt(
+        totalWithBoth[0].count,
+        10
+      )
+      const totalOnlyAcupunctureCount = parseInt(
+        totalOnlyAcupuncture[0].count,
+        10
+      )
+      const totalOnlyMedicineCount = parseInt(totalOnlyMedicine[0].count, 10)
+
+      // Calculate rates
+      const totalAcupunctureRate =
+        totalConsultations > 0
+          ? (totalConsultationWithAcupuncture / totalConsultations) * 100
+          : 0
+      const totalMedicineRate =
+        totalConsultations > 0
+          ? (totalConsultationWithMedicine / totalConsultations) * 100
+          : 0
+      const totalBothTreatmentRate =
+        totalConsultations > 0
+          ? (totalConsultationWithBothTreatment / totalConsultations) * 100
+          : 0
+      const totalOnlyAcupunctureRate =
+        totalConsultations > 0
+          ? (totalOnlyAcupunctureCount / totalConsultations) * 100
+          : 0
+      const totalOnlyMedicineRate =
+        totalConsultations > 0
+          ? (totalOnlyMedicineCount / totalConsultations) * 100
+          : 0
+
+      const data = dailyData.map((day) => {
+        const consultationCount = parseInt(day.consultationcount, 10)
+        const consultationWithAcupuncture = Number(
+          day.consultationwithacupuncture
+        )
+        const consultationWithMedicine = Number(day.consultationwithmedicine)
+        const consultationWithBothTreatment = Number(
+          day.consultationwithbothtreatment
+        )
+        const onlyAcupunctureCount = Number(day.onlyacupuncturecount)
+        const onlyMedicineCount = Number(day.onlymedicinecount)
+
+        const acupunctureRate =
+          consultationCount > 0
+            ? (consultationWithAcupuncture / consultationCount) * 100
+            : 0
+        const medicineRate =
+          consultationCount > 0
+            ? (consultationWithMedicine / consultationCount) * 100
+            : 0
+        const bothTreatmentRate =
+          consultationCount > 0
+            ? (consultationWithBothTreatment / consultationCount) * 100
+            : 0
+        const onlyAcupunctureRate =
+          consultationCount > 0
+            ? (onlyAcupunctureCount / consultationCount) * 100
+            : 0
+        const onlyMedicineRate =
+          consultationCount > 0
+            ? (onlyMedicineCount / consultationCount) * 100
+            : 0
+
+        return {
           date: day.date,
-          consultationCount: parseInt(day.consultationcount, 10),
-          consultationWithAcupuncture: Number(day.consultationwithacupuncture),
-          consultationWithMedicine: Number(day.consultationwithmedicine),
-          consultationWithBothTreatment: Number(
-            day.consultationwithbothtreatment
-          ),
-          onlyAcupunctureCount: Number(day.onlyacupuncturecount),
-          onlyMedicineCount: Number(day.onlymedicinecount),
-        })),
+          consultationCount,
+          consultationWithAcupuncture,
+          consultationWithMedicine,
+          consultationWithBothTreatment,
+          onlyAcupunctureCount,
+          onlyMedicineCount,
+          acupunctureRate,
+          medicineRate,
+          bothTreatmentRate,
+          onlyAcupunctureRate,
+          onlyMedicineRate,
+        }
+      })
+
+      return {
+        totalConsultations,
+        totalConsultationWithAcupuncture,
+        totalConsultationWithMedicine,
+        totalConsultationWithBothTreatment,
+        totalOnlyAcupunctureCount,
+        totalOnlyMedicineCount,
+        totalAcupunctureRate,
+        totalMedicineRate,
+        totalOnlyAcupunctureRate,
+        totalOnlyMedicineRate,
+        totalBothTreatmentRate,
+        data,
       }
     } catch (e) {
       throw new RepositoryError(
@@ -1232,6 +1321,459 @@ export class ConsultationRepository
         'ConsultAppointmentEntity getById error',
         e as Error
       )
+    }
+  }
+
+  public async findSocketData(id: string): Promise<{
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: RoomNumberType
+  }> {
+    try {
+      const result = await this.getQuery<
+        Array<{
+          time_slot_id: string
+          clinic_id: string
+          consultation_room_id: string
+        }>
+      >(
+        `
+        SELECT 
+          t.id AS time_slot_id, 
+          t.clinic_id AS clinic_id, 
+          t.consultation_room_id AS consultation_room_id 
+        FROM consultations c
+        JOIN time_slots t ON c.time_slot_id = t.id
+        WHERE c.id = $1;
+        `,
+        [id]
+      )
+      return {
+        timeSlotId: result[0].time_slot_id,
+        clinicId: result[0].clinic_id,
+        consultationRoomNumber: result[0]
+          .consultation_room_id as RoomNumberType,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultAppointmentEntity findSocketData error',
+        e as Error
+      )
+    }
+  }
+
+  public async getSocketUpdatedData(id: string): Promise<{
+    id: string
+    isOnsiteCanceled: boolean
+    consultationNumber: number
+    doctor: {
+      firstName: string
+      lastName: string
+    }
+    patient: {
+      firstName: string
+      lastName: string
+      gender: GenderType
+      age: number
+    }
+    status: ConsultationStatus
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: RoomNumberType
+  }> {
+    try {
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          is_onsite_canceled: boolean
+          consultation_number: number
+          doctor_first_name: string
+          doctor_last_name: string
+          patient_first_name: string
+          patient_last_name: string
+          patient_gender: GenderType
+          patient_age: number
+          status: ConsultationStatus
+          time_slot_id: string
+          clinic_id: string
+          consultation_room_number: string
+        }>
+      >(
+        `
+          SELECT 
+            c.id,
+            CASE WHEN c.onsite_cancel_at IS NOT NULL THEN true ELSE false END AS is_onsite_canceled,
+            c.consultation_number,
+            d.first_name AS doctor_first_name,
+            d.last_name AS doctor_last_name,
+            p.first_name AS patient_first_name,
+            p.last_name AS patient_last_name,
+            p.gender AS patient_gender,
+             date_part('year', age(p.birth_date)) AS patient_age,
+            c.status,
+            c.time_slot_id,
+            t.clinic_id,
+            t.consultation_room_id AS consultation_room_number
+          FROM consultations c
+          JOIN time_slots t ON c.time_slot_id = t.id
+          JOIN doctors d ON t.doctor_id = d.id
+          JOIN patients p ON c.patient_id = p.id
+          WHERE c.id = $1
+          `,
+        [id]
+      )
+      const row = result[0]
+
+      return {
+        id: row.id,
+        isOnsiteCanceled: row.is_onsite_canceled,
+        consultationNumber: row.consultation_number,
+        doctor: {
+          firstName: row.doctor_first_name,
+          lastName: row.doctor_last_name,
+        },
+        patient: {
+          firstName: row.patient_first_name,
+          lastName: row.patient_last_name,
+          gender: row.patient_gender,
+          age: row.patient_age,
+        },
+        status: row.status,
+        timeSlotId: row.time_slot_id,
+        clinicId: row.clinic_id,
+        consultationRoomNumber: row.consultation_room_number as RoomNumberType,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationEntity getSocketUpdatedData error',
+        e as Error
+      )
+    }
+  }
+
+  public async checkMedicineTreatment(acupunctureTreatmentId: string): Promise<{
+    consultationId: string
+    medicineTreatment: MedicineTreatment
+  } | null> {
+    try {
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          medicine_treatment_id: string
+          get_medicine_at: Date | null
+        }>
+      >(
+        `
+        SELECT c.id, mt.id AS medicine_treatment_id, mt.get_medicine_at
+        FROM consultations c
+        LEFT JOIN medicine_treatments mt ON mt.id = c.medicine_treatment_id
+        WHERE c.acupuncture_treatment_id = $1
+        AND c.medicine_treatment_id IS NOT NULL
+        LIMIT 1
+        `,
+        [acupunctureTreatmentId]
+      )
+
+      if (result.length > 0) {
+        const {
+          id: consultationId,
+          medicine_treatment_id: medicineTreatmentId,
+          get_medicine_at: getMedicineAt,
+        } = result[0]
+
+        const medicineTreatment = new MedicineTreatment({
+          id: medicineTreatmentId,
+          getMedicineAt,
+        })
+
+        return {
+          consultationId,
+          medicineTreatment,
+        }
+      }
+
+      return null
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationEntity checkMedicineTreatment error',
+        e as Error
+      )
+    }
+  }
+
+  public async getRealTimeLists(
+    timeSlotId: string | Array<{ id: string }>,
+    limit: number,
+    offset: number
+  ): Promise<{
+    data: Array<{
+      id: string
+      isOnsiteCanceled: boolean
+      consultationNumber: number
+      doctor: {
+        firstName: string
+        lastName: string
+      }
+      patient: {
+        firstName: string
+        lastName: string
+        gender: GenderType
+        age: number
+      }
+      status: ConsultationStatus
+      timeSlotId: string
+      clinicId: string
+      consultationRoomNumber: RoomNumberType
+    }>
+    totalCounts: number
+  }> {
+    try {
+      let timeSlotCondition = ''
+      let queryParams: any[] = [limit, offset]
+
+      if (typeof timeSlotId === 'string') {
+        timeSlotCondition = `c.time_slot_id = $1`
+        queryParams = [timeSlotId, limit, offset]
+      } else if (Array.isArray(timeSlotId)) {
+        const ids = timeSlotId.map((ts) => ts.id)
+        timeSlotCondition = `c.time_slot_id IN (${ids
+          .map((_, index) => `$${index + 1}`)
+          .join(', ')})`
+        queryParams = [...ids, limit, offset]
+      }
+
+      const result = await this.getQuery<
+        Array<{
+          id: string
+          is_onsite_canceled: boolean
+          consultation_number: number
+          doctor_first_name: string
+          doctor_last_name: string
+          patient_first_name: string
+          patient_last_name: string
+          patient_gender: GenderType
+          patient_age: number
+          status: ConsultationStatus
+          time_slot_id: string
+          clinic_id: string
+          consultation_room_number: RoomNumberType
+        }>
+      >(
+        `
+      SELECT 
+        c.id,
+        CASE WHEN c.onsite_cancel_at IS NOT NULL THEN true ELSE false END AS is_onsite_canceled,
+        c.consultation_number,
+        d.first_name AS doctor_first_name,
+        d.last_name AS doctor_last_name,
+        p.first_name AS patient_first_name,
+        p.last_name AS patient_last_name,
+        p.gender AS patient_gender,
+        date_part('year', age(p.birth_date)) AS patient_age,
+        c.status,
+        c.time_slot_id,
+        ts.clinic_id,
+        cr.room_number AS consultation_room_number
+      FROM consultations c
+      JOIN time_slots ts ON ts.id = c.time_slot_id
+      JOIN doctors d ON d.id = ts.doctor_id
+      JOIN patients p ON p.id = c.patient_id
+      LEFT JOIN consultation_rooms cr ON cr.id = ts.consultation_room_id
+      WHERE ${timeSlotCondition}
+      ORDER BY c.check_in_at ASC
+      LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}
+      `,
+        queryParams
+      )
+
+      const countResult = await this.getQuery<Array<{ total_count: string }>>(
+        `
+      SELECT COUNT(*) AS total_count
+      FROM consultations c
+      WHERE ${timeSlotCondition}
+      `,
+        queryParams.slice(0, -2)
+      )
+
+      const totalCounts = parseInt(countResult[0].total_count, 10)
+
+      return {
+        data: result.map((row) => ({
+          id: row.id,
+          isOnsiteCanceled: row.is_onsite_canceled,
+          consultationNumber: row.consultation_number,
+          doctor: {
+            firstName: row.doctor_first_name,
+            lastName: row.doctor_last_name,
+          },
+          patient: {
+            firstName: row.patient_first_name,
+            lastName: row.patient_last_name,
+            gender: row.patient_gender,
+            age: row.patient_age,
+          },
+          status: row.status,
+          timeSlotId: row.time_slot_id,
+          clinicId: row.clinic_id,
+          consultationRoomNumber: row.consultation_room_number,
+        })),
+        totalCounts,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationEntity getRealTimeLists error',
+        e as Error
+      )
+    }
+  }
+
+  public async getDurationBookingByGranularity(
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType,
+    granularity: Granularity = Granularity.DAY
+  ): Promise<{
+    totalConsultations: number
+    consultationWithOnlineBooking: number
+    onlineBookingRate: number
+    data: Array<{
+      date: string
+      onlineBookingCount: number
+      consultationCount: number
+      onlineBookingRate: number
+    }>
+  }> {
+    try {
+      const modifiedClinicId =
+        clinicId !== undefined && clinicId !== '' ? clinicId : null
+      const modifiedDoctorId = doctorId !== undefined ? doctorId : null
+      const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
+      const startDateTime = dayjs(startDate)
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const endDateTime = dayjs(endDate)
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+
+      const dateFormat = getDateFormat(granularity)
+
+      const result = await this.getQuery<
+        Array<{
+          date: string
+          online_booking_count: string
+          consultation_count: string
+        }>
+      >(
+        `
+          SELECT 
+          TO_CHAR(c.check_in_at, $6) AS date,
+          COUNT(*) AS consultation_count,
+          COUNT(CASE WHEN c.source = 'ONLINE_BOOKING' THEN 1 END) AS online_booking_count
+          FROM consultations c
+          LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
+          WHERE c.check_in_at BETWEEN $1 AND $2
+            AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
+            AND ($4::uuid IS NULL OR ts.doctor_id = $4::uuid)
+            AND ($5::varchar IS NULL OR ts.time_period = $5::varchar)
+          GROUP BY TO_CHAR(c.check_in_at, $6)
+          ORDER BY date;
+        `,
+        [
+          startDateTime,
+          endDateTime,
+          modifiedClinicId,
+          modifiedDoctorId,
+          modifiedTimePeriod,
+          dateFormat,
+        ]
+      )
+      const data = result.map((row) => ({
+        date: row.date,
+        onlineBookingCount: parseInt(row.online_booking_count, 10),
+        consultationCount: parseInt(row.consultation_count, 10),
+        onlineBookingRate:
+          parseInt(row.consultation_count, 10) > 0
+            ? Math.round(
+                (parseInt(row.online_booking_count, 10) /
+                  parseInt(row.consultation_count, 10)) *
+                  100
+              )
+            : 0,
+      }))
+
+      const totalConsultations = data.reduce(
+        (acc, cur) => acc + cur.consultationCount,
+        0
+      )
+      const consultationWithOnlineBooking = data.reduce(
+        (acc, cur) => acc + cur.onlineBookingCount,
+        0
+      )
+      const onlineBookingRate =
+        totalConsultations > 0
+          ? Math.round(
+              (consultationWithOnlineBooking / totalConsultations) * 100
+            )
+          : 0
+      return {
+        totalConsultations,
+        consultationWithOnlineBooking,
+        onlineBookingRate,
+        data,
+      }
+    } catch (e) {
+      throw new RepositoryError(
+        'ConsultationRepository getDurationBookingByGranularity error',
+        e as Error
+      )
+    }
+  }
+
+  public async getPreviousPeriodDates(
+    startDate: string,
+    endDate: string,
+    granularity: Granularity = Granularity.WEEK
+  ): Promise<{ lastStartDate: string; lastEndDate: string }> {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    switch (granularity) {
+      case Granularity.DAY: {
+        const lastWeekStart = new Date(start)
+        const lastWeekEnd = new Date(end)
+        lastWeekStart.setDate(
+          lastWeekStart.getDate() - lastWeekStart.getDay() - 7
+        )
+        lastWeekEnd.setDate(lastWeekStart.getDate() + 6)
+        return {
+          lastStartDate: lastWeekStart.toISOString().split('T')[0],
+          lastEndDate: lastWeekEnd.toISOString().split('T')[0],
+        }
+      }
+      case Granularity.WEEK: {
+        start.setMonth(start.getMonth() - 1)
+        end.setMonth(end.getMonth() - 1)
+        break
+      }
+      case Granularity.MONTH: {
+        start.setFullYear(start.getFullYear() - 1)
+        end.setFullYear(end.getFullYear() - 1)
+        break
+      }
+      case Granularity.YEAR: {
+        start.setFullYear(start.getFullYear() - 1)
+        end.setFullYear(end.getFullYear() - 1)
+        break
+      }
+      default:
+        throw new Error('Unsupported granularity')
+    }
+
+    return {
+      lastStartDate: start.toISOString().split('T')[0],
+      lastEndDate: end.toISOString().split('T')[0],
     }
   }
 

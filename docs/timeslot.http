@@ -1,0 +1,23 @@
+@hostname = http://localhost:10000
+
+@usersPath = {{hostname}}/api/users
+
+### user signin
+# @name signin
+POST {{usersPath}}/signin
+Content-Type: application/json
+
+{
+  "email": "doctor_zhang@example.com",
+  "password": "123456"
+}
+###
+@accessToken = Bearer {{signin.response.body.token}}
+
+@timeslotsPath = {{hostname}}/api/time-slots
+
+### get time slots
+GET {{timeslotsPath}}?clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9bs
+Authorization: {{accessToken}}
+Content-Type: application/json
+###

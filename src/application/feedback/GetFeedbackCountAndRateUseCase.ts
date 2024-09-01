@@ -1,3 +1,4 @@
+import { RedisServer } from 'infrastructure/database/RedisServer'
 import { Granularity } from '../../domain/common'
 import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
 import { IFeedbackRepository } from '../../domain/feedback/interfaces/repositories/IFeedbackRepository'
@@ -39,13 +40,25 @@ interface GetFeedbackCountAndRateResponse {
     threeStarFeedbackRate: number
     fourStarFeedbackRate: number
     fiveStarFeedbackRate: number
+    totalReasonsCount: number
+    waitAcupunctureReason: number
+    waitBedReason: number
+    waitConsultationReason: number
+    waitMedicineReason: number
+    doctorPoorAttitude: number
+    waitAcupunctureReasonRate: number
+    waitBedReasonRate: number
+    waitConsultationReasonRate: number
+    waitMedicineReasonRate: number
+    doctorPoorAttitudeRate: number
   }>
 }
 
 export class GetFeedbackCountAndRateUseCase {
   constructor(
     private readonly feedbackRepository: IFeedbackRepository,
-    private readonly doctorRepository: IDoctorRepository
+    private readonly doctorRepository: IDoctorRepository,
+    private readonly redis: RedisServer
   ) {}
 
   public async execute(
@@ -61,10 +74,19 @@ export class GetFeedbackCountAndRateUseCase {
       currentUser,
     } = request
 
-    let currentDoctorId
+    let currentDoctorId = doctorId
     if (currentUser.role === UserRoleType.DOCTOR) {
       const doctor = await this.doctorRepository.findByUserId(currentUser.id)
       currentDoctorId = doctor?.id
+    }
+
+    const redisKey = `feedback_counts_and_rate_${
+      currentDoctorId ?? 'allDoctors'
+    }_${granularity ?? 'allGranularity'}_${startDate}_${endDate}`
+
+    const cachedData = await this.redis.get(redisKey)
+    if (cachedData !== null) {
+      return JSON.parse(cachedData)
     }
 
     const result = await this.feedbackRepository.getStarFeedback(
@@ -72,7 +94,7 @@ export class GetFeedbackCountAndRateUseCase {
       endDate,
       clinicId,
       timePeriod,
-      currentDoctorId !== undefined ? currentDoctorId : doctorId,
+      currentDoctorId,
       granularity
     )
 
@@ -92,6 +114,10 @@ export class GetFeedbackCountAndRateUseCase {
         data: [],
       }
     }
+
+    await this.redis.set(redisKey, JSON.stringify(result), {
+      expiresInSec: 31_536_000,
+    })
 
     return result
   }

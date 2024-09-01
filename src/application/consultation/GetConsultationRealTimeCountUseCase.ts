@@ -1,11 +1,13 @@
+import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
 import { ITimeSlotRepository } from '../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
 import { User, UserRoleType } from '../../domain/user/User'
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 
 interface GetConsultationRealTimeCountRequest {
   clinicId?: string
-  consultationRoomNumber?: string
+  consultationRoomNumber?: RoomNumberType
   currentUser: User
 }
 
@@ -17,6 +19,12 @@ interface GetConsultationRealTimeCountResponse {
   waitForNeedleRemovedCount: number
   waitForMedicineCount: number
   completedCount: number
+  onsiteCancelCount: number
+  clinicId: string | Array<{ clinicId: string }>
+  consultationRoomNumber:
+    | RoomNumberType
+    | Array<{ consultationRoomNumber: RoomNumberType }>
+  timePeriod: TimePeriodType | Array<{ timePeriod: string }> | null
 }
 
 export class GetConsultationRealTimeCountUseCase {
@@ -31,6 +39,8 @@ export class GetConsultationRealTimeCountUseCase {
   ): Promise<GetConsultationRealTimeCountResponse | null> {
     const { clinicId, consultationRoomNumber, currentUser } = request
 
+    const currentTime = new Date()
+
     let currentDoctorId
 
     if (currentUser.role === UserRoleType.DOCTOR) {
@@ -38,14 +48,13 @@ export class GetConsultationRealTimeCountUseCase {
       currentDoctorId = doctor?.id
 
       if (currentDoctorId !== undefined) {
-        const currentTime = new Date()
-        const timeSlotId =
+        const result =
           await this.timeSlotRepository.findCurrentTimeSlotForDoctor(
             currentDoctorId,
             currentTime
           )
 
-        if (timeSlotId === null) {
+        if (result === null) {
           return {
             timeSlotId: '',
             waitForConsultationCount: 0,
@@ -54,27 +63,25 @@ export class GetConsultationRealTimeCountUseCase {
             waitForNeedleRemovedCount: 0,
             waitForMedicineCount: 0,
             completedCount: 0,
+            onsiteCancelCount: 0,
+            clinicId: '',
+            consultationRoomNumber: RoomNumberType.ROOM_ONE,
+            timePeriod: null,
           }
         }
 
         const realTimeCounts =
-          await this.consultationRepository.getRealTimeCounts(
-            timeSlotId,
-            undefined,
-            undefined,
-            currentDoctorId
-          )
+          await this.consultationRepository.getRealTimeCounts(result.timeSlotId)
 
         return {
           ...realTimeCounts,
-          timeSlotId,
+          ...result,
         }
       }
     }
 
     if (currentUser.role === UserRoleType.ADMIN) {
-      const currentTime = new Date()
-      const timeSlotIds =
+      const results =
         await this.timeSlotRepository.findMatchingTimeSlotForAdmin(
           currentTime,
           clinicId,
@@ -82,7 +89,7 @@ export class GetConsultationRealTimeCountUseCase {
           undefined
         )
 
-      if (timeSlotIds.length === 0) {
+      if (results.length === 0) {
         return {
           timeSlotId: [],
           waitForConsultationCount: 0,
@@ -91,20 +98,42 @@ export class GetConsultationRealTimeCountUseCase {
           waitForNeedleRemovedCount: 0,
           waitForMedicineCount: 0,
           completedCount: 0,
+          onsiteCancelCount: 0,
+          clinicId: [],
+          consultationRoomNumber: [],
+          timePeriod: null,
         }
       }
 
+      const timeSlotIds: Array<{ id: string }> = results.map((result) => ({
+        id: result.id,
+      }))
+
+      const clinicIds: Array<{ clinicId: string }> = results.map((result) => ({
+        clinicId: result.clinicId,
+      }))
+
+      const consultationRoomNumbers: Array<{
+        consultationRoomNumber: RoomNumberType
+      }> = results.map((result) => ({
+        consultationRoomNumber: result.consultationRoomNumber,
+      }))
+
+      const timePeriods: Array<{ timePeriod: TimePeriodType }> = results.map(
+        (result) => ({
+          timePeriod: result.timePeriod,
+        })
+      )
+
       const realTimeCounts =
-        await this.consultationRepository.getRealTimeCounts(
-          timeSlotIds,
-          clinicId,
-          consultationRoomNumber,
-          undefined
-        )
+        await this.consultationRepository.getRealTimeCounts(timeSlotIds)
 
       return {
         ...realTimeCounts,
         timeSlotId: timeSlotIds,
+        clinicId: clinicIds,
+        consultationRoomNumber: consultationRoomNumbers,
+        timePeriod: timePeriods,
       }
     }
 

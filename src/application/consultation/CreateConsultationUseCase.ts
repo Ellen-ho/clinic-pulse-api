@@ -5,6 +5,10 @@ import {
 } from '../../domain/consultation/Consultation'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { IUuidService } from '../../domain/utils/IUuidService'
+import {
+  CONSULTATION_JOB_NAME,
+  IConsultationQueueService,
+} from '../../application/queue/ConsultationQueueService'
 
 interface CreateConsultationRequest {
   patientId: string
@@ -19,7 +23,8 @@ interface CreateConsultationResponse {
 export class CreateConsultationUseCase {
   constructor(
     private readonly consultationRepository: IConsultationRepository,
-    private readonly uuidService: IUuidService
+    private readonly uuidService: IUuidService,
+    private readonly consultationQueueService: IConsultationQueueService
   ) {}
 
   public async execute(
@@ -30,11 +35,6 @@ export class CreateConsultationUseCase {
     const isFirstTimeVisit = await this.consultationRepository.isFirstTimeVisit(
       patientId
     )
-
-    // const timeSlotId = await this.timeSlotRepository.findMatchingTimeSlot(
-    //   doctorId,
-    //   checkInAt
-    // )
 
     const latestNumber =
       await this.consultationRepository.getLatestOddConsultationNumber(
@@ -64,6 +64,12 @@ export class CreateConsultationUseCase {
     })
 
     await this.consultationRepository.save(newConsultation)
+
+    await this.consultationQueueService.addConsultationJob(
+      CONSULTATION_JOB_NAME.CHECK_CONSULTATION_WAITING_TIME,
+      { consultationId: newConsultation.id },
+      { delay: 3600 * 1000 }
+    )
 
     return {
       id: newConsultation.id,

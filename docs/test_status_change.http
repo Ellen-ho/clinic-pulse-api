@@ -1,0 +1,91 @@
+@hostname = http://localhost:10000
+
+@usersPath = {{hostname}}/api/users
+
+### user signin
+# @name signin
+POST {{usersPath}}/signin
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "123456"
+}
+###
+@accessToken = Bearer {{signin.response.body.token}}
+
+
+### create consultation
+POST {{hostname}}/api/consultations
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "patientId":"00005428-bee6-4a24-bf73-19e6ddc1b3d3",
+  "timeSlotId": "251e23fc-485f-4440-b9de-7113d1201445"
+}
+###
+
+# 共同起點
+### update consultation startAt
+@id = 615b7608-ffa3-4afd-84d9-e1f95d9a9a59
+PATCH {{hostname}}/api/consultations/{{id}}/start_at
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+
+# 情況1：針灸
+### create acupuncture treatment
+POST {{hostname}}/api/consultations/{{consultationId}}/acupuncture-treatments
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### update acupuncture treatment assign bed
+PATCH {{hostname}}/api/consultations/{{consultationId}}/acupuncture-treatments/assign_bed
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### update acupuncture treatment start
+PATCH {{hostname}}/api/consultations/{{consultationId}}/acupuncture-treatments/start_at
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### update acupuncture treatment remove needle 
+PATCH {{hostname}}/api/consultations/{{consultationId}}/acupuncture-treatments/remove_needle
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### update consultation check out at
+PATCH {{hostname}}/api/consultations/{{consultationId}}/check_out_at
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+
+# =====================
+
+# 情況2：拿藥
+### create medicine treatment
+POST {{hostname}}/api/consultations/{{consultationId}}/medicine-treatments
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+
+### update get medicine at
+PATCH {{hostname}}/api/consultations/{{consultationId}}/medicine-treatments/get_medicine
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+# 情況3：針灸 + 拿藥
+### create medicine and acupucture treatment
+POST {{hostname}}/api/consultations/{{consultationId}}/medicine_and_acupuncture
+Authorization: {{accessToken}}
+Content-Type: application/json
+###

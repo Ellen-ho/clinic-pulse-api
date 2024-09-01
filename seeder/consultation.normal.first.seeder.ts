@@ -17,7 +17,6 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-// Add normal first visit consultations
 export default class ConsultationNormalFirstSeeder implements Seeder {
   public async run(
     dataSource: DataSource,
@@ -35,8 +34,8 @@ export default class ConsultationNormalFirstSeeder implements Seeder {
     /**
      * SETTING
      */
-    const months = TARGET_MONTH // Array of year-month strings
-    const range = [10, 20] // random counts range for consultations each time slot
+    const months = TARGET_MONTH
+    const range = [10, 20]
 
     for (const month of months) {
       const startOfMonth = `${month}-01T00:00:00.000Z`
@@ -107,7 +106,7 @@ export default class ConsultationNormalFirstSeeder implements Seeder {
       const assignBedAt = endAt.add(random(5, 20), 'minute')
 
       const acupunctureStartAt = assignBedAt.add(random(5, 20), 'minute')
-      const acupunctureEndAt = acupunctureStartAt.add(15, 'minute') // Fixed 15 minutes after start
+      const acupunctureEndAt = acupunctureStartAt.add(15, 'minute')
       const removeNeedleAt = acupunctureEndAt.add(random(5, 20), 'minute')
       checkOutAt = removeNeedleAt.add(random(5, 20), 'minute')
 

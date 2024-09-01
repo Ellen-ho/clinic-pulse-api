@@ -1,6 +1,9 @@
+import { RedisServer } from 'infrastructure/database/RedisServer'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
-import { NotFoundError } from '../../infrastructure/error/NotFoundError'
+import { User, UserRoleType } from 'domain/user/User'
+import { DoctorRepository } from 'infrastructure/entities/doctor/DoctorRepository'
+import { Granularity } from 'domain/common'
 
 interface GetFirstTimeConsultationCountAndRateRequest {
   startDate: string
@@ -8,44 +11,122 @@ interface GetFirstTimeConsultationCountAndRateRequest {
   clinicId?: string
   timePeriod?: TimePeriodType
   doctorId?: string
+  granularity?: Granularity
+  currentUser: User
 }
 
 interface GetFirstTimeConsultationCountAndRateResponse {
+  lastConsultations: number
+  lastFirstTimeConsultationCount: number
+  lastFirstTimeConsultationRate: number
   firstTimeConsultationCount: number
   firstTimeConsultationRate: number
+  totalConsultations: number
+  compareConsultations: number
+  compareFirstTimeConsultation: number
+  compareFirstTimeRates: number
+  isGetMore: boolean
+  data: Array<{
+    date: string
+    firstTimeCount: number
+    consultationCount: number
+    firstTimeRate: number
+  }>
 }
 
 export class GetFirstTimeConsultationCountAndRateUseCase {
   constructor(
-    private readonly consultationRepository: IConsultationRepository
+    private readonly consultationRepository: IConsultationRepository,
+    private readonly doctorRepository: DoctorRepository,
+    private readonly redis: RedisServer
   ) {}
 
   public async execute(
     request: GetFirstTimeConsultationCountAndRateRequest
   ): Promise<GetFirstTimeConsultationCountAndRateResponse> {
-    const { startDate, endDate, clinicId, timePeriod, doctorId } = request
+    const {
+      startDate,
+      endDate,
+      clinicId,
+      timePeriod,
+      doctorId,
+      granularity,
+      currentUser,
+    } = request
+
+    let currentDoctorId = doctorId
+    if (currentUser.role === UserRoleType.DOCTOR) {
+      const doctor = await this.doctorRepository.findByUserId(currentUser.id)
+      currentDoctorId = doctor?.id
+    }
+
+    const redisKey = `onsite_canceled_${currentDoctorId ?? 'allDoctors'}_${
+      granularity ?? 'allGranularity'
+    }_${startDate}_${endDate}`
+
+    const cachedData = await this.redis.get(redisKey)
+    if (cachedData !== null) {
+      return JSON.parse(cachedData)
+    }
 
     const result =
-      await this.consultationRepository.getFirstTimeConsultationCounts(
+      await this.consultationRepository.getDurationFirstTimeByGranularity(
         startDate,
         endDate,
         clinicId,
         timePeriod,
-        doctorId
+        currentDoctorId,
+        granularity
       )
 
-    if (result.totalConsultationCount === 0) {
-      throw new NotFoundError(
-        'No consultation data matches the specified criteria.'
+    const { lastStartDate, lastEndDate } =
+      await this.consultationRepository.getPreviousPeriodDates(
+        startDate,
+        endDate,
+        granularity
       )
-    }
 
-    const firstTimeConsultationRate =
-      (result.firstTimeConsultationCount / result.totalConsultationCount) * 100
+    const lastResult =
+      await this.consultationRepository.getDurationFirstTimeByGranularity(
+        lastStartDate,
+        lastEndDate,
+        clinicId,
+        timePeriod,
+        currentDoctorId,
+        granularity
+      )
 
-    return {
+    const compareConsultations =
+      result.totalConsultations - lastResult.totalConsultations
+    const compareFirstTimeConsultation =
+      result.firstTimeConsultationCount - lastResult.firstTimeConsultationCount
+    const compareFirstTimeRates =
+      lastResult.firstTimeConsultationRate === 0
+        ? 0
+        : ((result.firstTimeConsultationRate -
+            lastResult.firstTimeConsultationRate) /
+            lastResult.firstTimeConsultationRate) *
+          100
+    const isGetMore = compareFirstTimeRates > 0
+
+    const finalResponse: GetFirstTimeConsultationCountAndRateResponse = {
+      lastConsultations: lastResult.totalConsultations,
+      lastFirstTimeConsultationCount: lastResult.firstTimeConsultationCount,
+      lastFirstTimeConsultationRate: lastResult.firstTimeConsultationRate,
       firstTimeConsultationCount: result.firstTimeConsultationCount,
-      firstTimeConsultationRate,
+      firstTimeConsultationRate: result.firstTimeConsultationRate,
+      totalConsultations: result.totalConsultations,
+      compareConsultations,
+      compareFirstTimeConsultation,
+      compareFirstTimeRates,
+      isGetMore,
+      data: result.data,
     }
+
+    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
+      expiresInSec: 31_536_000,
+    })
+
+    return finalResponse
   }
 }

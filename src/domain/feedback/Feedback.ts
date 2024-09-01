@@ -1,12 +1,10 @@
-import { Consultation } from '../../domain/consultation/Consultation'
-
 export interface IFeedbackProps {
   id: string
   feedbackRating: number
-  selectedContent: SelectedContent
+  selectedContent: SelectedContent | null
   detailedContent: string | null
   receivedAt: Date
-  consultation: Consultation
+  consultationId: string
 }
 
 export enum SelectedContent {
@@ -28,7 +26,7 @@ export class Feedback {
     return this.props.feedbackRating
   }
 
-  public get selectedContent(): SelectedContent {
+  public get selectedContent(): SelectedContent | null {
     return this.props.selectedContent
   }
 
@@ -40,7 +38,7 @@ export class Feedback {
     return this.props.receivedAt
   }
 
-  public get consultation(): Consultation {
-    return this.props.consultation
+  public get consultationId(): string {
+    return this.props.consultationId
   }
 }

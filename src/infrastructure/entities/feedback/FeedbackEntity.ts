@@ -4,6 +4,7 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm'
 import { ConsultationEntity } from '../consultation/ConsultationEntity'
 import { SelectedContent } from '../../../domain/feedback/Feedback'
@@ -23,8 +24,9 @@ export class FeedbackEntity {
     name: 'selected_content',
     type: 'varchar',
     length: 255,
+    nullable: true,
   })
-  public selectedContent!: SelectedContent
+  public selectedContent!: SelectedContent | null
 
   @Column({ name: 'detailed_content', type: 'text', nullable: true })
   public detailedContent!: string | null
@@ -35,4 +37,8 @@ export class FeedbackEntity {
   @OneToOne(() => ConsultationEntity, { nullable: false })
   @JoinColumn({ name: 'consultation_id' })
   public consultation!: ConsultationEntity
+
+  @Column({ name: 'consultation_id' })
+  @RelationId((feedback: FeedbackEntity) => feedback.consultation)
+  public consultationId!: string
 }

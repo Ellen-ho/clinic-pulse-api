@@ -13,6 +13,11 @@ export interface IDoctorProps {
   user: User
 }
 
+interface IAvatarUpdated {
+  [key: string]: any
+  avatar: string
+}
+
 export class Doctor {
   constructor(private readonly props: IDoctorProps) {}
 
@@ -50,5 +55,9 @@ export class Doctor {
 
   public get user(): User {
     return this.props.user
+  }
+
+  public updateAvatar(data: IAvatarUpdated): void {
+    this.props.avatar = data.avatar
   }
 }

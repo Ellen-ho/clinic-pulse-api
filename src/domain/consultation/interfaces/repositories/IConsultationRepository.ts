@@ -1,6 +1,8 @@
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 import { GenderType, Granularity } from '../../../../domain/common'
 import {
   Consultation,
+  ConsultationStatus,
   OnsiteCancelReasonType,
   TreatmentType,
 } from '../../../../domain/consultation/Consultation'
@@ -79,7 +81,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     }>
     totalCounts: number
   }>
-  getDurationCanceledAndBookingByGranularity: (
+  getDurationCanceledByGranularity: (
     startDate: string,
     endDate: string,
     clinicId?: string,
@@ -88,31 +90,23 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     granularity?: Granularity
   ) => Promise<{
     totalConsultations: number
-    consultationWithOnlineBooking: number
     consultationWithOnsiteCancel: number
-    onlineBookingRate: number
     onsiteCancelRate: number
     data: Array<{
       date: string
-      onlineBookingCount: number
       onsiteCancelCount: number
       consultationCount: number
-      onlineBookingRate: number
       onsiteCancelRate: number
     }>
   }>
-  getRealTimeCounts: (
-    timeSlotId: string | Array<{ id: string }>,
-    clinicId?: string,
-    consultationRoomNumber?: string,
-    doctorId?: string
-  ) => Promise<{
+  getRealTimeCounts: (timeSlotId: string | Array<{ id: string }>) => Promise<{
     waitForConsultationCount: number
     waitForBedAssignedCount: number
     waitForAcupunctureTreatmentCount: number
     waitForNeedleRemovedCount: number
     waitForMedicineCount: number
     completedCount: number
+    onsiteCancelCount: number
   }>
   getAverageWaitingTime: (
     startDate: string,
@@ -137,15 +131,23 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       averageMedicationWait: number
     }>
   }>
-  getFirstTimeConsultationCounts: (
+  getDurationFirstTimeByGranularity: (
     startDate: string,
     endDate: string,
     clinicId?: string,
     timePeriod?: TimePeriodType,
-    doctorId?: string
+    doctorId?: string,
+    granularity?: Granularity
   ) => Promise<{
-    totalConsultationCount: number
     firstTimeConsultationCount: number
+    firstTimeConsultationRate: number
+    totalConsultations: number
+    data: Array<{
+      date: string
+      firstTimeCount: number
+      consultationCount: number
+      firstTimeRate: number
+    }>
   }>
   getDurationCountByGranularity: (
     startDate: string,
@@ -175,6 +177,11 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     totalConsultationWithBothTreatment: number
     totalOnlyAcupunctureCount: number
     totalOnlyMedicineCount: number
+    totalAcupunctureRate: number
+    totalMedicineRate: number
+    totalOnlyAcupunctureRate: number
+    totalOnlyMedicineRate: number
+    totalBothTreatmentRate: number
     data: Array<{
       date: string
       consultationCount: number
@@ -183,9 +190,87 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       consultationWithBothTreatment: number
       onlyAcupunctureCount: number
       onlyMedicineCount: number
+      acupunctureRate: number
+      medicineRate: number
+      onlyAcupunctureRate: number
+      onlyMedicineRate: number
+      bothTreatmentRate: number
     }>
   }>
   isFirstTimeVisit: (patientId: string) => Promise<boolean>
   getLatestOddConsultationNumber: (timeSlotId: string) => Promise<number>
   getById: (id: string) => Promise<Consultation | null>
+  findSocketData: (id: string) => Promise<{
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: RoomNumberType
+  }>
+  getRealTimeLists: (
+    timeSlotId: string | Array<{ id: string }>,
+    limit: number,
+    offset: number
+  ) => Promise<{
+    data: Array<{
+      id: string
+      isOnsiteCanceled: boolean
+      consultationNumber: number
+      doctor: {
+        firstName: string
+        lastName: string
+      }
+      patient: {
+        firstName: string
+        lastName: string
+        gender: GenderType
+        age: number
+      }
+      status: ConsultationStatus
+      timeSlotId: string
+      clinicId: string
+      consultationRoomNumber: RoomNumberType
+    }>
+    totalCounts: number
+  }>
+  getSocketUpdatedData: (id: string) => Promise<{
+    id: string
+    isOnsiteCanceled: boolean
+    consultationNumber: number
+    doctor: {
+      firstName: string
+      lastName: string
+    }
+    patient: {
+      firstName: string
+      lastName: string
+      gender: GenderType
+      age: number
+    }
+    status: ConsultationStatus
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: RoomNumberType
+  }>
+  getDurationBookingByGranularity: (
+    startDate: string,
+    endDate: string,
+    clinicId?: string,
+    doctorId?: string,
+    timePeriod?: TimePeriodType,
+    granularity?: Granularity
+  ) => Promise<{
+    totalConsultations: number
+    consultationWithOnlineBooking: number
+    onlineBookingRate: number
+    data: Array<{
+      date: string
+      onlineBookingCount: number
+      consultationCount: number
+      onlineBookingRate: number
+    }>
+  }>
+  getPreviousPeriodDates: (
+    startDate: string,
+    endDate: string,
+    granularity?: Granularity
+  ) => Promise<{ lastStartDate: string; lastEndDate: string }>
 }

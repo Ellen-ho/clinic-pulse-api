@@ -17,12 +17,14 @@ const authenticated = (
   passport.authenticate(
     'jwt',
     { session: false },
-    (err: any, user: Express.User | false | null) => {
+    (err: any, user: Express.User | false | null, info: any) => {
       // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (err || !user) {
         return res.status(401).json({ status: 'error', message: '驗證失敗！' })
       }
       req.user = user
+      //@ts-expect-error
+      req.permissions = info.permissions
       next()
     }
   )(req, res, next)

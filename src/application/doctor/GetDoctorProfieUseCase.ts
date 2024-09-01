@@ -1,8 +1,9 @@
-import { GenderType } from 'domain/common'
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
-import { User, UserRoleType } from 'domain/user/User'
-import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { getAvatarUrl } from '../../application/helper/AvatarHelper'
+import { GenderType } from '../../domain/common'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
+import { User, UserRoleType } from '../../domain/user/User'
+import { AuthorizationError } from '../../infrastructure/error/AuthorizationError'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface GetDoctorProfileRequest {
   doctorId: string
@@ -19,7 +20,6 @@ interface GetDoctorProfileResponse {
   onboardDate: Date
   resignationDate: Date | null
   email: string
-  // hashedPassword: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -47,7 +47,7 @@ export class GetDoctorProfileUseCase {
 
       return {
         id: existingDoctor.id,
-        avatar: existingDoctor.avatar,
+        avatar: getAvatarUrl(existingDoctor.avatar),
         firstName: existingDoctor.firstName,
         lastName: existingDoctor.lastName,
         gender: existingDoctor.gender,
@@ -55,7 +55,6 @@ export class GetDoctorProfileUseCase {
         onboardDate: existingDoctor.onboardDate,
         resignationDate: existingDoctor.resignationDate,
         email: user.email,
-        // hashedPassword: user.hashedPassword,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       }
@@ -68,7 +67,7 @@ export class GetDoctorProfileUseCase {
 
       return {
         id: existingDoctor.id,
-        avatar: existingDoctor.avatar,
+        avatar: getAvatarUrl(existingDoctor.avatar),
         firstName: existingDoctor.firstName,
         lastName: existingDoctor.lastName,
         gender: existingDoctor.gender,
@@ -76,7 +75,6 @@ export class GetDoctorProfileUseCase {
         onboardDate: existingDoctor.onboardDate,
         resignationDate: existingDoctor.resignationDate,
         email: existingDoctor.user.email,
-        // hashedPassword: null,
         createdAt: existingDoctor.user.createdAt,
         updatedAt: existingDoctor.user.updatedAt,
       }

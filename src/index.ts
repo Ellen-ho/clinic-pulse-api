@@ -1,4 +1,5 @@
 import express, { Express } from 'express'
+import * as path from 'path'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import session from 'express-session'
@@ -20,7 +21,7 @@ import { GetConsultationListUseCase } from './application/consultation/GetConsul
 import { ConsultationController } from './infrastructure/http/controllers/ConsultationController'
 import { ConsultationRoutes } from './infrastructure/http/routes/ConsultationRoutes'
 import { GetSingleConsultationUseCase } from './application/consultation/GetSingleConsultationUseCase'
-import { GetConsultationRealTimeCountUseCase } from './application/consultation/GetConsultatoinRealTimeCountUseCase'
+import { GetConsultationRealTimeCountUseCase } from './application/consultation/GetConsultationRealTimeCountUseCase'
 import { GetAverageWaitingTimeUseCase } from './application/consultation/GetAverageWaitingTimeUseCase'
 import { GetFirstTimeConsultationCountAndRateUseCase } from './application/consultation/GetFirstTimeConsultationCountAndRateUseCase'
 import { GetAverageConsultationCountUseCase } from './application/consultation/GetAverageConsultationCountUseCase'
@@ -37,7 +38,6 @@ import { GetPatientNameAutoCompleteUseCase } from './application/patient/getPati
 import { PatientRoutes } from './infrastructure/http/routes/PatientRoutes'
 import { errorHandler } from './infrastructure/http/middlewares/ErrorHandler'
 import { TimeSlotRepository } from './infrastructure/entities/timeSlot/TimeSlotRepository'
-import { GetConsultationOnsiteCanceledAndBookingUseCase } from './application/consultation/GetConsultationOnsiteCanceledAndBookingUseCase'
 import { CreateConsultationUseCase } from './application/consultation/CreateConsultationUseCase'
 import { GetAllDoctorsUseCase } from './application/doctor/GetAllDoctorsUseCase'
 import { DoctorController } from './infrastructure/http/controllers/DoctorController'
@@ -79,12 +79,32 @@ import { NotificationHelper } from './application/notification/NotificationHelpe
 import SocketService from './infrastructure/network/SocketService'
 import { createServer } from 'http'
 import { ReviewRepository } from './infrastructure/entities/review/ReviewRepository'
-import { GetReviewListUseCase } from 'application/review/GetReviewListUseCase'
-import { ReviewController } from 'infrastructure/http/controllers/ReviewController'
-import { ReviewRoutes } from 'infrastructure/http/routes/ReviewRoutes'
-import { GetSingleReviewUseCase } from 'application/review/GetSingleReviewUseCase'
-import GoogleReviewService from 'infrastructure/network/GoogleReviewService'
-
+import { GetReviewListUseCase } from './application/review/GetReviewListUseCase'
+import { ReviewController } from './infrastructure/http/controllers/ReviewController'
+import { ReviewRoutes } from './infrastructure/http/routes/ReviewRoutes'
+import { GetSingleReviewUseCase } from './application/review/GetSingleReviewUseCase'
+import RealTimeSocketService from './infrastructure/network/RealtimeSocketService'
+import { RealTimeUpdateHelper } from './application/consultation/RealTimeUpdateHelper'
+import { CreateAcupunctureAndMedicineUseCase } from './application/common/CreateAcupunctureAndMedicineUseCase'
+import { GetConsultationSocketRealTimeCountUseCase } from './application/consultation/GetConsultationSocketRealTimeCountUseCase'
+import { GetConsultationRealTimeListUseCase } from './application/consultation/GetConsultationRealTimeListUseCase'
+import { GetConsultationSocketRealTimeListUseCase } from './application/consultation/GetConsultationSocketRealTimeListUseCase'
+import { CreateFeedbackUseCase } from './application/feedback/CreateFeedbackUseCase'
+import { S3Client } from '@aws-sdk/client-s3'
+import { EditDoctorAvatarUseCase } from './application/doctor/EditDoctorAvatarUseCase'
+import { RedisServer } from './infrastructure/database/RedisServer'
+import { GoogleReviewCronJob } from './application/cronjob/GoogleReviewCronJob'
+import GoogleReviewService from './infrastructure/network/GoogleReviewService'
+import { Scheduler } from './infrastructure/network/Scheduler'
+import { TimeSlotController } from './infrastructure/http/controllers/TimeSlotController'
+import { GetTimeSlotUseCase } from './application/time-slot/GetTimeSlotUseCase'
+import { TimeSlotRoutes } from './infrastructure/http/routes/TimeSlotRoutes'
+import { GetReviewCountAndRateUseCase } from './application/review/GetReviewCountAndRateUseCase'
+import { QueueService } from './infrastructure/network/QueueService'
+import { ConsultationQueueService } from './application/queue/ConsultationQueueService'
+import { GetConsultationOnsiteCanceledCountAndRateUseCase } from './application/consultation/GetConsultationOnsiteCanceledCountAndRateUseCase'
+import { GetConsultationBookingCountAndRateUseCase } from './application/consultation/GetConsultationBookingCountAndRateUseCase'
+import { PermissionRepository } from './infrastructure/entities/permission/PermissionRepository'
 void main()
 
 async function main(): Promise<void> {
@@ -106,16 +126,23 @@ async function main(): Promise<void> {
   }
 
   const app: Express = express()
-
-  // Socket.io init
   const httpServer = createServer(app)
-  const io = new Server(httpServer, {
+
+  // Notofication socket
+  const notificationIO = new Server(httpServer, {
     path: '/ws/notification',
     transports: ['websocket'],
     cors: corsOptions,
   })
+  const notificationSocketService = new SocketService(notificationIO)
 
-  const socketService = new SocketService(io)
+  // Real time socket
+  const realTimeIO = new Server(httpServer, {
+    path: '/ws/real-time',
+    transports: ['websocket'],
+    cors: corsOptions,
+  })
+  const realTimeSocketService = new RealTimeSocketService(realTimeIO)
 
   /**
    * Database Connection
@@ -123,11 +150,28 @@ async function main(): Promise<void> {
   const postgresDatabase = await PostgresDatabase.getInstance()
   const dataSource = postgresDatabase.getDataSource()
 
+  const redis = new RedisServer({
+    host: process.env.REDIS_HOST as string,
+    port: Number(process.env.REDIS_PORT as string),
+    authToken: process.env.REDIS_AUTH_TOKEN as string,
+    retryAttempts: Number(process.env.REDIS_RECONNECT_ATTEMPTS as string),
+    retryDelayMS: Number(process.env.REDIS_RECONNECT_DELAY_MS as string),
+    awsTlsEnabled: process.env.REDIS_AWS_TLS_ENABLED === 'true',
+  })
+
+  await redis.connect()
+
   /**
    * Shared Services
    */
   const uuidService = new UuidService()
   const hashGenerator = new BcryptHashGenerator()
+  const scheduler = new Scheduler()
+  const queueService = new QueueService({
+    redisPort: Number(process.env.REDIS_PORT as string),
+    redisUrl: process.env.REDIS_HOST as string,
+    redisPassword: process.env.REDIS_AUTH_TOKEN as string,
+  })
 
   // Repository
   const userRepository = new UserRepository(dataSource)
@@ -145,6 +189,15 @@ async function main(): Promise<void> {
   const clinicRepository = new ClinicRepository(dataSource)
   const notificationRepository = new NotificationRepository(dataSource)
   const reviewRepository = new ReviewRepository(dataSource)
+  const permissionRepository = new PermissionRepository(dataSource)
+
+  const s3Client = new S3Client({
+    credentials: {
+      accessKeyId: process.env.ACCESS_KEY as string,
+      secretAccessKey: process.env.SECRET_ACCESS_KEY as string,
+    },
+    region: process.env.BUCKET_REGION as string,
+  })
 
   /**
    * Cross domain helper
@@ -153,8 +206,18 @@ async function main(): Promise<void> {
   const notificationHelper = new NotificationHelper(
     notificationRepository,
     uuidService,
-    socketService
+    notificationSocketService
   )
+
+  const realTimeUpdateHelper = new RealTimeUpdateHelper(realTimeSocketService)
+
+  const consultationQueueService = new ConsultationQueueService(
+    consultationRepository,
+    userRepository,
+    queueService,
+    notificationHelper
+  )
+  await consultationQueueService.init()
 
   // Domain
   const createUserUseCase = new CreateUserUseCase(
@@ -166,6 +229,12 @@ async function main(): Promise<void> {
   const createDoctorUseCase = new CreateDoctorUseCase(
     doctorRepository,
     uuidService
+  )
+
+  const editDoctorAvatarUseCase = new EditDoctorAvatarUseCase(
+    s3Client,
+    uuidService,
+    doctorRepository
   )
 
   const getAllDoctorsUseCase = new GetAllDoctorsUseCase(doctorRepository)
@@ -182,10 +251,18 @@ async function main(): Promise<void> {
     doctorRepository
   )
 
-  const getConsultationOnsiteCanceledAndBookingUseCase =
-    new GetConsultationOnsiteCanceledAndBookingUseCase(
+  const getConsultationOnsiteCanceledCountAndRateUseCase =
+    new GetConsultationOnsiteCanceledCountAndRateUseCase(
       consultationRepository,
-      doctorRepository
+      doctorRepository,
+      redis
+    )
+
+  const getConsultationBookingCountAndRateUseCase =
+    new GetConsultationBookingCountAndRateUseCase(
+      consultationRepository,
+      doctorRepository,
+      redis
     )
 
   const getConsultationRealTimeCountUseCase =
@@ -197,23 +274,37 @@ async function main(): Promise<void> {
 
   const getAverageWaitingTimeUseCase = new GetAverageWaitingTimeUseCase(
     consultationRepository,
-    doctorRepository
+    doctorRepository,
+    redis
   )
   const getFirstTimeConsultationCountAndRateUseCase =
-    new GetFirstTimeConsultationCountAndRateUseCase(consultationRepository)
+    new GetFirstTimeConsultationCountAndRateUseCase(
+      consultationRepository,
+      doctorRepository,
+      redis
+    )
 
   const getAverageConsultationCountUseCase =
     new GetAverageConsultationCountUseCase(
       consultationRepository,
       timeSlotRepository,
-      doctorRepository
+      doctorRepository,
+      redis
     )
 
   const getDifferentTreatmentConsultationUseCase =
     new GetDifferentTreatmentConsultationUseCase(
       consultationRepository,
-      doctorRepository
+      doctorRepository,
+      redis
     )
+
+  const createFeedbackUseCase = new CreateFeedbackUseCase(
+    feedbackRepository,
+    uuidService,
+    notificationHelper,
+    userRepository
+  )
 
   const getFeedbackListUseCase = new GetFeedbackListUseCase(
     feedbackRepository,
@@ -227,7 +318,8 @@ async function main(): Promise<void> {
 
   const getFeedbackCountAndRateUseCase = new GetFeedbackCountAndRateUseCase(
     feedbackRepository,
-    doctorRepository
+    doctorRepository,
+    redis
   )
 
   const getPatientNameAutoCompleteUseCase =
@@ -235,7 +327,8 @@ async function main(): Promise<void> {
 
   const createConsultationUseCase = new CreateConsultationUseCase(
     consultationRepository,
-    uuidService
+    uuidService,
+    consultationQueueService
   )
 
   const updateConsultationStartAtUseCase = new UpdateConsultationStartAtUseCase(
@@ -253,11 +346,24 @@ async function main(): Promise<void> {
     uuidService
   )
 
+  const createAcupunctureAndMedicineUseCase =
+    new CreateAcupunctureAndMedicineUseCase(
+      acupunctureTreatmentRepository,
+      medicineTreatmentRepository,
+      uuidService
+    )
+
   const updateConsultationToAcupunctureUseCase =
-    new UpdateConsultationToAcupunctureUseCase(consultationRepository)
+    new UpdateConsultationToAcupunctureUseCase(
+      consultationRepository,
+      consultationQueueService
+    )
 
   const updateConsultationToMedicineUseCase =
-    new UpdateConsultationToMedicineUseCase(consultationRepository)
+    new UpdateConsultationToMedicineUseCase(
+      consultationRepository,
+      consultationQueueService
+    )
 
   const updateConsultationCheckOutAtUseCase =
     new UpdateConsultationCheckOutAtUseCase(consultationRepository)
@@ -276,10 +382,16 @@ async function main(): Promise<void> {
     )
 
   const updateConsultationToWaitAcupunctureUseCase =
-    new UpdateConsultationToWaitAcupunctureUseCase(consultationRepository)
+    new UpdateConsultationToWaitAcupunctureUseCase(
+      consultationRepository,
+      consultationQueueService
+    )
 
   const updateConsultationToWaitRemoveNeedleUseCase =
-    new UpdateConsultationToWaitRemoveNeedleUseCase(consultationRepository)
+    new UpdateConsultationToWaitRemoveNeedleUseCase(
+      consultationRepository,
+      consultationQueueService
+    )
 
   const updateConsultationOnsiteCancelAtUseCase =
     new UpdateConsultationOnsiteCancelAtUseCase(
@@ -288,6 +400,13 @@ async function main(): Promise<void> {
       doctorRepository,
       userRepository,
       notificationHelper
+    )
+
+  const getConsultationRealTimeListUseCase =
+    new GetConsultationRealTimeListUseCase(
+      consultationRepository,
+      doctorRepository,
+      timeSlotRepository
     )
 
   const updateMedicineTreatmentUseCase = new UpdateMedicineTreatmentUseCase(
@@ -331,19 +450,62 @@ async function main(): Promise<void> {
 
   const getSingleReviewUseCase = new GetSingleReviewUseCase(reviewRepository)
 
+  const getReviewCountAndRateUseCase = new GetReviewCountAndRateUseCase(
+    reviewRepository,
+    redis
+  )
+
+  const getConsultationSocketRealTimeCountUseCase =
+    new GetConsultationSocketRealTimeCountUseCase(consultationRepository)
+
+  const getConsultationSocketRealTimeListUseCase =
+    new GetConsultationSocketRealTimeListUseCase(consultationRepository)
+
+  const getTimeSlotUseCase = new GetTimeSlotUseCase(
+    timeSlotRepository,
+    doctorRepository
+  )
+
+  const googleReviewService = new GoogleReviewService(
+    reviewRepository,
+    uuidService,
+    notificationHelper,
+    redis,
+    userRepository
+  )
+
+  /**
+   * Cron Job
+   */
+  const googleReviewCronJob = new GoogleReviewCronJob(
+    googleReviewService,
+    scheduler
+  )
+  await googleReviewCronJob.init()
+
   // Controller
-  const commonController = new CommonController(getDoctorsAndClinicsUseCase)
+  const commonController = new CommonController(
+    getDoctorsAndClinicsUseCase,
+    createAcupunctureAndMedicineUseCase,
+    updateConsultationToAcupunctureUseCase,
+    getConsultationSocketRealTimeCountUseCase,
+    getConsultationSocketRealTimeListUseCase,
+    realTimeUpdateHelper
+  )
 
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
-    doctorRepository
+    doctorRepository,
+    permissionRepository
   )
 
   const consultationController = new ConsultationController(
+    realTimeUpdateHelper,
     getConsultationListUseCase,
     getSingleConsultationUseCase,
-    getConsultationOnsiteCanceledAndBookingUseCase,
+    getConsultationOnsiteCanceledCountAndRateUseCase,
+    getConsultationBookingCountAndRateUseCase,
     getConsultationRealTimeCountUseCase,
     getAverageWaitingTimeUseCase,
     getFirstTimeConsultationCountAndRateUseCase,
@@ -352,13 +514,17 @@ async function main(): Promise<void> {
     createConsultationUseCase,
     updateConsultationCheckOutAtUseCase,
     updateConsultationStartAtUseCase,
-    updateConsultationOnsiteCancelAtUseCase
+    updateConsultationOnsiteCancelAtUseCase,
+    getConsultationSocketRealTimeCountUseCase,
+    getConsultationRealTimeListUseCase,
+    getConsultationSocketRealTimeListUseCase
   )
 
   const feedbackController = new FeedbackController(
     getFeedbackListUseCase,
     getSingleFeedbackUseCase,
-    getFeedbackCountAndRateUseCase
+    getFeedbackCountAndRateUseCase,
+    createFeedbackUseCase
   )
 
   const patientController = new PatientController(
@@ -367,7 +533,8 @@ async function main(): Promise<void> {
 
   const doctorController = new DoctorController(
     getAllDoctorsUseCase,
-    getDoctorProfileUseCase
+    getDoctorProfileUseCase,
+    editDoctorAvatarUseCase
   )
 
   const acupunctureTreatmentController = new AcupunctureTreatmentController(
@@ -377,14 +544,22 @@ async function main(): Promise<void> {
     updateAcupunctureTreatmentStartAtUseCase,
     updateAcupunctureTreatmentRemoveNeedleAtUseCase,
     updateConsultationToWaitAcupunctureUseCase,
-    updateConsultationToWaitRemoveNeedleUseCase
+    updateConsultationToWaitRemoveNeedleUseCase,
+    getConsultationSocketRealTimeCountUseCase,
+    getConsultationSocketRealTimeListUseCase,
+    updateConsultationToMedicineUseCase,
+    realTimeUpdateHelper,
+    consultationRepository
   )
 
   const medicineTreatmentController = new MedicineTreatmentController(
     createMedicineTreatmentUseCase,
     updateConsultationToMedicineUseCase,
     updateMedicineTreatmentUseCase,
-    updateConsultationCheckOutAtUseCase
+    updateConsultationCheckOutAtUseCase,
+    getConsultationSocketRealTimeCountUseCase,
+    getConsultationSocketRealTimeListUseCase,
+    realTimeUpdateHelper
   )
 
   const notificationController = new NotificationController(
@@ -398,8 +573,11 @@ async function main(): Promise<void> {
 
   const reviewController = new ReviewController(
     getReviewListUseCase,
-    getSingleReviewUseCase
+    getSingleReviewUseCase,
+    getReviewCountAndRateUseCase
   )
+
+  const timeSlotController = new TimeSlotController(getTimeSlotUseCase)
 
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
@@ -429,6 +607,7 @@ async function main(): Promise<void> {
   const notificationRoutes = new NotificationRoutes(notificationController)
   const reviewRoutes = new ReviewRoutes(reviewController)
   const commonRoutes = new CommonRoutes(commonController)
+  const timeSlotRoutes = new TimeSlotRoutes(timeSlotController)
 
   const mainRoutes = new MainRoutes(
     userRoutes,
@@ -440,14 +619,13 @@ async function main(): Promise<void> {
     medicineRoutes,
     notificationRoutes,
     reviewRoutes,
-    commonRoutes
+    commonRoutes,
+    timeSlotRoutes
   )
 
-  // const googleReviewService = new GoogleReviewService(
-  //   reviewRepository,
-  //   uuidService
-  // )
   // await googleReviewService.fetchAllGoogleReviews()
+
+  app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
   app.use(cors(corsOptions))
 

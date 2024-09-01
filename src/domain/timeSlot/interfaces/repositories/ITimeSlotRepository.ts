@@ -1,3 +1,4 @@
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 import { Granularity } from '../../../../domain/common'
 import { IBaseRepository } from '../../../../domain/shared/IBaseRepository'
 import { TimePeriodType, TimeSlot } from '../../../../domain/timeSlot/TimeSlot'
@@ -24,12 +25,60 @@ export interface ITimeSlotRepository extends IBaseRepository<TimeSlot> {
   findCurrentTimeSlotForDoctor: (
     doctorId: string,
     currentTime: Date
-  ) => Promise<string | null>
+  ) => Promise<{
+    timeSlotId: string
+    clinicId: string
+    consultationRoomNumber: RoomNumberType
+    timePeriod: TimePeriodType
+  } | null>
   findMatchingTimeSlotForAdmin: (
     currentTime: Date,
     clinicId?: string,
-    consultationRoomNumber?: string,
+    consultationRoomNumber?: RoomNumberType,
     doctorId?: string
-  ) => Promise<Array<{ id: string }>>
+  ) => Promise<
+    Array<{
+      id: string
+      clinicId: string
+      consultationRoomNumber: RoomNumberType
+      timePeriod: TimePeriodType
+    }>
+  >
   getById: (id: string) => Promise<TimeSlot | null>
+  findByClinicId: (clinicId: string) => Promise<
+    Array<{
+      id: string
+      startAt: Date
+      endAt: Date
+      timePeriod: TimePeriodType
+      clinicId: string
+      doctor: {
+        id: string
+        firstName: string
+        lastName: string
+      }
+      consultationRoom: {
+        id: string
+        roomNumber: string
+      }
+    }>
+  >
+  findByDoctorId: (doctorId: string) => Promise<
+    Array<{
+      id: string
+      startAt: Date
+      endAt: Date
+      timePeriod: TimePeriodType
+      clinicId: string
+      doctor: {
+        id: string
+        firstName: string
+        lastName: string
+      }
+      consultationRoom: {
+        id: string
+        roomNumber: string
+      }
+    }>
+  >
 }

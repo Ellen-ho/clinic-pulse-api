@@ -1,3 +1,4 @@
+import { CreateFeedbackUseCase } from 'application/feedback/CreateFeedbackUseCase'
 import { GetFeedbackCountAndRateUseCase } from '../../../application/feedback/GetFeedbackCountAndRateUseCase'
 import { GetFeedbackListUseCase } from '../../../application/feedback/GetFeedbackListUseCase'
 import { GetSingleFeedbackUseCase } from '../../../application/feedback/GetSingleFeedbackUseCase'
@@ -10,13 +11,15 @@ export interface IFeedbackController {
   getFeedbackList: (req: Request, res: Response) => Promise<Response>
   getSingleFeedback: (req: Request, res: Response) => Promise<Response>
   getFeedbackCountAndRate: (req: Request, res: Response) => Promise<Response>
+  createFeedback: (req: Request, res: Response) => Promise<Response>
 }
 
 export class FeedbackController implements IFeedbackController {
   constructor(
     private readonly getFeedbackListUseCase: GetFeedbackListUseCase,
     private readonly getSingleFeedbackUseCase: GetSingleFeedbackUseCase,
-    private readonly getFeedbackCountAndRateUseCase: GetFeedbackCountAndRateUseCase
+    private readonly getFeedbackCountAndRateUseCase: GetFeedbackCountAndRateUseCase,
+    private readonly createFeedbackUseCase: CreateFeedbackUseCase
   ) {}
 
   public getFeedbackList = async (
@@ -70,6 +73,16 @@ export class FeedbackController implements IFeedbackController {
       currentUser: req.user as User,
     }
     const result = await this.getFeedbackCountAndRateUseCase.execute(request)
+
+    return res.status(200).json(result)
+  }
+
+  public createFeedback = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = { ...req.body }
+    const result = await this.createFeedbackUseCase.execute(request)
 
     return res.status(200).json(result)
   }
