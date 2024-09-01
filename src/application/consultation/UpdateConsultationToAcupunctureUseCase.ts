@@ -22,7 +22,7 @@ export class UpdateConsultationToAcupunctureUseCase {
     request: UpdateConsultationToAcupunctureRequest
   ): Promise<void> {
     const { acupunctureTreatment } = request
-    const id = '2762e440-3932-47d6-af43-9a5a85888df5'
+    const id = 'e3b82db9-8d99-4b47-b419-5d287bb4cce5'
 
     const existingConsultation = await this.consultationRepository.getById(id)
 
@@ -31,11 +31,11 @@ export class UpdateConsultationToAcupunctureUseCase {
     }
 
     const updatedStatus = ConsultationStatus.WAITING_FOR_BED_ASSIGNMENT
-    const updatedStartAt = new Date()
+    const updatedEndAt = new Date()
 
     existingConsultation.updateToAcupuncture({
       status: updatedStatus,
-      endAt: updatedStartAt,
+      endAt: updatedEndAt,
       acupunctureTreatment,
     })
 
@@ -44,7 +44,7 @@ export class UpdateConsultationToAcupunctureUseCase {
     await this.consultationQueueService.addConsultationJob(
       CONSULTATION_JOB_NAME.CHECK_BED_ASSIGNED_WAITING_TIME,
       { consultationId: existingConsultation.id },
-      { delay: 1800 * 1000 }
+      { delay: 60 * 1000 }
     )
   }
 }

@@ -4,6 +4,8 @@ import { asyncHandler } from '../middlewares/AsyncHandler'
 import { ITimeSlotController } from '../controllers/TimeSlotController'
 import { getTimeSlotSchema } from 'application/time-slot/TimeSlotValidator'
 import { validator } from '../middlewares/Validator'
+import { authorized } from '../middlewares/Authorized'
+import { PERMISSION } from '../../../domain/permission/Permission'
 
 export class TimeSlotRoutes {
   private readonly routes: Router
@@ -12,6 +14,7 @@ export class TimeSlotRoutes {
     this.routes.get(
       '/',
       authenticated,
+      authorized(PERMISSION.TIME_SLOT_READ),
       validator(getTimeSlotSchema),
       asyncHandler(this.timeSlotController.getTimeSlot)
     )

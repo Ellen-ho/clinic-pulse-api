@@ -63,7 +63,7 @@ export class AcupunctureTreatmentController
       await this.createAcupunctureTreatmentUseCase.execute()
 
     const request = {
-      id: '2762e440-3932-47d6-af43-9a5a85888df5',
+      id: 'e3b82db9-8d99-4b47-b419-5d287bb4cce5', // con id
       acupunctureTreatment: acupunctureTreatment.acupunctureTreatment,
     }
     await this.updateConsultationToAcupunctureUseCase.execute(request)

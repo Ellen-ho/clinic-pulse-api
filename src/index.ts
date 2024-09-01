@@ -102,9 +102,9 @@ import { TimeSlotRoutes } from './infrastructure/http/routes/TimeSlotRoutes'
 import { GetReviewCountAndRateUseCase } from './application/review/GetReviewCountAndRateUseCase'
 import { QueueService } from './infrastructure/network/QueueService'
 import { ConsultationQueueService } from './application/queue/ConsultationQueueService'
-import { GetConsultationOnsiteCanceledCountAndRateUseCase } from 'application/consultation/GetConsultationOnsiteCanceledCountAndRateUseCase'
-import { GetConsultationBookingCountAndRateUseCase } from 'application/consultation/GetConsultationBookingCountAndRateUseCase'
-
+import { GetConsultationOnsiteCanceledCountAndRateUseCase } from './application/consultation/GetConsultationOnsiteCanceledCountAndRateUseCase'
+import { GetConsultationBookingCountAndRateUseCase } from './application/consultation/GetConsultationBookingCountAndRateUseCase'
+import { PermissionRepository } from './infrastructure/entities/permission/PermissionRepository'
 void main()
 
 async function main(): Promise<void> {
@@ -189,6 +189,7 @@ async function main(): Promise<void> {
   const clinicRepository = new ClinicRepository(dataSource)
   const notificationRepository = new NotificationRepository(dataSource)
   const reviewRepository = new ReviewRepository(dataSource)
+  const permissionRepository = new PermissionRepository(dataSource)
 
   const s3Client = new S3Client({
     credentials: {
@@ -495,7 +496,8 @@ async function main(): Promise<void> {
   const userController = new UserController(
     createUserUseCase,
     createDoctorUseCase,
-    doctorRepository
+    doctorRepository,
+    permissionRepository
   )
 
   const consultationController = new ConsultationController(

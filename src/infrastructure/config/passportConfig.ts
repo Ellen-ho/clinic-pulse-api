@@ -67,7 +67,9 @@ export class PassportConfig {
           .findById(jwtPayload.id)
           .then((user) => {
             if (user !== null) {
-              done(null, user)
+              const permissions = jwtPayload.permissions
+
+              done(null, user, { permissions })
               return
             }
 

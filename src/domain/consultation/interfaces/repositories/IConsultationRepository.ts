@@ -177,6 +177,11 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     totalConsultationWithBothTreatment: number
     totalOnlyAcupunctureCount: number
     totalOnlyMedicineCount: number
+    totalAcupunctureRate: number
+    totalMedicineRate: number
+    totalOnlyAcupunctureRate: number
+    totalOnlyMedicineRate: number
+    totalBothTreatmentRate: number
     data: Array<{
       date: string
       consultationCount: number
@@ -185,6 +190,11 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
       consultationWithBothTreatment: number
       onlyAcupunctureCount: number
       onlyMedicineCount: number
+      acupunctureRate: number
+      medicineRate: number
+      onlyAcupunctureRate: number
+      onlyMedicineRate: number
+      bothTreatmentRate: number
     }>
   }>
   isFirstTimeVisit: (patientId: string) => Promise<boolean>

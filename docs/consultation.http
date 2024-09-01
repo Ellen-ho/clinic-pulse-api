@@ -78,12 +78,12 @@ Content-Type: application/json
 
 {
   "patientId":"00005428-bee6-4a24-bf73-19e6ddc1b3d3",
-  "timeSlotId": "74f51241-7d87-4112-89a5-1dba770c73fb"
+  "timeSlotId": "ffeaea79-b30f-4f62-87b4-acee6c747d18"
 }
 ###
 
 ### update consultation startAt
-@id = 2762e440-3932-47d6-af43-9a5a85888df5
+@id = 149c5c40-9452-4ced-9435-20e5053f0329
 PATCH {{consultationsPath}}/{{id}}/start_at
 Authorization: {{accessToken}}
 Content-Type: application/json
@@ -98,3 +98,10 @@ Content-Type: application/json
 
 ###
 
+### update consultation to Acupuncture
+@id = 149c5c40-9452-4ced-9435-20e5053f0329
+PATCH {{consultationsPath}}/{{id}}/start_at
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+###

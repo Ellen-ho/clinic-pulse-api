@@ -6,7 +6,7 @@ import { authenticated } from '../middlewares/Auth'
 import {
   deleteNotificationSchema,
   getNotificationDetailsSchema,
-} from 'application/notification/notificationValidator'
+} from '../../../application/notification/NotificationValidator'
 
 export class NotificationRoutes {
   private readonly routes: Router

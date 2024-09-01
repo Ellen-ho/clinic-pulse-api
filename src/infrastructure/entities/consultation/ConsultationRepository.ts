@@ -1021,6 +1021,11 @@ export class ConsultationRepository
     totalConsultationWithBothTreatment: number
     totalOnlyAcupunctureCount: number
     totalOnlyMedicineCount: number
+    totalAcupunctureRate: number
+    totalMedicineRate: number
+    totalOnlyAcupunctureRate: number
+    totalOnlyMedicineRate: number
+    totalBothTreatmentRate: number
     data: Array<{
       date: string
       consultationCount: number
@@ -1029,6 +1034,11 @@ export class ConsultationRepository
       consultationWithBothTreatment: number
       onlyAcupunctureCount: number
       onlyMedicineCount: number
+      acupunctureRate: number
+      medicineRate: number
+      onlyAcupunctureRate: number
+      onlyMedicineRate: number
+      bothTreatmentRate: number
     }>
   }> {
     try {
@@ -1148,30 +1158,109 @@ export class ConsultationRepository
         baseQueryParams
       )
 
-      return {
-        totalConsultations: parseInt(totalConsultationsResult[0].count, 10),
-        totalConsultationWithAcupuncture: parseInt(
-          totalWithAcupuncture[0].count,
-          10
-        ),
-        totalConsultationWithMedicine: parseInt(totalWithMedicine[0].count, 10),
-        totalConsultationWithBothTreatment: parseInt(
-          totalWithBoth[0].count,
-          10
-        ),
-        totalOnlyAcupunctureCount: parseInt(totalOnlyAcupuncture[0].count, 10),
-        totalOnlyMedicineCount: parseInt(totalOnlyMedicine[0].count, 10),
-        data: dailyData.map((day) => ({
+      const totalConsultations = parseInt(totalConsultationsResult[0].count, 10)
+      const totalConsultationWithAcupuncture = parseInt(
+        totalWithAcupuncture[0].count,
+        10
+      )
+      const totalConsultationWithMedicine = parseInt(
+        totalWithMedicine[0].count,
+        10
+      )
+      const totalConsultationWithBothTreatment = parseInt(
+        totalWithBoth[0].count,
+        10
+      )
+      const totalOnlyAcupunctureCount = parseInt(
+        totalOnlyAcupuncture[0].count,
+        10
+      )
+      const totalOnlyMedicineCount = parseInt(totalOnlyMedicine[0].count, 10)
+
+      // Calculate rates
+      const totalAcupunctureRate =
+        totalConsultations > 0
+          ? (totalConsultationWithAcupuncture / totalConsultations) * 100
+          : 0
+      const totalMedicineRate =
+        totalConsultations > 0
+          ? (totalConsultationWithMedicine / totalConsultations) * 100
+          : 0
+      const totalBothTreatmentRate =
+        totalConsultations > 0
+          ? (totalConsultationWithBothTreatment / totalConsultations) * 100
+          : 0
+      const totalOnlyAcupunctureRate =
+        totalConsultations > 0
+          ? (totalOnlyAcupunctureCount / totalConsultations) * 100
+          : 0
+      const totalOnlyMedicineRate =
+        totalConsultations > 0
+          ? (totalOnlyMedicineCount / totalConsultations) * 100
+          : 0
+
+      const data = dailyData.map((day) => {
+        const consultationCount = parseInt(day.consultationcount, 10)
+        const consultationWithAcupuncture = Number(
+          day.consultationwithacupuncture
+        )
+        const consultationWithMedicine = Number(day.consultationwithmedicine)
+        const consultationWithBothTreatment = Number(
+          day.consultationwithbothtreatment
+        )
+        const onlyAcupunctureCount = Number(day.onlyacupuncturecount)
+        const onlyMedicineCount = Number(day.onlymedicinecount)
+
+        const acupunctureRate =
+          consultationCount > 0
+            ? (consultationWithAcupuncture / consultationCount) * 100
+            : 0
+        const medicineRate =
+          consultationCount > 0
+            ? (consultationWithMedicine / consultationCount) * 100
+            : 0
+        const bothTreatmentRate =
+          consultationCount > 0
+            ? (consultationWithBothTreatment / consultationCount) * 100
+            : 0
+        const onlyAcupunctureRate =
+          consultationCount > 0
+            ? (onlyAcupunctureCount / consultationCount) * 100
+            : 0
+        const onlyMedicineRate =
+          consultationCount > 0
+            ? (onlyMedicineCount / consultationCount) * 100
+            : 0
+
+        return {
           date: day.date,
-          consultationCount: parseInt(day.consultationcount, 10),
-          consultationWithAcupuncture: Number(day.consultationwithacupuncture),
-          consultationWithMedicine: Number(day.consultationwithmedicine),
-          consultationWithBothTreatment: Number(
-            day.consultationwithbothtreatment
-          ),
-          onlyAcupunctureCount: Number(day.onlyacupuncturecount),
-          onlyMedicineCount: Number(day.onlymedicinecount),
-        })),
+          consultationCount,
+          consultationWithAcupuncture,
+          consultationWithMedicine,
+          consultationWithBothTreatment,
+          onlyAcupunctureCount,
+          onlyMedicineCount,
+          acupunctureRate,
+          medicineRate,
+          bothTreatmentRate,
+          onlyAcupunctureRate,
+          onlyMedicineRate,
+        }
+      })
+
+      return {
+        totalConsultations,
+        totalConsultationWithAcupuncture,
+        totalConsultationWithMedicine,
+        totalConsultationWithBothTreatment,
+        totalOnlyAcupunctureCount,
+        totalOnlyMedicineCount,
+        totalAcupunctureRate,
+        totalMedicineRate,
+        totalOnlyAcupunctureRate,
+        totalOnlyMedicineRate,
+        totalBothTreatmentRate,
+        data,
       }
     } catch (e) {
       throw new RepositoryError(
