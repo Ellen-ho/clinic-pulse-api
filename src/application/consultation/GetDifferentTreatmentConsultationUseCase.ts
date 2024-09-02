@@ -149,36 +149,61 @@ export class GetDifferentTreatmentConsultationUseCase {
       result.totalOnlyMedicineCount - lastResult.totalOnlyMedicineCount
 
     const compareTotalAcupunctureRate =
-      lastResult.totalAcupunctureRate !== 0
-        ? ((result.totalAcupunctureRate - lastResult.totalAcupunctureRate) /
-            lastResult.totalAcupunctureRate) *
-          100
-        : 0
+      lastResult.totalAcupunctureRate === 0
+        ? result.totalAcupunctureRate > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalAcupunctureRate - lastResult.totalAcupunctureRate) /
+              lastResult.totalAcupunctureRate) *
+              10000
+          ) / 100
+
     const compareTotalMedicineRate =
-      lastResult.totalMedicineRate !== 0
-        ? ((result.totalMedicineRate - lastResult.totalMedicineRate) /
-            lastResult.totalMedicineRate) *
-          100
-        : 0
+      lastResult.totalMedicineRate === 0
+        ? result.totalMedicineRate > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalMedicineRate - lastResult.totalMedicineRate) /
+              lastResult.totalMedicineRate) *
+              10000
+          ) / 100
+
     const compareTotalOnlyAcupunctureRate =
-      lastResult.totalOnlyAcupunctureRate !== 0
-        ? ((result.totalOnlyAcupunctureRate -
-            lastResult.totalOnlyAcupunctureRate) /
-            lastResult.totalOnlyAcupunctureRate) *
-          100
-        : 0
+      lastResult.totalOnlyAcupunctureRate === 0
+        ? result.totalOnlyAcupunctureRate > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalOnlyAcupunctureRate -
+              lastResult.totalOnlyAcupunctureRate) /
+              lastResult.totalOnlyAcupunctureRate) *
+              10000
+          ) / 100
+
     const compareTotalOnlyMedicineRate =
-      lastResult.totalOnlyMedicineRate !== 0
-        ? ((result.totalOnlyMedicineRate - lastResult.totalOnlyMedicineRate) /
-            lastResult.totalOnlyMedicineRate) *
-          100
-        : 0
+      lastResult.totalOnlyMedicineRate === 0
+        ? result.totalOnlyMedicineRate > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalOnlyMedicineRate - lastResult.totalOnlyMedicineRate) /
+              lastResult.totalOnlyMedicineRate) *
+              10000
+          ) / 100
+
     const compareTotalBothTreatmentRate =
-      lastResult.totalBothTreatmentRate !== 0
-        ? ((result.totalBothTreatmentRate - lastResult.totalBothTreatmentRate) /
-            lastResult.totalBothTreatmentRate) *
-          100
-        : 0
+      lastResult.totalBothTreatmentRate === 0
+        ? result.totalBothTreatmentRate > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalBothTreatmentRate -
+              lastResult.totalBothTreatmentRate) /
+              lastResult.totalBothTreatmentRate) *
+              10000
+          ) / 100
 
     const isWithAcupunctureGetMore = compareTotalConsultationWithAcupuncture > 0
     const isWithMedicineGetMore = compareTotalConsultationWithMedicine > 0
@@ -232,9 +257,15 @@ export class GetDifferentTreatmentConsultationUseCase {
       data: result.data,
     }
 
-    await this.redis.set(redisKey, JSON.stringify(response), {
-      expiresInSec: 31_536_000,
-    })
+    await this.redis.set(
+      `different_treatments_${currentDoctorId ?? 'allDoctors'}_${
+        granularity ?? 'allGranularity'
+      }_${startDate}_${endDate}`,
+      JSON.stringify(response),
+      {
+        expiresInSec: 31_536_000,
+      }
+    )
 
     return response
   }

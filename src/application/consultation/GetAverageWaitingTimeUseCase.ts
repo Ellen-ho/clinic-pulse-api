@@ -152,24 +152,51 @@ export class GetAverageWaitingTimeUseCase {
 
     const compareAverageConsultationWaitRate =
       lastAverageConsultationWait === 0
-        ? 0
-        : (compareAverageConsultationWait / lastAverageConsultationWait) * 100
+        ? compareAverageConsultationWait > 0
+          ? 100
+          : 0
+        : Math.round(
+            (compareAverageConsultationWait / lastAverageConsultationWait) *
+              10000
+          ) / 100
+
     const compareAverageBedAssignmentWaitRate =
       lastAverageBedAssignmentWait === 0
-        ? 0
-        : (compareAverageBedAssignmentWait / lastAverageBedAssignmentWait) * 100
+        ? compareAverageBedAssignmentWait > 0
+          ? 100
+          : 0
+        : Math.round(
+            (compareAverageBedAssignmentWait / lastAverageBedAssignmentWait) *
+              10000
+          ) / 100
+
     const compareAverageAcupunctureWaitRate =
       lastAverageAcupunctureWait === 0
-        ? 0
-        : (compareAverageAcupunctureWait / lastAverageAcupunctureWait) * 100
+        ? compareAverageAcupunctureWait > 0
+          ? 100
+          : 0
+        : Math.round(
+            (compareAverageAcupunctureWait / lastAverageAcupunctureWait) * 10000
+          ) / 100
+
     const compareAverageNeedleRemovalWaitRate =
       lastAverageNeedleRemovalWait === 0
-        ? 0
-        : (compareAverageNeedleRemovalWait / lastAverageNeedleRemovalWait) * 100
+        ? compareAverageNeedleRemovalWait > 0
+          ? 100
+          : 0
+        : Math.round(
+            (compareAverageNeedleRemovalWait / lastAverageNeedleRemovalWait) *
+              10000
+          ) / 100
+
     const compareAverageMedicationWaitRate =
       lastAverageMedicationWait === 0
-        ? 0
-        : (compareAverageMedicationWait / lastAverageMedicationWait) * 100
+        ? compareAverageMedicationWait > 0
+          ? 100
+          : 0
+        : Math.round(
+            (compareAverageMedicationWait / lastAverageMedicationWait) * 10000
+          ) / 100
 
     const finalResponse = {
       lastAverageConsultationWait,

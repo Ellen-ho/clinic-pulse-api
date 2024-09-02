@@ -60,7 +60,7 @@ export class GetFirstTimeConsultationCountAndRateUseCase {
       currentDoctorId = doctor?.id
     }
 
-    const redisKey = `onsite_canceled_${currentDoctorId ?? 'allDoctors'}_${
+    const redisKey = `first_time_${currentDoctorId ?? 'allDoctors'}_${
       granularity ?? 'allGranularity'
     }_${startDate}_${endDate}`
 
@@ -102,11 +102,15 @@ export class GetFirstTimeConsultationCountAndRateUseCase {
       result.firstTimeConsultationCount - lastResult.firstTimeConsultationCount
     const compareFirstTimeRates =
       lastResult.firstTimeConsultationRate === 0
-        ? 0
-        : ((result.firstTimeConsultationRate -
-            lastResult.firstTimeConsultationRate) /
-            lastResult.firstTimeConsultationRate) *
-          100
+        ? result.firstTimeConsultationRate > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.firstTimeConsultationRate -
+              lastResult.firstTimeConsultationRate) /
+              lastResult.firstTimeConsultationRate) *
+              10000
+          ) / 100
     const isGetMore = compareFirstTimeRates > 0
 
     const finalResponse: GetFirstTimeConsultationCountAndRateResponse = {

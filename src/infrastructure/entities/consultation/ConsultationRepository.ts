@@ -1177,29 +1177,38 @@ export class ConsultationRepository
       )
       const totalOnlyMedicineCount = parseInt(totalOnlyMedicine[0].count, 10)
 
-      // Calculate rates
       const totalAcupunctureRate =
         totalConsultations > 0
-          ? (totalConsultationWithAcupuncture / totalConsultations) * 100
+          ? Math.round(
+              (totalConsultationWithAcupuncture / totalConsultations) * 10000
+            ) / 100
           : 0
       const totalMedicineRate =
         totalConsultations > 0
-          ? (totalConsultationWithMedicine / totalConsultations) * 100
+          ? Math.round(
+              (totalConsultationWithMedicine / totalConsultations) * 10000
+            ) / 100
           : 0
       const totalBothTreatmentRate =
         totalConsultations > 0
-          ? (totalConsultationWithBothTreatment / totalConsultations) * 100
+          ? Math.round(
+              (totalConsultationWithBothTreatment / totalConsultations) * 10000
+            ) / 100
           : 0
       const totalOnlyAcupunctureRate =
         totalConsultations > 0
-          ? (totalOnlyAcupunctureCount / totalConsultations) * 100
+          ? Math.round(
+              (totalOnlyAcupunctureCount / totalConsultations) * 10000
+            ) / 100
           : 0
       const totalOnlyMedicineRate =
         totalConsultations > 0
-          ? (totalOnlyMedicineCount / totalConsultations) * 100
+          ? Math.round((totalOnlyMedicineCount / totalConsultations) * 10000) /
+            100
           : 0
 
       const data = dailyData.map((day) => {
+        const date = day.date
         const consultationCount = parseInt(day.consultationcount, 10)
         const consultationWithAcupuncture = Number(
           day.consultationwithacupuncture
@@ -1213,27 +1222,34 @@ export class ConsultationRepository
 
         const acupunctureRate =
           consultationCount > 0
-            ? (consultationWithAcupuncture / consultationCount) * 100
+            ? Math.round(
+                (consultationWithAcupuncture / consultationCount) * 10000
+              ) / 100
             : 0
         const medicineRate =
           consultationCount > 0
-            ? (consultationWithMedicine / consultationCount) * 100
+            ? Math.round(
+                (consultationWithMedicine / consultationCount) * 10000
+              ) / 100
             : 0
         const bothTreatmentRate =
           consultationCount > 0
-            ? (consultationWithBothTreatment / consultationCount) * 100
+            ? Math.round(
+                (consultationWithBothTreatment / consultationCount) * 10000
+              ) / 100
             : 0
         const onlyAcupunctureRate =
           consultationCount > 0
-            ? (onlyAcupunctureCount / consultationCount) * 100
+            ? Math.round((onlyAcupunctureCount / consultationCount) * 10000) /
+              100
             : 0
         const onlyMedicineRate =
           consultationCount > 0
-            ? (onlyMedicineCount / consultationCount) * 100
+            ? Math.round((onlyMedicineCount / consultationCount) * 10000) / 100
             : 0
 
         return {
-          date: day.date,
+          date,
           consultationCount,
           consultationWithAcupuncture,
           consultationWithMedicine,
@@ -1741,15 +1757,15 @@ export class ConsultationRepository
 
     switch (granularity) {
       case Granularity.DAY: {
-        const lastWeekStart = new Date(start)
-        const lastWeekEnd = new Date(end)
-        lastWeekStart.setDate(
-          lastWeekStart.getDate() - lastWeekStart.getDay() - 7
-        )
-        lastWeekEnd.setDate(lastWeekStart.getDate() + 6)
+        const lastStartDate = new Date(start)
+        const lastEndDate = new Date(end)
+
+        lastStartDate.setDate(start.getDate() - 7)
+        lastEndDate.setDate(end.getDate() - 7)
+
         return {
-          lastStartDate: lastWeekStart.toISOString().split('T')[0],
-          lastEndDate: lastWeekEnd.toISOString().split('T')[0],
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
         }
       }
       case Granularity.WEEK: {

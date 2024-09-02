@@ -17,7 +17,7 @@ Content-Type: application/json
 @consultationsPath = {{hostname}}/api/consultations
 
 ### get consultation list
-GET {{consultationsPath}}?limit=25&page=1&startDate=2024-08-01&endDate=2024-08-31
+GET {{consultationsPath}}?limit=25&page=1&startDate=2024-08-01&endDate=2024-08-31&timePeriod=EVENING_SESSION
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
@@ -29,8 +29,14 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
-### get consultation canceled and booking
-GET {{consultationsPath}}/canceled_and_booking?granularity=DAY&startDate=2024-05-27&endDate=2024-06-02&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+### get consultation canceled 
+GET {{consultationsPath}}/canceled?granularity=DAY&startDate=2024-07-29&endDate=2024-08-04&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### get consultation booking
+GET {{consultationsPath}}/canceled?granularity=DAY&startDate=2024-07-29&endDate=2024-08-04&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
@@ -54,19 +60,19 @@ Content-Type: application/json
 ###
 
 ### get first time consultation
-GET {{consultationsPath}}/first_time?startDate=2024-07-01&endDate=2024-07-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/first_time?granularity=DAY&startDate=2024-07-29&endDate=2024-08-04&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
 ### get average consultation count
-GET {{consultationsPath}}/average_counts?granularity=DAY&startDate=2024-05-27&endDate=2024-06-02&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/average_counts?granularity=DAY&startDate=2024-07-29&endDate=2024-08-04&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
 ### get different treatments 
-GET {{consultationsPath}}/different_treatments?granularity=WEEK&startDate=2024-08-01&endDate=2024-08-13&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/different_treatments?granularity=DAY&startDate=2024-09-02&endDate=2024-09-08&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###

@@ -3,7 +3,7 @@ import { IConsultationRepository } from '../../domain/consultation/interfaces/re
 import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
 import { User, UserRoleType } from '../../domain/user/User'
-import { RedisServer } from '../../infrastructure/database/RedisServer'
+import { RedisServer } from 'infrastructure/database/RedisServer'
 
 interface GetConsultationBookingCountAndRateRequest {
   startDate: string
@@ -103,10 +103,14 @@ export class GetConsultationBookingCountAndRateUseCase {
       lastResult.consultationWithOnlineBooking
     const compareBookingRates =
       lastResult.onlineBookingRate === 0
-        ? 0
-        : ((result.onlineBookingRate - lastResult.onlineBookingRate) /
-            lastResult.onlineBookingRate) *
-          100
+        ? result.onlineBookingRate > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.onlineBookingRate - lastResult.onlineBookingRate) /
+              lastResult.onlineBookingRate) *
+              10000
+          ) / 100
     const isGetMore = compareBookingRates < 0
 
     const finalResponse: GetConsultationBookingCountAndRateResponse = {

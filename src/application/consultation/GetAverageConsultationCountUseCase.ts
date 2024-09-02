@@ -28,6 +28,7 @@ interface GetAverageConsultationCountResponse {
   isAverageGetMore: boolean
   compareTotalRate: number
   compareAverageRate: number
+  compareSlotRate: number
   totalConsultations: number
   totalSlots: number
   averagePatientPerSlot: number
@@ -107,6 +108,7 @@ export class GetAverageConsultationCountUseCase {
         isAverageGetMore: false,
         compareTotalRate: 0,
         compareAverageRate: 0,
+        compareSlotRate: 0,
         totalConsultations: 0,
         totalSlots: 0,
         averagePatientPerSlot: 0,
@@ -190,18 +192,24 @@ export class GetAverageConsultationCountUseCase {
 
     const compareTotalRate =
       lastTotalCount === 0
-        ? 0
-        : Math.round(
-            ((compareTotalCount - lastTotalCount) / lastTotalCount) * 100 * 100
-          ) / 100
+        ? compareTotalCount > 0
+          ? 100
+          : 0
+        : Math.round((compareTotalCount / lastTotalCount) * 10000) / 100
+
     const compareAverageRate =
       lastAverageCount === 0
-        ? 0
-        : Math.round(
-            (compareAverageCount - lastAverageCount / lastAverageCount) *
-              100 *
-              100
-          ) / 100
+        ? compareAverageCount > 0
+          ? 100
+          : 0
+        : Math.round((compareAverageCount / lastAverageCount) * 10000) / 100
+
+    const compareSlotRate =
+      lastTotalSlots === 0
+        ? compareSlots > 0
+          ? 100
+          : 0
+        : Math.round((compareSlots / lastTotalSlots) * 10000) / 100
 
     const finalResponse = {
       ...response,
@@ -215,11 +223,18 @@ export class GetAverageConsultationCountUseCase {
       isAverageGetMore,
       compareTotalRate,
       compareAverageRate,
+      compareSlotRate,
     }
 
-    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
-      expiresInSec: 31_536_000,
-    })
+    await this.redis.set(
+      `average_counts_${currentDoctorId ?? 'allDoctors'}_${
+        granularity ?? 'allGranularity'
+      }_${startDate}_${endDate}`,
+      JSON.stringify(finalResponse),
+      {
+        expiresInSec: 31_536_000,
+      }
+    )
 
     return finalResponse
   }

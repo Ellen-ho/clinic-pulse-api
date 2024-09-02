@@ -102,10 +102,14 @@ export class GetConsultationOnsiteCanceledCountAndRateUseCase {
       lastResult.consultationWithOnsiteCancel
     const compareOsiteCancelRates =
       lastResult.onsiteCancelRate === 0
-        ? 0
-        : ((result.onsiteCancelRate - lastResult.onsiteCancelRate) /
-            lastResult.onsiteCancelRate) *
-          100
+        ? result.onsiteCancelRate > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.onsiteCancelRate - lastResult.onsiteCancelRate) /
+              lastResult.onsiteCancelRate) *
+              10000
+          ) / 100
     const isCutDown = compareOsiteCancelRates < 0
 
     const finalResponse: GetConsultationOnsiteCanceledCountAndRateResponse = {
