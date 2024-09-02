@@ -1,0 +1,8 @@
+FROM redis:6.2.6
+
+ARG REDIS_AUTH_TOKEN
+ENV REDIS_AUTH_TOKEN=${REDIS_AUTH_TOKEN}
+
+EXPOSE 6379
+
+CMD ["redis-server", "--requirepass", "${REDIS_AUTH_TOKEN}"]

@@ -22,14 +22,14 @@ import { IRealTimeUpdateHelper } from '../../../application/consultation/RealTim
 import {
   GetConsultationSocketRealTimeCountRequest,
   GetConsultationSocketRealTimeCountUseCase,
-} from 'application/consultation/GetConsultationSocketRealTimeCountUseCase'
-import { GetConsultationRealTimeListUseCase } from 'application/consultation/GetConsultationRealTimeListUseCase'
+} from '../../../application/consultation/GetConsultationSocketRealTimeCountUseCase'
+import { GetConsultationRealTimeListUseCase } from '../../../application/consultation/GetConsultationRealTimeListUseCase'
 import {
   GetConsultationSocketRealTimeListRequest,
   GetConsultationSocketRealTimeListUseCase,
-} from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
-import { GetConsultationBookingCountAndRateUseCase } from 'application/consultation/GetConsultationBookingCountAndRateUseCase'
+} from '../../../application/consultation/GetConsultationSocketRealTimeListUseCase'
+import { RoomNumberType } from '../../../domain/consultationRoom/ConsultationRoom'
+import { GetConsultationBookingCountAndRateUseCase } from '../../../application/consultation/GetConsultationBookingCountAndRateUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>

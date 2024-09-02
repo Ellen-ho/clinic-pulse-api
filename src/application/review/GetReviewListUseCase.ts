@@ -1,7 +1,7 @@
-import { IReviewRepository } from 'domain/review/interfaces/repositories/IReviewRepository'
+import { IReviewRepository } from '../../domain/review/interfaces/repositories/IReviewRepository'
 import { getOffset, getPagination } from '../../infrastructure/utils/Pagination'
-import { User, UserRoleType } from 'domain/user/User'
-import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
+import { User, UserRoleType } from '../../domain/user/User'
+import { AuthorizationError } from '../../infrastructure/error/AuthorizationError'
 
 interface GetReviewListRequest {
   startDate: string

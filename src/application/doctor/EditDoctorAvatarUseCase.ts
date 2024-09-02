@@ -1,8 +1,8 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { IUuidService } from '../../domain/utils/IUuidService'
 import path from 'path'
-import { DoctorRepository } from 'infrastructure/entities/doctor/DoctorRepository'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { DoctorRepository } from '../../infrastructure/entities/doctor/DoctorRepository'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface EditDoctorAvatarRequest {
   file: Express.Multer.File

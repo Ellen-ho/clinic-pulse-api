@@ -9,17 +9,17 @@ import { UpdateConsultationToWaitRemoveNeedleUseCase } from '../../../applicatio
 import {
   GetConsultationSocketRealTimeCountRequest,
   GetConsultationSocketRealTimeCountUseCase,
-} from 'application/consultation/GetConsultationSocketRealTimeCountUseCase'
-import { IRealTimeUpdateHelper } from 'application/consultation/RealTimeUpdateHelper'
-import { ConsultationRepository } from 'infrastructure/entities/consultation/ConsultationRepository'
-import { UpdateConsultationToMedicineUseCase } from 'application/consultation/UpdateConsultationToMedicineUseCase'
+} from '../../../application/consultation/GetConsultationSocketRealTimeCountUseCase'
+import { IRealTimeUpdateHelper } from '../../../application/consultation/RealTimeUpdateHelper'
+import { ConsultationRepository } from '../../../infrastructure/entities/consultation/ConsultationRepository'
+import { UpdateConsultationToMedicineUseCase } from '../../../application/consultation/UpdateConsultationToMedicineUseCase'
 import {
   GetConsultationSocketRealTimeListRequest,
   GetConsultationSocketRealTimeListUseCase,
-} from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
-import { GenderType } from 'domain/common'
-import { ConsultationStatus } from 'domain/consultation/Consultation'
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+} from '../../../application/consultation/GetConsultationSocketRealTimeListUseCase'
+import { GenderType } from '../../../domain/common'
+import { ConsultationStatus } from '../../../domain/consultation/Consultation'
+import { RoomNumberType } from '../../../domain/consultationRoom/ConsultationRoom'
 
 export interface IAcupunctureTreatmentController {
   createAcupunctureTreatment: (req: Request, res: Response) => Promise<Response>

@@ -1,4 +1,4 @@
-import { CreateFeedbackUseCase } from 'application/feedback/CreateFeedbackUseCase'
+import { CreateFeedbackUseCase } from '../../../application/feedback/CreateFeedbackUseCase'
 import { GetFeedbackCountAndRateUseCase } from '../../../application/feedback/GetFeedbackCountAndRateUseCase'
 import { GetFeedbackListUseCase } from '../../../application/feedback/GetFeedbackListUseCase'
 import { GetSingleFeedbackUseCase } from '../../../application/feedback/GetSingleFeedbackUseCase'

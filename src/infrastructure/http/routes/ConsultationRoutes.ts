@@ -16,7 +16,7 @@ import {
   getSingleConsultationSchema,
 } from '../../../application/consultation/ConsultationValidator'
 import { authorized } from '../middlewares/Authorized'
-import { PERMISSION } from 'domain/permission/Permission'
+import { PERMISSION } from '../../../domain/permission/Permission'
 
 export class ConsultationRoutes {
   private readonly routes: Router

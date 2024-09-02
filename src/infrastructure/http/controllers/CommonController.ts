@@ -1,19 +1,19 @@
-import { CreateAcupunctureAndMedicineUseCase } from 'application/common/CreateAcupunctureAndMedicineUseCase'
+import { CreateAcupunctureAndMedicineUseCase } from '../../../application/common/CreateAcupunctureAndMedicineUseCase'
 import { GetDoctorsAndClinicsUseCase } from '../../../application/common/GetDoctorsAndClinicsUseCase'
 import { Request, Response } from 'express'
-import { UpdateConsultationToAcupunctureUseCase } from 'application/consultation/UpdateConsultationToAcupunctureUseCase'
+import { UpdateConsultationToAcupunctureUseCase } from '../../../application/consultation/UpdateConsultationToAcupunctureUseCase'
 import {
   GetConsultationSocketRealTimeCountRequest,
   GetConsultationSocketRealTimeCountUseCase,
-} from 'application/consultation/GetConsultationSocketRealTimeCountUseCase'
-import { RealTimeUpdateHelper } from 'application/consultation/RealTimeUpdateHelper'
+} from '../../../application/consultation/GetConsultationSocketRealTimeCountUseCase'
+import { RealTimeUpdateHelper } from '../../../application/consultation/RealTimeUpdateHelper'
 import {
   GetConsultationSocketRealTimeListRequest,
   GetConsultationSocketRealTimeListUseCase,
-} from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
-import { GenderType } from 'domain/common'
-import { ConsultationStatus } from 'domain/consultation/Consultation'
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+} from '../../../application/consultation/GetConsultationSocketRealTimeListUseCase'
+import { GenderType } from '../../../domain/common'
+import { ConsultationStatus } from '../../../domain/consultation/Consultation'
+import { RoomNumberType } from '../../../domain/consultationRoom/ConsultationRoom'
 export interface ICommonController {
   getDoctorsAndClinics: (req: Request, res: Response) => Promise<Response>
 }

@@ -1,8 +1,8 @@
-import { Granularity } from 'domain/common'
-import { IReviewRepository } from 'domain/review/interfaces/repositories/IReviewRepository'
-import { User, UserRoleType } from 'domain/user/User'
-import { RedisServer } from 'infrastructure/database/RedisServer'
-import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
+import { Granularity } from '../../domain/common'
+import { IReviewRepository } from '../../domain/review/interfaces/repositories/IReviewRepository'
+import { User, UserRoleType } from '../../domain/user/User'
+import { RedisServer } from '../../infrastructure/database/RedisServer'
+import { AuthorizationError } from '../../infrastructure/error/AuthorizationError'
 
 interface GetReviewCountAndRateRequest {
   startDate: string

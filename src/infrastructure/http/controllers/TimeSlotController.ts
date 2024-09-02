@@ -1,5 +1,5 @@
-import { GetTimeSlotUseCase } from 'application/time-slot/GetTimeSlotUseCase'
-import { User } from 'domain/user/User'
+import { GetTimeSlotUseCase } from '../../../application/time-slot/GetTimeSlotUseCase'
+import { User } from '../../../domain/user/User'
 import { Request, Response } from 'express'
 
 export interface ITimeSlotController {

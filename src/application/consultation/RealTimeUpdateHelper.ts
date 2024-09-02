@@ -1,7 +1,7 @@
-import { GenderType } from 'domain/common'
-import { ConsultationStatus } from 'domain/consultation/Consultation'
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
-import { IRealTimeSocketService } from 'domain/network/interfaces/IRealTimeSocketService'
+import { GenderType } from '../../domain/common'
+import { ConsultationStatus } from '../../domain/consultation/Consultation'
+import { RoomNumberType } from '../../domain/consultationRoom/ConsultationRoom'
+import { IRealTimeSocketService } from '../../domain/network/interfaces/IRealTimeSocketService'
 
 interface ISendUpdatedWaitingCountsProps {
   clinicId: string

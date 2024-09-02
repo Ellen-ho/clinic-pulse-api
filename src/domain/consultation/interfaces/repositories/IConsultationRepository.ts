@@ -1,4 +1,4 @@
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+import { RoomNumberType } from '../../../../domain/consultationRoom/ConsultationRoom'
 import { GenderType, Granularity } from '../../../../domain/common'
 import {
   Consultation,

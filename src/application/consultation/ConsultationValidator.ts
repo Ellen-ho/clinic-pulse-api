@@ -1,4 +1,4 @@
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+import { RoomNumberType } from '../../domain/consultationRoom/ConsultationRoom'
 import { Granularity } from '../../domain/common'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
 import Joi from 'joi'

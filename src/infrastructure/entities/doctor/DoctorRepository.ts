@@ -5,8 +5,8 @@ import { DoctorMapper } from './DoctorMapper'
 import { Doctor } from '../../../domain/doctor/Doctor'
 import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import { IDoctorRepository } from '../../../domain/doctor/interfaces/repositories/IDoctorRepository'
-import { GenderType } from 'domain/common'
-import { UserRoleType } from 'domain/user/User'
+import { GenderType } from '../../../domain/common'
+import { UserRoleType } from '../../../domain/user/User'
 
 export class DoctorRepository
   extends BaseRepository<DoctorEntity, Doctor>

@@ -1,14 +1,14 @@
-import { INotificationHelper } from 'application/notification/NotificationHelper'
+import { INotificationHelper } from '../../application/notification/NotificationHelper'
 import {
   ConsultationStatus,
   OnsiteCancelReasonType,
-} from 'domain/consultation/Consultation'
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
-import { NotificationType } from 'domain/notification/Notification'
-import { ITimeSlotRepository } from 'domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
-import { IUserRepository } from 'domain/user/interfaces/repositories/IUserRepository'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+} from '../../domain/consultation/Consultation'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
+import { NotificationType } from '../../domain/notification/Notification'
+import { ITimeSlotRepository } from '../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
+import { IUserRepository } from '../../domain/user/interfaces/repositories/IUserRepository'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface UpdateConsultationOnsiteCancelAtRequest {
   consultationId: string

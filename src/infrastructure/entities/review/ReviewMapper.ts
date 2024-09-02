@@ -1,6 +1,6 @@
-import { IEntityMapper } from 'domain/shared/IEntityMapper'
+import { IEntityMapper } from '../../../domain/shared/IEntityMapper'
 import { ReviewEntity } from './ReviewEntity'
-import { Review } from 'domain/review/Review'
+import { Review } from '../../../domain/review/Review'
 
 export class ReviewMapper implements IEntityMapper<ReviewEntity, Review> {
   public toDomainModel(entity: ReviewEntity): Review {

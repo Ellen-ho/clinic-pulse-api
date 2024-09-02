@@ -1,4 +1,4 @@
-import { Granularity } from 'domain/common'
+import { Granularity } from '../../domain/common'
 import Joi from 'joi'
 
 export const getReviewListSchema = {

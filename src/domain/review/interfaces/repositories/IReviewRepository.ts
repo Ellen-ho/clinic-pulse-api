@@ -1,6 +1,6 @@
-import { Review } from 'domain/review/Review'
+import { Review } from '../../../../domain/review/Review'
 import { IBaseRepository } from '../../../shared/IBaseRepository'
-import { Granularity } from 'domain/common'
+import { Granularity } from '../../../../domain/common'
 
 export interface IReviewRepository extends IBaseRepository<Review> {
   findLatestReview: () => Promise<Review | null>

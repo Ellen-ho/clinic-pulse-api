@@ -8,7 +8,7 @@ import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 import { ITimeSlotRepository } from '../../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
 import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import dayjs from 'dayjs'
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+import { RoomNumberType } from '../../../domain/consultationRoom/ConsultationRoom'
 
 export class TimeSlotRepository
   extends BaseRepository<TimeSlotEntity, TimeSlot>

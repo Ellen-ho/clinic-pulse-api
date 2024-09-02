@@ -1,9 +1,9 @@
-import { IDoctorRepository } from 'domain/doctor/interfaces/repositories/IDoctorRepository'
-import { ITimeSlotRepository } from 'domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
-import { TimePeriodType } from 'domain/timeSlot/TimeSlot'
-import { User, UserRoleType } from 'domain/user/User'
-import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
+import { ITimeSlotRepository } from '../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
+import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
+import { User, UserRoleType } from '../../domain/user/User'
+import { AuthorizationError } from '../../infrastructure/error/AuthorizationError'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface ITimeSlot {
   id: string

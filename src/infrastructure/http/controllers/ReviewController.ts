@@ -1,8 +1,8 @@
-import { GetReviewCountAndRateUseCase } from 'application/review/GetReviewCountAndRateUseCase'
-import { GetReviewListUseCase } from 'application/review/GetReviewListUseCase'
-import { GetSingleReviewUseCase } from 'application/review/GetSingleReviewUseCase'
-import { Granularity } from 'domain/common'
-import { User } from 'domain/user/User'
+import { GetReviewCountAndRateUseCase } from '../../../application/review/GetReviewCountAndRateUseCase'
+import { GetReviewListUseCase } from '../../../application/review/GetReviewListUseCase'
+import { GetSingleReviewUseCase } from '../../../application/review/GetSingleReviewUseCase'
+import { Granularity } from '../../../domain/common'
+import { User } from '../../../domain/user/User'
 import { Request, Response } from 'express'
 
 export interface IReviewController {

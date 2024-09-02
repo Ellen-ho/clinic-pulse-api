@@ -1,13 +1,13 @@
-import { BaseRepository } from 'infrastructure/database/BaseRepository'
+import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
 import { DataSource } from 'typeorm'
 import { ReviewMapper } from './ReviewMapper'
 import { ReviewEntity } from './ReviewEntity'
-import { Review } from 'domain/review/Review'
-import { IReviewRepository } from 'domain/review/interfaces/repositories/IReviewRepository'
-import { RepositoryError } from 'infrastructure/error/RepositoryError'
+import { Review } from '../../../domain/review/Review'
+import { IReviewRepository } from '../../../domain/review/interfaces/repositories/IReviewRepository'
+import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import dayjs from 'dayjs'
-import { Granularity } from 'domain/common'
-import { getDateFormat } from 'infrastructure/utils/SqlDateFormat'
+import { Granularity } from '../../../domain/common'
+import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 
 export class ReviewRepository
   extends BaseRepository<ReviewEntity, Review>

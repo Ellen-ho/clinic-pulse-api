@@ -1,9 +1,9 @@
-import { RedisServer } from 'infrastructure/database/RedisServer'
+import { RedisServer } from '../../infrastructure/database/RedisServer'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
-import { User, UserRoleType } from 'domain/user/User'
-import { DoctorRepository } from 'infrastructure/entities/doctor/DoctorRepository'
-import { Granularity } from 'domain/common'
+import { User, UserRoleType } from '../../domain/user/User'
+import { DoctorRepository } from '../../infrastructure/entities/doctor/DoctorRepository'
+import { Granularity } from '../../domain/common'
 
 interface GetFirstTimeConsultationCountAndRateRequest {
   startDate: string

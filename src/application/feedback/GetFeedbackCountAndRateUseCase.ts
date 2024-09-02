@@ -1,4 +1,4 @@
-import { RedisServer } from 'infrastructure/database/RedisServer'
+import { RedisServer } from '../../infrastructure/database/RedisServer'
 import { Granularity } from '../../domain/common'
 import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
 import { IFeedbackRepository } from '../../domain/feedback/interfaces/repositories/IFeedbackRepository'

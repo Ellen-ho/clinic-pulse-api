@@ -1,6 +1,6 @@
-import { GenderType } from 'domain/common'
-import { ConsultationStatus } from 'domain/consultation/Consultation'
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+import { GenderType } from '../../../domain/common'
+import { ConsultationStatus } from '../../../domain/consultation/Consultation'
+import { RoomNumberType } from '../../../domain/consultationRoom/ConsultationRoom'
 
 export interface ISendToUser {
   clinicId: string

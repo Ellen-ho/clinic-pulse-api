@@ -1,10 +1,10 @@
-import { NotificationHelper } from 'application/notification/NotificationHelper'
+import { NotificationHelper } from '../../application/notification/NotificationHelper'
 import { Job } from 'bull'
-import { ConsultationStatus } from 'domain/consultation/Consultation'
-import { NotificationType } from 'domain/notification/Notification'
-import { ConsultationRepository } from 'infrastructure/entities/consultation/ConsultationRepository'
-import { UserRepository } from 'infrastructure/entities/user/UserRepository'
-import { IQueueService } from 'infrastructure/network/QueueService'
+import { ConsultationStatus } from '../../domain/consultation/Consultation'
+import { NotificationType } from '../../domain/notification/Notification'
+import { ConsultationRepository } from '../../infrastructure/entities/consultation/ConsultationRepository'
+import { UserRepository } from '../../infrastructure/entities/user/UserRepository'
+import { IQueueService } from '../../infrastructure/network/QueueService'
 
 export enum CONSULTATION_JOB_NAME {
   CHECK_CONSULTATION_WAITING_TIME = 'checkConsultationWaitingTime',

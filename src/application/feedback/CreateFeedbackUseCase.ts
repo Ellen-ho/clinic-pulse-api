@@ -1,10 +1,10 @@
-import { NotificationHelper } from 'application/notification/NotificationHelper'
-import { Feedback, SelectedContent } from 'domain/feedback/Feedback'
-import { IFeedbackRepository } from 'domain/feedback/interfaces/repositories/IFeedbackRepository'
-import { NotificationType } from 'domain/notification/Notification'
-import { IUserRepository } from 'domain/user/interfaces/repositories/IUserRepository'
-import { IUuidService } from 'domain/utils/IUuidService'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { NotificationHelper } from '../../application/notification/NotificationHelper'
+import { Feedback, SelectedContent } from '../../domain/feedback/Feedback'
+import { IFeedbackRepository } from '../../domain/feedback/interfaces/repositories/IFeedbackRepository'
+import { NotificationType } from '../../domain/notification/Notification'
+import { IUserRepository } from '../../domain/user/interfaces/repositories/IUserRepository'
+import { IUuidService } from '../../domain/utils/IUuidService'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface CreateFeedbackRequest {
   feedbackRating: number

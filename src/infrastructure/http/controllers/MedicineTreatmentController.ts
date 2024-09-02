@@ -6,15 +6,15 @@ import { UpdateConsultationCheckOutAtUseCase } from '../../../application/consul
 import {
   GetConsultationSocketRealTimeCountRequest,
   GetConsultationSocketRealTimeCountUseCase,
-} from 'application/consultation/GetConsultationSocketRealTimeCountUseCase'
-import { RealTimeUpdateHelper } from 'application/consultation/RealTimeUpdateHelper'
-import { GenderType } from 'domain/common'
-import { ConsultationStatus } from 'domain/consultation/Consultation'
+} from '../../../application/consultation/GetConsultationSocketRealTimeCountUseCase'
+import { RealTimeUpdateHelper } from '../../../application/consultation/RealTimeUpdateHelper'
+import { GenderType } from '../../../domain/common'
+import { ConsultationStatus } from '../../../domain/consultation/Consultation'
 import {
   GetConsultationSocketRealTimeListRequest,
   GetConsultationSocketRealTimeListUseCase,
-} from 'application/consultation/GetConsultationSocketRealTimeListUseCase'
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+} from '../../../application/consultation/GetConsultationSocketRealTimeListUseCase'
+import { RoomNumberType } from '../../../domain/consultationRoom/ConsultationRoom'
 
 export interface IMedicineTreatmentController {
   createMedicineTreatment: (req: Request, res: Response) => Promise<Response>

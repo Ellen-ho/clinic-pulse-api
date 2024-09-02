@@ -1,7 +1,7 @@
 import {
   CONSULTATION_JOB_NAME,
   IConsultationQueueService,
-} from 'application/queue/ConsultationQueueService'
+} from '../../application/queue/ConsultationQueueService'
 import { ConsultationStatus } from '../../domain/consultation/Consultation'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { AcupunctureTreatment } from '../../domain/treatment/AcupunctureTreatment'

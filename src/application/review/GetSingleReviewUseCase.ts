@@ -1,7 +1,7 @@
-import { IReviewRepository } from 'domain/review/interfaces/repositories/IReviewRepository'
+import { IReviewRepository } from '../../domain/review/interfaces/repositories/IReviewRepository'
 import { User, UserRoleType } from '../../domain/user/User'
 import { NotFoundError } from '../../infrastructure/error/NotFoundError'
-import { AuthorizationError } from 'infrastructure/error/AuthorizationError'
+import { AuthorizationError } from '../../infrastructure/error/AuthorizationError'
 
 interface GetSingleReviewRequest {
   reviewId: string

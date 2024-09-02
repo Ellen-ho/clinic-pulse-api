@@ -1,4 +1,4 @@
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+import { RoomNumberType } from '../../../../domain/consultationRoom/ConsultationRoom'
 import { Granularity } from '../../../../domain/common'
 import { IBaseRepository } from '../../../../domain/shared/IBaseRepository'
 import { TimePeriodType, TimeSlot } from '../../../../domain/timeSlot/TimeSlot'

@@ -3,7 +3,7 @@ import { GetDoctorProfileUseCase } from '../../../application/doctor/GetDoctorPr
 import { User } from '../../../domain/user/User'
 import { Request, Response } from 'express'
 import dotenv from 'dotenv'
-import { EditDoctorAvatarUseCase } from 'application/doctor/EditDoctorAvatarUseCase'
+import { EditDoctorAvatarUseCase } from '../../../application/doctor/EditDoctorAvatarUseCase'
 
 dotenv.config()
 

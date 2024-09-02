@@ -1,4 +1,4 @@
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+import { RoomNumberType } from '../../domain/consultationRoom/ConsultationRoom'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 export interface GetConsultationSocketRealTimeCountRequest {
   consultationId: string

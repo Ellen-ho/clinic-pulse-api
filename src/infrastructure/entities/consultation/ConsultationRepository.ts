@@ -15,7 +15,7 @@ import { RepositoryError } from '../../../infrastructure/error/RepositoryError'
 import { getDateFormat } from '../../../infrastructure/utils/SqlDateFormat'
 import dayjs from 'dayjs'
 import { MedicineTreatment } from '../../../domain/treatment/MedicineTreatment'
-import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
+import { RoomNumberType } from '../../../domain/consultationRoom/ConsultationRoom'
 
 export class ConsultationRepository
   extends BaseRepository<ConsultationEntity, Consultation>

@@ -1,8 +1,8 @@
-import { AcupunctureTreatment } from 'domain/treatment/AcupunctureTreatment'
-import { IAcupunctureTreatmentRepository } from 'domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
-import { IMedicineTreatmentRepository } from 'domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
-import { MedicineTreatment } from 'domain/treatment/MedicineTreatment'
-import { IUuidService } from 'domain/utils/IUuidService'
+import { AcupunctureTreatment } from '../../domain/treatment/AcupunctureTreatment'
+import { IAcupunctureTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
+import { IMedicineTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
+import { MedicineTreatment } from '../../domain/treatment/MedicineTreatment'
+import { IUuidService } from '../../domain/utils/IUuidService'
 
 interface CreateAcupunctureAndMedicineResponse {
   acupunctureTreatment: AcupunctureTreatment

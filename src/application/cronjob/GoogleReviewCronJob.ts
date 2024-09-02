@@ -1,5 +1,5 @@
-import GoogleReviewService from 'infrastructure/network/GoogleReviewService'
-import { IScheduler } from 'infrastructure/network/Scheduler'
+import GoogleReviewService from '../../infrastructure/network/GoogleReviewService'
+import { IScheduler } from '../../infrastructure/network/Scheduler'
 import schedule from 'node-schedule'
 
 export interface IGoogleReviewCronJob {
