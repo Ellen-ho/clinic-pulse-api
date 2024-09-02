@@ -3,7 +3,7 @@ import { IConsultationRepository } from '../../domain/consultation/interfaces/re
 import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
 import { User, UserRoleType } from '../../domain/user/User'
-import { RedisServer } from 'infrastructure/database/RedisServer'
+import { RedisServer } from '../../infrastructure/database/RedisServer'
 
 interface GetConsultationBookingCountAndRateRequest {
   startDate: string
