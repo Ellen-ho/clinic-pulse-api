@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { BaseRepository } from '../../../infrastructure/database/BaseRepository'
 import { PermissionEntity } from './PermissionEntity'
 import { Permission } from '../../../domain/permission/Permission'
