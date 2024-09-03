@@ -35,7 +35,7 @@ export default class ConsultationNormalFirstSeeder implements Seeder {
      * SETTING
      */
     const months = TARGET_MONTH
-    const range = [10, 20]
+    const range = [6, 30]
 
     for (const month of months) {
       const startOfMonth = `${month}-01T00:00:00.000Z`
@@ -85,9 +85,9 @@ export default class ConsultationNormalFirstSeeder implements Seeder {
     })
 
     const treatmentType =
-      Math.random() > 0.5 ? 'ACUPUNCTURE_TREATMENT' : 'MEDICINE_TREATMENT'
+      Math.random() > 0.8 ? 'ACUPUNCTURE_TREATMENT' : 'MEDICINE_TREATMENT'
     const consultationSource =
-      Math.random() > 0.5
+      Math.random() > 0.7
         ? ConsultationSource.ONLINE_BOOKING
         : ConsultationSource.ONSITE_REGISTRATION
 
@@ -103,12 +103,12 @@ export default class ConsultationNormalFirstSeeder implements Seeder {
     let medicineTreatment: MedicineTreatmentEntity | null = null
 
     if (treatmentType === 'ACUPUNCTURE_TREATMENT') {
-      const assignBedAt = endAt.add(random(5, 20), 'minute')
+      const assignBedAt = endAt.add(random(5, 30), 'minute')
 
-      const acupunctureStartAt = assignBedAt.add(random(5, 20), 'minute')
+      const acupunctureStartAt = assignBedAt.add(random(5, 30), 'minute')
       const acupunctureEndAt = acupunctureStartAt.add(15, 'minute')
-      const removeNeedleAt = acupunctureEndAt.add(random(5, 20), 'minute')
-      checkOutAt = removeNeedleAt.add(random(5, 20), 'minute')
+      const removeNeedleAt = acupunctureEndAt.add(random(5, 30), 'minute')
+      checkOutAt = removeNeedleAt.add(random(5, 30), 'minute')
 
       acupunctureTreatment = await acupunctureTreatmentRepository.save({
         startAt: acupunctureStartAt,
@@ -119,7 +119,7 @@ export default class ConsultationNormalFirstSeeder implements Seeder {
         needleCounts: random(4, 20),
       })
     } else {
-      const getMedicineAt = endAt.add(random(5, 20), 'minute')
+      const getMedicineAt = endAt.add(random(5, 30), 'minute')
       checkOutAt = getMedicineAt
 
       medicineTreatment = await medicineTreatmentRepository.save({
@@ -130,7 +130,7 @@ export default class ConsultationNormalFirstSeeder implements Seeder {
     await consultationRepository.save({
       status: ConsultationStatus.CHECK_OUT,
       source: consultationSource,
-      consultationNumber: random(100, 999),
+      consultationNumber: random(1, 100),
       checkInAt: checkInAt,
       startAt: startAt,
       endAt: endAt,
