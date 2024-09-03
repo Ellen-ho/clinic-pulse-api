@@ -133,20 +133,75 @@ export class GetDifferentTreatmentConsultationUseCase {
       )
 
     const compareTotalConsultations =
-      result.totalConsultations - lastResult.totalConsultations
+      lastResult.totalConsultations === 0
+        ? result.totalConsultations > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalConsultations - lastResult.totalConsultations) /
+              lastResult.totalConsultations) *
+              10000
+          ) / 100
+
     const compareTotalConsultationWithAcupuncture =
-      result.totalConsultationWithAcupuncture -
-      lastResult.totalConsultationWithAcupuncture
+      lastResult.totalConsultationWithAcupuncture === 0
+        ? result.totalConsultationWithAcupuncture > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalConsultationWithAcupuncture -
+              lastResult.totalConsultationWithAcupuncture) /
+              lastResult.totalConsultationWithAcupuncture) *
+              10000
+          ) / 100
+
     const compareTotalConsultationWithMedicine =
-      result.totalConsultationWithMedicine -
-      lastResult.totalConsultationWithMedicine
+      lastResult.totalConsultationWithMedicine === 0
+        ? result.totalConsultationWithMedicine > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalConsultationWithMedicine -
+              lastResult.totalConsultationWithMedicine) /
+              lastResult.totalConsultationWithMedicine) *
+              10000
+          ) / 100
+
     const compareTotalConsultationWithBothTreatment =
-      result.totalConsultationWithBothTreatment -
-      lastResult.totalConsultationWithBothTreatment
+      lastResult.totalConsultationWithBothTreatment === 0
+        ? result.totalConsultationWithBothTreatment > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalConsultationWithBothTreatment -
+              lastResult.totalConsultationWithBothTreatment) /
+              lastResult.totalConsultationWithBothTreatment) *
+              10000
+          ) / 100
+
     const compareTotalOnlyAcupunctureCount =
-      result.totalOnlyAcupunctureCount - lastResult.totalOnlyAcupunctureCount
+      lastResult.totalOnlyAcupunctureCount === 0
+        ? result.totalOnlyAcupunctureCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalOnlyAcupunctureCount -
+              lastResult.totalOnlyAcupunctureCount) /
+              lastResult.totalOnlyAcupunctureCount) *
+              10000
+          ) / 100
+
     const compareTotalOnlyMedicineCount =
-      result.totalOnlyMedicineCount - lastResult.totalOnlyMedicineCount
+      lastResult.totalOnlyMedicineCount === 0
+        ? result.totalOnlyMedicineCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalOnlyMedicineCount -
+              lastResult.totalOnlyMedicineCount) /
+              lastResult.totalOnlyMedicineCount) *
+              10000
+          ) / 100
 
     const compareTotalAcupunctureRate =
       lastResult.totalAcupunctureRate === 0

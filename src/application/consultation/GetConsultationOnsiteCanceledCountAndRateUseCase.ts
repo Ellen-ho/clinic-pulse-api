@@ -97,9 +97,22 @@ export class GetConsultationOnsiteCanceledCountAndRateUseCase {
 
     const compareConsultations =
       result.totalConsultations - lastResult.totalConsultations
+
+    console.log(result.consultationWithOnsiteCancel)
+    console.log(lastResult.consultationWithOnsiteCancel)
+
     const compareConsultationWithOnsiteCancel =
-      result.consultationWithOnsiteCancel -
-      lastResult.consultationWithOnsiteCancel
+      lastResult.consultationWithOnsiteCancel === 0
+        ? result.consultationWithOnsiteCancel > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.consultationWithOnsiteCancel -
+              lastResult.consultationWithOnsiteCancel) /
+              lastResult.consultationWithOnsiteCancel) *
+              10000
+          ) / 100
+
     const compareOsiteCancelRates =
       lastResult.onsiteCancelRate === 0
         ? result.onsiteCancelRate > 0

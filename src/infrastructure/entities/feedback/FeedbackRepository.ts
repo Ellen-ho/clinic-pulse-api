@@ -472,21 +472,26 @@ export class FeedbackRepository
         threeStarFeedbackCount: totalThreeStarFeedbackCount,
         fourStarFeedbackCount: totalFourStarFeedbackCount,
         fiveStarFeedbackCount: totalFiveStarFeedbackCount,
-        oneStarFeedbackRate: Math.round(
-          (totalOneStarFeedbackCount / totalFeedbackCounts) * 100
-        ),
-        twoStarFeedbackRate: Math.round(
-          (totalTwoStarFeedbackCount / totalFeedbackCounts) * 100
-        ),
-        threeStarFeedbackRate: Math.round(
-          (totalThreeStarFeedbackCount / totalFeedbackCounts) * 100
-        ),
-        fourStarFeedbackRate: Math.round(
-          (totalFourStarFeedbackCount / totalFeedbackCounts) * 100
-        ),
-        fiveStarFeedbackRate: Math.round(
-          (totalFiveStarFeedbackCount / totalFeedbackCounts) * 100
-        ),
+        oneStarFeedbackRate:
+          Math.round(
+            (totalOneStarFeedbackCount / totalFeedbackCounts) * 10000
+          ) / 100,
+        twoStarFeedbackRate:
+          Math.round(
+            (totalTwoStarFeedbackCount / totalFeedbackCounts) * 10000
+          ) / 100,
+        threeStarFeedbackRate:
+          Math.round(
+            (totalThreeStarFeedbackCount / totalFeedbackCounts) * 10000
+          ) / 100,
+        fourStarFeedbackRate:
+          Math.round(
+            (totalFourStarFeedbackCount / totalFeedbackCounts) * 10000
+          ) / 100,
+        fiveStarFeedbackRate:
+          Math.round(
+            (totalFiveStarFeedbackCount / totalFeedbackCounts) * 10000
+          ) / 100,
         data: result.map((row) => ({
           date: row.date,
           feedbackCount: parseInt(row.feedbackcount, 10),
@@ -573,6 +578,76 @@ export class FeedbackRepository
         'FeedbackRepository getStarFeedback error',
         e as Error
       )
+    }
+  }
+
+  public async getPreviousPeriodDates(
+    startDate: string,
+    endDate: string,
+    granularity: Granularity = Granularity.WEEK
+  ): Promise<{ lastStartDate: string; lastEndDate: string }> {
+    const start = new Date(startDate)
+
+    switch (granularity) {
+      case Granularity.DAY: {
+        const lastStartDate = new Date(start)
+        const currentDayOfWeek = lastStartDate.getDay()
+
+        const daysToLastMonday =
+          currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1
+        lastStartDate.setDate(start.getDate() - 7 - daysToLastMonday)
+
+        const lastEndDate = new Date(lastStartDate)
+        lastEndDate.setDate(lastStartDate.getDate() + 6)
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
+      }
+      case Granularity.WEEK: {
+        const lastStartDate = new Date(start)
+        lastStartDate.setMonth(start.getMonth() - 1)
+        lastStartDate.setDate(1)
+
+        const lastEndDate = new Date(lastStartDate)
+        lastEndDate.setMonth(lastEndDate.getMonth() + 1)
+        lastEndDate.setDate(0)
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
+      }
+      case Granularity.MONTH:
+      case Granularity.YEAR: {
+        const lastStartDate = new Date(start)
+        lastStartDate.setFullYear(start.getFullYear() - 1)
+
+        if (granularity === Granularity.YEAR) {
+          lastStartDate.setMonth(0)
+          lastStartDate.setDate(1)
+        } else {
+          lastStartDate.setDate(1)
+        }
+
+        const lastEndDate = new Date(lastStartDate)
+
+        if (granularity === Granularity.YEAR) {
+          lastEndDate.setMonth(11)
+          lastEndDate.setDate(31)
+        } else {
+          lastEndDate.setMonth(lastStartDate.getMonth() + 1)
+          lastEndDate.setDate(0)
+        }
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
+      }
+      default:
+        throw new Error('Unsupported granularity')
     }
   }
 

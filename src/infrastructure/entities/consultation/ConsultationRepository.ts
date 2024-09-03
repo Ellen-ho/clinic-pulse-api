@@ -495,8 +495,8 @@ export class ConsultationRepository
             ? Math.round(
                 (parseInt(row.onsite_cancel_count, 10) /
                   parseInt(row.consultation_count, 10)) *
-                  100
-              )
+                  10000
+              ) / 100
             : 0,
       }))
 
@@ -511,8 +511,8 @@ export class ConsultationRepository
       const onsiteCancelRate =
         totalConsultations > 0
           ? Math.round(
-              (consultationWithOnsiteCancel / totalConsultations) * 100
-            )
+              (consultationWithOnsiteCancel / totalConsultations) * 10000
+            ) / 100
           : 0
 
       return {
@@ -890,7 +890,7 @@ export class ConsultationRepository
         const consultationCount = parseInt(row.consultation_count, 10)
         const firstTimeRate =
           consultationCount > 0
-            ? Math.round((firstTimeCount / consultationCount) * 100)
+            ? Math.round((firstTimeCount / consultationCount) * 10000) / 100
             : 0
 
         return {
@@ -911,7 +911,9 @@ export class ConsultationRepository
       )
       const firstTimeConsultationRate =
         totalConsultations > 0
-          ? Math.round((firstTimeConsultationCount / totalConsultations) * 100)
+          ? Math.round(
+              (firstTimeConsultationCount / totalConsultations) * 10000
+            ) / 100
           : 0
 
       return {
@@ -1714,8 +1716,8 @@ export class ConsultationRepository
             ? Math.round(
                 (parseInt(row.online_booking_count, 10) /
                   parseInt(row.consultation_count, 10)) *
-                  100
-              )
+                  10000
+              ) / 100
             : 0,
       }))
 
@@ -1730,8 +1732,8 @@ export class ConsultationRepository
       const onlineBookingRate =
         totalConsultations > 0
           ? Math.round(
-              (consultationWithOnlineBooking / totalConsultations) * 100
-            )
+              (consultationWithOnlineBooking / totalConsultations) * 10000
+            ) / 100
           : 0
       return {
         totalConsultations,
@@ -1753,15 +1755,18 @@ export class ConsultationRepository
     granularity: Granularity = Granularity.WEEK
   ): Promise<{ lastStartDate: string; lastEndDate: string }> {
     const start = new Date(startDate)
-    const end = new Date(endDate)
 
     switch (granularity) {
       case Granularity.DAY: {
         const lastStartDate = new Date(start)
-        const lastEndDate = new Date(end)
+        const currentDayOfWeek = lastStartDate.getDay()
 
-        lastStartDate.setDate(start.getDate() - 7)
-        lastEndDate.setDate(end.getDate() - 7)
+        const daysToLastMonday =
+          currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1
+        lastStartDate.setDate(start.getDate() - 7 - daysToLastMonday)
+
+        const lastEndDate = new Date(lastStartDate)
+        lastEndDate.setDate(lastStartDate.getDate() + 6)
 
         return {
           lastStartDate: lastStartDate.toISOString().split('T')[0],
@@ -1769,27 +1774,48 @@ export class ConsultationRepository
         }
       }
       case Granularity.WEEK: {
-        start.setMonth(start.getMonth() - 1)
-        end.setMonth(end.getMonth() - 1)
-        break
+        const lastStartDate = new Date(start)
+        lastStartDate.setMonth(start.getMonth() - 1)
+        lastStartDate.setDate(1)
+
+        const lastEndDate = new Date(lastStartDate)
+        lastEndDate.setMonth(lastEndDate.getMonth() + 1)
+        lastEndDate.setDate(0)
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
       }
-      case Granularity.MONTH: {
-        start.setFullYear(start.getFullYear() - 1)
-        end.setFullYear(end.getFullYear() - 1)
-        break
-      }
+      case Granularity.MONTH:
       case Granularity.YEAR: {
-        start.setFullYear(start.getFullYear() - 1)
-        end.setFullYear(end.getFullYear() - 1)
-        break
+        const lastStartDate = new Date(start)
+        lastStartDate.setFullYear(start.getFullYear() - 1)
+
+        if (granularity === Granularity.YEAR) {
+          lastStartDate.setMonth(0)
+          lastStartDate.setDate(1)
+        } else {
+          lastStartDate.setDate(1)
+        }
+
+        const lastEndDate = new Date(lastStartDate)
+
+        if (granularity === Granularity.YEAR) {
+          lastEndDate.setMonth(11)
+          lastEndDate.setDate(31)
+        } else {
+          lastEndDate.setMonth(lastStartDate.getMonth() + 1)
+          lastEndDate.setDate(0)
+        }
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
       }
       default:
         throw new Error('Unsupported granularity')
-    }
-
-    return {
-      lastStartDate: start.toISOString().split('T')[0],
-      lastEndDate: end.toISOString().split('T')[0],
     }
   }
 

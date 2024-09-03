@@ -98,9 +98,19 @@ export class GetConsultationBookingCountAndRateUseCase {
 
     const compareConsultations =
       result.totalConsultations - lastResult.totalConsultations
+
     const compareConsultationWithBooking =
-      result.consultationWithOnlineBooking -
-      lastResult.consultationWithOnlineBooking
+      lastResult.consultationWithOnlineBooking === 0
+        ? result.consultationWithOnlineBooking > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.consultationWithOnlineBooking -
+              lastResult.consultationWithOnlineBooking) /
+              lastResult.consultationWithOnlineBooking) *
+              10000
+          ) / 100
+
     const compareBookingRates =
       lastResult.onlineBookingRate === 0
         ? result.onlineBookingRate > 0
