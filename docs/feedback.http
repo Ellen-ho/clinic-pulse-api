@@ -28,7 +28,7 @@ Content-Type: application/json
 ###
 
 ### get feedback rations
-GET {{feedbacksPath}}/related_ratios?granularity=WEEK&startDate=2024-08-01&endDate=2024-08-31
+GET {{feedbacksPath}}/related_ratios?granularity=DAY&startDate=2024-09-02&endDate=2024-09-08
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
