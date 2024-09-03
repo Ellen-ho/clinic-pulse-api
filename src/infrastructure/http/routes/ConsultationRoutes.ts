@@ -115,6 +115,54 @@ export class ConsultationRoutes {
           this.consultationController.updateConsultationOnsiteCancelAt
         )
       )
+      .patch(
+        '/:id/check_out_at',
+        authenticated
+        // validator(createConsultationSchema),
+        // asyncHandler(this.consultationController.createConsultation)
+      )
+      .patch(
+        '/:id/acupuncture-treatments/remove_needle',
+        authenticated
+        // validator(createConsultationSchema),
+        // asyncHandler(this.consultationController.createConsultation)
+      )
+      .patch(
+        '/:id/acupuncture-treatments/start_at',
+        authenticated
+        // validator(createConsultationSchema),
+        // asyncHandler(this.consultationController.createConsultation)
+      )
+      .patch(
+        '/:id/acupuncture-treatments/assign_bed',
+        authenticated
+        // validator(createConsultationSchema),
+        // asyncHandler(this.consultationController.createConsultation)
+      )
+      .patch(
+        '/:id/medicine-treatments/get_medicine',
+        authenticated
+        // validator(createConsultationSchema),
+        // asyncHandler(this.consultationController.createConsultation)
+      )
+      .post(
+        '/:id/acupuncture-treatments',
+        authenticated
+        // validator(createConsultationSchema),
+        // asyncHandler(this.consultationController.createConsultation)
+      )
+      .post(
+        '/:id/medicine-treatments',
+        authenticated
+        // validator(createConsultationSchema),
+        // asyncHandler(this.consultationController.createConsultation)
+      )
+      .post(
+        '/:id/medicine_and_acupuncture',
+        authenticated
+        // validator(createConsultationSchema),
+        // asyncHandler(this.consultationController.createConsultation)
+      )
       .post(
         '/',
         authenticated,

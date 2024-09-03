@@ -15,7 +15,7 @@ Content-Type: application/json
 @accessToken = Bearer {{signin.response.body.token}}
 
 
-### create consultation
+### create consultation DONE
 POST {{hostname}}/api/consultations
 Authorization: {{accessToken}}
 Content-Type: application/json
@@ -27,9 +27,9 @@ Content-Type: application/json
 ###
 
 # 共同起點
-### update consultation startAt
-@id = 615b7608-ffa3-4afd-84d9-e1f95d9a9a59
-PATCH {{hostname}}/api/consultations/{{id}}/start_at
+### update consultation startAt DONE
+@consultationId = 615b7608-ffa3-4afd-84d9-e1f95d9a9a59
+PATCH {{hostname}}/api/consultations/{{consultationId}}/start_at
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###

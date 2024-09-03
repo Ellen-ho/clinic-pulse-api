@@ -390,14 +390,14 @@ export class ConsultationController implements IConsultationController {
     res: Response
   ): Promise<Response> => {
     const request = {
-      id: req.params.id,
+      consultationId: req.params.id,
     }
-    const consultationId = (
-      await this.updateConsultationStartAtUseCase.execute(request)
-    ).id
+
+    await this.updateConsultationStartAtUseCase.execute(request)
+
     const countResult =
       await this.getConsultationSocketRealTimeCountUseCase.execute({
-        consultationId,
+        consultationId: request.consultationId,
       })
 
     await this.realTimeUpdateHelper.sendUpdatedWaitingCounts({
@@ -417,7 +417,7 @@ export class ConsultationController implements IConsultationController {
 
     const getConsultationSocketRealTimeListRequest: GetConsultationSocketRealTimeListRequest =
       {
-        consultationId,
+        consultationId: request.consultationId,
       }
 
     const listResult =
