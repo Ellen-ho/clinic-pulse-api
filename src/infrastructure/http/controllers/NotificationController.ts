@@ -32,6 +32,8 @@ export class NotificationController implements INotificationController {
   ): Promise<Response> => {
     const request = {
       user: req.user as User,
+      page: req.query.page as string,
+      limit: req.query.limit as string,
     }
     const result = await this.getNotificationListUseCase.execute(request)
     return res.status(200).json(result)
