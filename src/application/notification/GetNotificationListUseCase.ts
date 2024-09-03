@@ -47,16 +47,7 @@ export class GetNotificationListUseCase {
         requestLimit,
         offset
       )
-    console.table({
-      requestLimit,
-      offset,
-      count: existingNotificationList.total_counts,
-      pagination: getPagination(
-        requestLimit,
-        offset,
-        existingNotificationList.total_counts
-      ),
-    })
+
     return {
       data: existingNotificationList.notifications,
       pagination: getPagination(
