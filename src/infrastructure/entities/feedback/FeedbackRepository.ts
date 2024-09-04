@@ -622,24 +622,16 @@ export class FeedbackRepository
       case Granularity.MONTH:
       case Granularity.YEAR: {
         const lastStartDate = new Date(start)
+        const lastEndDate = new Date(start)
+
         lastStartDate.setFullYear(start.getFullYear() - 1)
+        lastEndDate.setFullYear(start.getFullYear() - 1)
 
-        if (granularity === Granularity.YEAR) {
-          lastStartDate.setMonth(0)
-          lastStartDate.setDate(1)
-        } else {
-          lastStartDate.setDate(1)
-        }
+        lastStartDate.setMonth(0)
+        lastStartDate.setDate(1)
 
-        const lastEndDate = new Date(lastStartDate)
-
-        if (granularity === Granularity.YEAR) {
-          lastEndDate.setMonth(11)
-          lastEndDate.setDate(31)
-        } else {
-          lastEndDate.setMonth(lastStartDate.getMonth() + 1)
-          lastEndDate.setDate(0)
-        }
+        lastEndDate.setMonth(11)
+        lastEndDate.setDate(31)
 
         return {
           lastStartDate: lastStartDate.toISOString().split('T')[0],

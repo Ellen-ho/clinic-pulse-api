@@ -100,6 +100,9 @@ import { GetConsultationOnsiteCanceledCountAndRateUseCase } from './application/
 import { GetConsultationBookingCountAndRateUseCase } from './application/consultation/GetConsultationBookingCountAndRateUseCase'
 import { PermissionRepository } from './infrastructure/entities/permission/PermissionRepository'
 import { UpdateConsultationToWaitForBedUseCase } from 'application/consultation/UpdateConsultationToWaitForBedUseCase'
+import { CreatePasswordChangeMailUseCase } from 'application/user/CreatePasswordChangeMailUseCase'
+import { UpdatePasswordUseCase } from 'application/user/UpdatePasswordUseCase'
+import { GoogleMailService } from 'infrastructure/network/GoogleMailService'
 void main()
 
 async function main(): Promise<void> {
@@ -162,6 +165,7 @@ async function main(): Promise<void> {
   const uuidService = new UuidService()
   const hashGenerator = new BcryptHashGenerator()
   const scheduler = new Scheduler()
+  const mailService = new GoogleMailService()
   const queueService = new QueueService({
     redisPort: Number(process.env.REDIS_PORT as string),
     redisUrl: process.env.REDIS_HOST as string,
@@ -230,6 +234,16 @@ async function main(): Promise<void> {
     s3Client,
     uuidService,
     doctorRepository
+  )
+
+  const createPasswordChangeMailUseCase = new CreatePasswordChangeMailUseCase(
+    userRepository,
+    mailService
+  )
+
+  const updatePasswordUseCase = new UpdatePasswordUseCase(
+    userRepository,
+    hashGenerator
   )
 
   const getAllDoctorsUseCase = new GetAllDoctorsUseCase(doctorRepository)
@@ -487,7 +501,9 @@ async function main(): Promise<void> {
     createUserUseCase,
     createDoctorUseCase,
     doctorRepository,
-    permissionRepository
+    permissionRepository,
+    createPasswordChangeMailUseCase,
+    updatePasswordUseCase
   )
 
   const consultationController = new ConsultationController(
