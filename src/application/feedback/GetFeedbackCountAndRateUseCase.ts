@@ -117,9 +117,6 @@ export class GetFeedbackCountAndRateUseCase {
         granularity
       )
 
-    console.log(lastStartDate)
-    console.log(lastEndDate)
-
     const lastResult = await this.feedbackRepository.getStarFeedback(
       lastStartDate,
       lastEndDate,

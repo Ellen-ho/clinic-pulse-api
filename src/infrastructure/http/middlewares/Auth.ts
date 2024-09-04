@@ -23,7 +23,7 @@ const authenticated = (
         return res.status(401).json({ status: 'error', message: '驗證失敗！' })
       }
       req.user = user
-      //@ts-expect-error
+      // @ts-expect-error
       req.permissions = info.permissions
       next()
     }

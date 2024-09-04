@@ -31,8 +31,6 @@ export class UpdateConsultationCheckOutAtUseCase {
       checkOutAt: new Date(),
     })
 
-    console.log(existingConsultation)
-
     await this.consultationRepository.save(existingConsultation)
   }
 }
