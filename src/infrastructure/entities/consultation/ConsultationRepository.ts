@@ -1469,10 +1469,9 @@ export class ConsultationRepository
     }
   }
 
-  public async checkMedicineTreatment(acupunctureTreatmentId: string): Promise<{
+  public async checkMedicineTreatment(
     consultationId: string
-    medicineTreatment: MedicineTreatment
-  } | null> {
+  ): Promise<{ medicineTreatment: MedicineTreatment } | null> {
     try {
       const result = await this.getQuery<
         Array<{
@@ -1482,19 +1481,18 @@ export class ConsultationRepository
         }>
       >(
         `
-        SELECT c.id, mt.id AS medicine_treatment_id, mt.get_medicine_at
+        SELECT mt.id AS medicine_treatment_id, mt.get_medicine_at
         FROM consultations c
         LEFT JOIN medicine_treatments mt ON mt.id = c.medicine_treatment_id
-        WHERE c.acupuncture_treatment_id = $1
+        WHERE c.id = $1
         AND c.medicine_treatment_id IS NOT NULL
         LIMIT 1
         `,
-        [acupunctureTreatmentId]
+        [consultationId]
       )
 
       if (result.length > 0) {
         const {
-          id: consultationId,
           medicine_treatment_id: medicineTreatmentId,
           get_medicine_at: getMedicineAt,
         } = result[0]
@@ -1505,7 +1503,6 @@ export class ConsultationRepository
         })
 
         return {
-          consultationId,
           medicineTreatment,
         }
       }

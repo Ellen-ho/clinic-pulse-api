@@ -1,28 +1,27 @@
 import {
   CONSULTATION_JOB_NAME,
   IConsultationQueueService,
-} from '../../application/queue/ConsultationQueueService'
+} from '../queue/ConsultationQueueService'
 import { ConsultationStatus } from '../../domain/consultation/Consultation'
 import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { AcupunctureTreatment } from '../../domain/treatment/AcupunctureTreatment'
 import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
-interface UpdateConsultationToAcupunctureRequest {
+interface UpdateConsultationToWaitForBedRequest {
   id: string
   acupunctureTreatment: AcupunctureTreatment
 }
 
-export class UpdateConsultationToAcupunctureUseCase {
+export class UpdateConsultationToWaitForBedUseCase {
   constructor(
     private readonly consultationRepository: IConsultationRepository,
     private readonly consultationQueueService: IConsultationQueueService
   ) {}
 
   public async execute(
-    request: UpdateConsultationToAcupunctureRequest
+    request: UpdateConsultationToWaitForBedRequest
   ): Promise<void> {
-    const { acupunctureTreatment } = request
-    const id = 'e3b82db9-8d99-4b47-b419-5d287bb4cce5'
+    const { id, acupunctureTreatment } = request
 
     const existingConsultation = await this.consultationRepository.getById(id)
 
@@ -33,7 +32,7 @@ export class UpdateConsultationToAcupunctureUseCase {
     const updatedStatus = ConsultationStatus.WAITING_FOR_BED_ASSIGNMENT
     const updatedEndAt = new Date()
 
-    existingConsultation.updateToAcupuncture({
+    existingConsultation.updateToWaitForBed({
       status: updatedStatus,
       endAt: updatedEndAt,
       acupunctureTreatment,
@@ -44,7 +43,7 @@ export class UpdateConsultationToAcupunctureUseCase {
     await this.consultationQueueService.addConsultationJob(
       CONSULTATION_JOB_NAME.CHECK_BED_ASSIGNED_WAITING_TIME,
       { consultationId: existingConsultation.id },
-      { delay: 60 * 1000 }
+      { delay: 30 * 60 * 1000 }
     )
   }
 }

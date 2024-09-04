@@ -42,23 +42,17 @@ import { CreateConsultationUseCase } from './application/consultation/CreateCons
 import { GetAllDoctorsUseCase } from './application/doctor/GetAllDoctorsUseCase'
 import { DoctorController } from './infrastructure/http/controllers/DoctorController'
 import { DoctorRoutes } from './infrastructure/http/routes/DoctorRoutes'
-import { CreateAcupunctureTreatmentUseCase } from './application/treatment/CreateAcupunctureTreatmentUseCase'
-import { AcupunctureTreatmentController } from './infrastructure/http/controllers/AcupunctureTreatmentController'
-import { CreateMedicineTreatmentUseCase } from './application/treatment/CreateMedicineTreatmentUseCase'
+import { CreateAcupunctureTreatmentUseCase } from './application/consultation/CreateAcupunctureTreatmentUseCase'
+import { CreateMedicineTreatmentUseCase } from './application/consultation/CreateMedicineTreatmentUseCase'
 import { AcupunctureTreatmentRepository } from './infrastructure/entities/treatment/AcupunctureTreatmentRepository'
 import { MedicineTreatmentRepository } from './infrastructure/entities/treatment/MedicineTreatmentRepository'
-import { MedicineTreatmentController } from './infrastructure/http/controllers/MedicineTreatmentController'
-import { AcupunctureRoutes } from './infrastructure/http/routes/AcupunctureRoutes'
-import { MedicineRoutes } from './infrastructure/http/routes/MedicineRoutes'
-import { UpdateConsultationToAcupunctureUseCase } from './application/consultation/UpdateConsultationToAcupunctureUseCase'
 import { UpdateConsultationToMedicineUseCase } from './application/consultation/UpdateConsultationToMedicineUseCase'
 import { UpdateConsultationCheckOutAtUseCase } from './application/consultation/UpdateConsultationCheckOutAtUseCase'
-import { UpdateAcupunctureTreatmentAssignBedUseCase } from './application/treatment/UpdateAcupunctureTreatmentAssignBedUseCase'
-import { UpdateAcupunctureTreatmentStartAtUseCase } from './application/treatment/UpdateAcupunctureTreatmentStartAtUseCase'
-import { UpdateAcupunctureTreatmentRemoveNeedleAtUseCase } from './application/treatment/UpdateAcupunctureTreatmentRemoveNeedleAtUseCase'
+import { UpdateAcupunctureTreatmentStartAtUseCase } from './application/consultation/UpdateAcupunctureTreatmentStartAtUseCase'
+import { UpdateAcupunctureTreatmentRemoveNeedleAtUseCase } from './application/consultation/UpdateAcupunctureTreatmentRemoveNeedleAtUseCase'
 import { UpdateConsultationToWaitAcupunctureUseCase } from './application/consultation/UpdateConsultationToWaitAcupunctureUseCase'
 import { UpdateConsultationToWaitRemoveNeedleUseCase } from './application/consultation/UpdateConsultationToWaitRemoveNeedleUseCase'
-import { UpdateMedicineTreatmentUseCase } from './application/treatment/UpdateMedicineTreatmentUseCase'
+import { UpdateMedicineTreatmentUseCase } from './application/consultation/UpdateMedicineTreatmentUseCase'
 import { CommonController } from './infrastructure/http/controllers/CommonController'
 import { GetDoctorsAndClinicsUseCase } from './application/common/GetDoctorsAndClinicsUseCase'
 import { ClinicRepository } from './infrastructure/entities/clinic/ClinicRepository'
@@ -85,7 +79,7 @@ import { ReviewRoutes } from './infrastructure/http/routes/ReviewRoutes'
 import { GetSingleReviewUseCase } from './application/review/GetSingleReviewUseCase'
 import RealTimeSocketService from './infrastructure/network/RealtimeSocketService'
 import { RealTimeUpdateHelper } from './application/consultation/RealTimeUpdateHelper'
-import { CreateAcupunctureAndMedicineUseCase } from './application/common/CreateAcupunctureAndMedicineUseCase'
+import { CreateAcupunctureAndMedicineUseCase } from './application/consultation/CreateAcupunctureAndMedicineUseCase'
 import { GetConsultationSocketRealTimeCountUseCase } from './application/consultation/GetConsultationSocketRealTimeCountUseCase'
 import { GetConsultationRealTimeListUseCase } from './application/consultation/GetConsultationRealTimeListUseCase'
 import { GetConsultationSocketRealTimeListUseCase } from './application/consultation/GetConsultationSocketRealTimeListUseCase'
@@ -105,6 +99,7 @@ import { ConsultationQueueService } from './application/queue/ConsultationQueueS
 import { GetConsultationOnsiteCanceledCountAndRateUseCase } from './application/consultation/GetConsultationOnsiteCanceledCountAndRateUseCase'
 import { GetConsultationBookingCountAndRateUseCase } from './application/consultation/GetConsultationBookingCountAndRateUseCase'
 import { PermissionRepository } from './infrastructure/entities/permission/PermissionRepository'
+import { UpdateConsultationToWaitForBedUseCase } from 'application/consultation/UpdateConsultationToWaitForBedUseCase'
 void main()
 
 async function main(): Promise<void> {
@@ -338,11 +333,13 @@ async function main(): Promise<void> {
   const createAcupunctureTreatmentUseCase =
     new CreateAcupunctureTreatmentUseCase(
       acupunctureTreatmentRepository,
+      consultationRepository,
       uuidService
     )
 
   const createMedicineTreatmentUseCase = new CreateMedicineTreatmentUseCase(
     medicineTreatmentRepository,
+    consultationRepository,
     uuidService
   )
 
@@ -350,12 +347,14 @@ async function main(): Promise<void> {
     new CreateAcupunctureAndMedicineUseCase(
       acupunctureTreatmentRepository,
       medicineTreatmentRepository,
+      consultationRepository,
       uuidService
     )
 
-  const updateConsultationToAcupunctureUseCase =
-    new UpdateConsultationToAcupunctureUseCase(
+  const updateConsultationToWaitAcupunctureUseCase =
+    new UpdateConsultationToWaitAcupunctureUseCase(
       consultationRepository,
+      acupunctureTreatmentRepository,
       consultationQueueService
     )
 
@@ -368,23 +367,21 @@ async function main(): Promise<void> {
   const updateConsultationCheckOutAtUseCase =
     new UpdateConsultationCheckOutAtUseCase(consultationRepository)
 
-  const updateAcupunctureTreatmentAssignBedUseCase =
-    new UpdateAcupunctureTreatmentAssignBedUseCase(
-      acupunctureTreatmentRepository
+  const updateConsultationToWaitForBedUseCase =
+    new UpdateConsultationToWaitForBedUseCase(
+      consultationRepository,
+      consultationQueueService
     )
 
   const updateAcupunctureTreatmentStartAtUseCase =
-    new UpdateAcupunctureTreatmentStartAtUseCase(acupunctureTreatmentRepository)
+    new UpdateAcupunctureTreatmentStartAtUseCase(
+      acupunctureTreatmentRepository,
+      consultationRepository
+    )
 
   const updateAcupunctureTreatmentRemoveNeedleAtUseCase =
     new UpdateAcupunctureTreatmentRemoveNeedleAtUseCase(
       acupunctureTreatmentRepository
-    )
-
-  const updateConsultationToWaitAcupunctureUseCase =
-    new UpdateConsultationToWaitAcupunctureUseCase(
-      consultationRepository,
-      consultationQueueService
     )
 
   const updateConsultationToWaitRemoveNeedleUseCase =
@@ -484,14 +481,7 @@ async function main(): Promise<void> {
   await googleReviewCronJob.init()
 
   // Controller
-  const commonController = new CommonController(
-    getDoctorsAndClinicsUseCase,
-    createAcupunctureAndMedicineUseCase,
-    updateConsultationToAcupunctureUseCase,
-    getConsultationSocketRealTimeCountUseCase,
-    getConsultationSocketRealTimeListUseCase,
-    realTimeUpdateHelper
-  )
+  const commonController = new CommonController(getDoctorsAndClinicsUseCase)
 
   const userController = new UserController(
     createUserUseCase,
@@ -517,7 +507,18 @@ async function main(): Promise<void> {
     updateConsultationOnsiteCancelAtUseCase,
     getConsultationSocketRealTimeCountUseCase,
     getConsultationRealTimeListUseCase,
-    getConsultationSocketRealTimeListUseCase
+    getConsultationSocketRealTimeListUseCase,
+    createAcupunctureTreatmentUseCase,
+    updateConsultationToWaitForBedUseCase,
+    createMedicineTreatmentUseCase,
+    updateConsultationToMedicineUseCase,
+    updateConsultationToWaitAcupunctureUseCase,
+    updateAcupunctureTreatmentStartAtUseCase,
+    updateConsultationToWaitRemoveNeedleUseCase,
+    updateAcupunctureTreatmentRemoveNeedleAtUseCase,
+    updateMedicineTreatmentUseCase,
+    createAcupunctureAndMedicineUseCase,
+    consultationRepository
   )
 
   const feedbackController = new FeedbackController(
@@ -535,31 +536,6 @@ async function main(): Promise<void> {
     getAllDoctorsUseCase,
     getDoctorProfileUseCase,
     editDoctorAvatarUseCase
-  )
-
-  const acupunctureTreatmentController = new AcupunctureTreatmentController(
-    createAcupunctureTreatmentUseCase,
-    updateConsultationToAcupunctureUseCase,
-    updateAcupunctureTreatmentAssignBedUseCase,
-    updateAcupunctureTreatmentStartAtUseCase,
-    updateAcupunctureTreatmentRemoveNeedleAtUseCase,
-    updateConsultationToWaitAcupunctureUseCase,
-    updateConsultationToWaitRemoveNeedleUseCase,
-    getConsultationSocketRealTimeCountUseCase,
-    getConsultationSocketRealTimeListUseCase,
-    updateConsultationToMedicineUseCase,
-    realTimeUpdateHelper,
-    consultationRepository
-  )
-
-  const medicineTreatmentController = new MedicineTreatmentController(
-    createMedicineTreatmentUseCase,
-    updateConsultationToMedicineUseCase,
-    updateMedicineTreatmentUseCase,
-    updateConsultationCheckOutAtUseCase,
-    getConsultationSocketRealTimeCountUseCase,
-    getConsultationSocketRealTimeListUseCase,
-    realTimeUpdateHelper
   )
 
   const notificationController = new NotificationController(
@@ -600,10 +576,6 @@ async function main(): Promise<void> {
   const feedbackRoutes = new FeedbackRoutes(feedbackController)
   const patientRoutes = new PatientRoutes(patientController)
   const doctorRoutes = new DoctorRoutes(doctorController)
-  const acupunctureRoutes = new AcupunctureRoutes(
-    acupunctureTreatmentController
-  )
-  const medicineRoutes = new MedicineRoutes(medicineTreatmentController)
   const notificationRoutes = new NotificationRoutes(notificationController)
   const reviewRoutes = new ReviewRoutes(reviewController)
   const commonRoutes = new CommonRoutes(commonController)
@@ -615,8 +587,6 @@ async function main(): Promise<void> {
     feedbackRoutes,
     patientRoutes,
     doctorRoutes,
-    acupunctureRoutes,
-    medicineRoutes,
     notificationRoutes,
     reviewRoutes,
     commonRoutes,

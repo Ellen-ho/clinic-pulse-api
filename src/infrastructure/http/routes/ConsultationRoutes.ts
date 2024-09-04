@@ -4,7 +4,10 @@ import { authenticated } from '../middlewares/Auth'
 import { validator } from '../middlewares/Validator'
 import { asyncHandler } from '../middlewares/AsyncHandler'
 import {
+  createAcupunctureAndMedicineSchema,
+  createAcupunctureTreatmentSchema,
   createConsultationSchema,
+  createMedicineTreatmentSchema,
   getAverageConsultationCountSchema,
   getAverageWaitingTimeSchema,
   getConsultationBookingSchema,
@@ -14,6 +17,11 @@ import {
   getConsultationRealTimeListSchema,
   getDifferentTreatmentConsultationSchema,
   getSingleConsultationSchema,
+  updateAcupunctureStartAtSchema,
+  updateAcupunctureTreatmentRemoveNeedleAtSchema,
+  updateConsultationCheckOutSchema,
+  updateConsultationWaitForAcupunctureSchema,
+  updateMedicineTreatmentSchema,
 } from '../../../application/consultation/ConsultationValidator'
 import { authorized } from '../middlewares/Authorized'
 import { PERMISSION } from '../../../domain/permission/Permission'
@@ -104,64 +112,70 @@ export class ConsultationRoutes {
         asyncHandler(this.consultationController.getConsultationList)
       )
       .patch(
-        '/:id/start_at',
+        '/:id/start',
         authenticated,
         asyncHandler(this.consultationController.updateConsultationStartAt)
       )
       .patch(
-        '/:id/onsite_cancel_at',
+        '/:id/onsite_cancel',
         authenticated,
         asyncHandler(
           this.consultationController.updateConsultationOnsiteCancelAt
         )
       )
       .patch(
-        '/:id/check_out_at',
-        authenticated
-        // validator(createConsultationSchema),
-        // asyncHandler(this.consultationController.createConsultation)
+        '/:id/check_out',
+        authenticated,
+        validator(updateConsultationCheckOutSchema),
+        asyncHandler(this.consultationController.updateConsultationCheckOutAt)
       )
       .patch(
-        '/:id/acupuncture-treatments/remove_needle',
-        authenticated
-        // validator(createConsultationSchema),
-        // asyncHandler(this.consultationController.createConsultation)
+        '/:id/acupuncture-treatmen/remove_needle',
+        authenticated,
+        validator(updateAcupunctureTreatmentRemoveNeedleAtSchema),
+        asyncHandler(
+          this.consultationController.updateAcupunctureTreatmentRemoveNeedleAt
+        )
       )
       .patch(
-        '/:id/acupuncture-treatments/start_at',
-        authenticated
-        // validator(createConsultationSchema),
-        // asyncHandler(this.consultationController.createConsultation)
+        '/:id/acupuncture-treatment/start',
+        authenticated,
+        validator(updateAcupunctureStartAtSchema),
+        asyncHandler(
+          this.consultationController.updateAcupunctureTreatmentStartAt
+        )
       )
       .patch(
-        '/:id/acupuncture-treatments/assign_bed',
-        authenticated
-        // validator(createConsultationSchema),
-        // asyncHandler(this.consultationController.createConsultation)
+        '/:id/acupuncture-treatment/assign_bed',
+        authenticated,
+        validator(updateConsultationWaitForAcupunctureSchema),
+        asyncHandler(
+          this.consultationController.updateConsultationToWaitAcupuncture
+        )
       )
       .patch(
-        '/:id/medicine-treatments/get_medicine',
-        authenticated
-        // validator(createConsultationSchema),
-        // asyncHandler(this.consultationController.createConsultation)
+        '/:id/medicine-treatment/get_medicine',
+        authenticated,
+        validator(updateMedicineTreatmentSchema),
+        asyncHandler(this.consultationController.updateMedicineTreatment)
       )
       .post(
-        '/:id/acupuncture-treatments',
-        authenticated
-        // validator(createConsultationSchema),
-        // asyncHandler(this.consultationController.createConsultation)
+        '/:id/acupuncture-treatment',
+        authenticated,
+        validator(createAcupunctureTreatmentSchema),
+        asyncHandler(this.consultationController.createAcupunctureTreatment)
       )
       .post(
-        '/:id/medicine-treatments',
-        authenticated
-        // validator(createConsultationSchema),
-        // asyncHandler(this.consultationController.createConsultation)
+        '/:id/medicine-treatment',
+        authenticated,
+        validator(createMedicineTreatmentSchema),
+        asyncHandler(this.consultationController.createMedicineTreatment)
       )
       .post(
         '/:id/medicine_and_acupuncture',
-        authenticated
-        // validator(createConsultationSchema),
-        // asyncHandler(this.consultationController.createConsultation)
+        authenticated,
+        validator(createAcupunctureAndMedicineSchema),
+        asyncHandler(this.consultationController.createAcupunctureAndMedicine)
       )
       .post(
         '/',

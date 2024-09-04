@@ -3,7 +3,7 @@ import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 import { formatToUTC8 } from '../../infrastructure/utils/DateFormatToUTC'
 
 interface UpdateMedicineTreatmentRequest {
-  id: string
+  consultationId: string
 }
 
 export class UpdateMedicineTreatmentUseCase {
@@ -12,10 +12,12 @@ export class UpdateMedicineTreatmentUseCase {
   ) {}
 
   public async execute(request: UpdateMedicineTreatmentRequest): Promise<void> {
-    const id = '6a7815ff-6d51-4351-b765-28b68ce61843'
+    const { consultationId } = request
 
     const existingMedicneTreatment =
-      await this.medicineTreatmentRepository.getById(id)
+      await this.medicineTreatmentRepository.findByConsultationId(
+        consultationId
+      )
 
     if (existingMedicneTreatment == null) {
       throw new NotFoundError('This medicine treatment does not exist.')

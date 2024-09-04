@@ -21,8 +21,7 @@ export class UpdateConsultationToMedicineUseCase {
   public async execute(
     request: UpdateConsultationToMedicineRequest
   ): Promise<void> {
-    const { medicineTreatment } = request
-    const id = '6a7815ff-6d51-4351-b765-28b68ce61843'
+    const { id, medicineTreatment } = request
 
     const existingConsultation = await this.consultationRepository.getById(id)
 

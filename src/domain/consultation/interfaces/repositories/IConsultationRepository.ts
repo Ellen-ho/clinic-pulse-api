@@ -8,6 +8,7 @@ import {
 } from '../../../../domain/consultation/Consultation'
 import { IBaseRepository } from '../../../../domain/shared/IBaseRepository'
 import { TimePeriodType } from '../../../../domain/timeSlot/TimeSlot'
+import { MedicineTreatment } from 'domain/treatment/MedicineTreatment'
 
 export interface IConsultationRepository extends IBaseRepository<Consultation> {
   findById: (id: string) => Promise<{
@@ -273,4 +274,7 @@ export interface IConsultationRepository extends IBaseRepository<Consultation> {
     endDate: string,
     granularity?: Granularity
   ) => Promise<{ lastStartDate: string; lastEndDate: string }>
+  checkMedicineTreatment: (
+    consultationId: string
+  ) => Promise<{ medicineTreatment: MedicineTreatment } | null>
 }

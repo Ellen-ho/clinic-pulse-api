@@ -5,4 +5,7 @@ export interface IAcupunctureTreatmentRepository
   extends IBaseRepository<AcupunctureTreatment> {
   save: (acupunctureTreatment: AcupunctureTreatment) => Promise<void>
   getById: (id: string) => Promise<AcupunctureTreatment | null>
+  findByConsultationId: (
+    consultationId: string
+  ) => Promise<AcupunctureTreatment | null>
 }

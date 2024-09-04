@@ -5,4 +5,7 @@ export interface IMedicineTreatmentRepository
   extends IBaseRepository<MedicineTreatment> {
   save: (medicineTreatment: MedicineTreatment) => Promise<void>
   getById: (id: string) => Promise<MedicineTreatment | null>
+  findByConsultationId: (
+    consultationId: string
+  ) => Promise<MedicineTreatment | null>
 }

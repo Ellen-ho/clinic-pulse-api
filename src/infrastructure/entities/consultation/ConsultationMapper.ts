@@ -47,6 +47,7 @@ export class ConsultationMapper
     consultationEntity.checkInAt = domainModel.checkInAt
     consultationEntity.startAt = domainModel.startAt
     consultationEntity.endAt = domainModel.endAt
+    consultationEntity.checkOutAt = domainModel.checkOutAt
     consultationEntity.onsiteCancelAt = domainModel.onsiteCancelAt
     consultationEntity.onsiteCancelReason = domainModel.onsiteCancelReason
     consultationEntity.isFirstTimeVisit = domainModel.isFirstTimeVisit
