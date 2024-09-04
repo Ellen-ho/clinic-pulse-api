@@ -23,7 +23,7 @@ export class PassportConfig {
           passReqToCallback: true,
         },
         (req, email, password, done) => {
-          const errorMessage = 'Email or password is incorrect.'
+          const errorMessage = '電子信箱或密碼錯誤！'
 
           this.userRepo
             .findByEmail(email)
