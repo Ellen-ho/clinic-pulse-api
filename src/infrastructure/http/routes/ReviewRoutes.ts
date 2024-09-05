@@ -14,7 +14,8 @@ import { PERMISSION } from '../../../domain/permission/Permission'
 export class ReviewRoutes {
   private readonly routes: Router
   constructor(private readonly reviewController: IReviewController) {
-    this.routes = Router().get(
+    this.routes = Router()
+    this.routes.get(
       '/related_ratios',
       authenticated,
       authorized(PERMISSION.REPORT_CENTER_READ),
