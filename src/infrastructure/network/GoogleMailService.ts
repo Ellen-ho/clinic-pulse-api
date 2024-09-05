@@ -3,7 +3,7 @@ import nodemailer, { Transporter } from 'nodemailer'
 import {
   IMailService,
   ISendMailParams,
-} from 'domain/network/interfaces/IMailService'
+} from '../../domain/network/interfaces/IMailService'
 
 const SENDER_EMAIL_ADDRESS = process.env.SENDER_EMAIL_ADDRESS as string
 const GMAIL_PASSWORD = process.env.GMAIL_PASSWORD as string

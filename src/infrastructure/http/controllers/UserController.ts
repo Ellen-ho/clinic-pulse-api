@@ -6,8 +6,8 @@ import { CreateDoctorUseCase } from '../../../application/doctor/CreateDoctorUse
 import { DoctorRepository } from '../../../infrastructure/entities/doctor/DoctorRepository'
 import { getAvatarUrl } from '../../../application/helper/AvatarHelper'
 import { PermissionRepository } from '../../../infrastructure/entities/permission/PermissionRepository'
-import { CreatePasswordChangeMailUseCase } from 'application/user/CreatePasswordChangeMailUseCase'
-import { UpdatePasswordUseCase } from 'application/user/UpdatePasswordUseCase'
+import { CreatePasswordChangeMailUseCase } from '../../../application/user/CreatePasswordChangeMailUseCase'
+import { UpdatePasswordUseCase } from '../../../application/user/UpdatePasswordUseCase'
 
 export interface IUserController {
   signin: (req: Request, res: Response) => Promise<Response>

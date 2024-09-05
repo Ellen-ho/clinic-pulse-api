@@ -33,20 +33,20 @@ import {
 } from '../../../application/consultation/GetConsultationSocketRealTimeListUseCase'
 import { RoomNumberType } from '../../../domain/consultationRoom/ConsultationRoom'
 import { GetConsultationBookingCountAndRateUseCase } from '../../../application/consultation/GetConsultationBookingCountAndRateUseCase'
-import { CreateAcupunctureTreatmentUseCase } from 'application/consultation/CreateAcupunctureTreatmentUseCase'
-import { UpdateConsultationToMedicineUseCase } from 'application/consultation/UpdateConsultationToMedicineUseCase'
-import { CreateMedicineTreatmentUseCase } from 'application/consultation/CreateMedicineTreatmentUseCase'
-import { UpdateConsultationToWaitForBedUseCase } from 'application/consultation/UpdateConsultationToWaitForBedUseCase'
-import { UpdateConsultationToWaitAcupunctureUseCase } from 'application/consultation/UpdateConsultationToWaitAcupunctureUseCase'
-import { UpdateAcupunctureTreatmentStartAtUseCase } from 'application/consultation/UpdateAcupunctureTreatmentStartAtUseCase'
+import { CreateAcupunctureTreatmentUseCase } from '../../../application/consultation/CreateAcupunctureTreatmentUseCase'
+import { UpdateConsultationToMedicineUseCase } from '../../../application/consultation/UpdateConsultationToMedicineUseCase'
+import { CreateMedicineTreatmentUseCase } from '../../../application/consultation/CreateMedicineTreatmentUseCase'
+import { UpdateConsultationToWaitForBedUseCase } from '../../../application/consultation/UpdateConsultationToWaitForBedUseCase'
+import { UpdateConsultationToWaitAcupunctureUseCase } from '../../../application/consultation/UpdateConsultationToWaitAcupunctureUseCase'
+import { UpdateAcupunctureTreatmentStartAtUseCase } from '../../../application/consultation/UpdateAcupunctureTreatmentStartAtUseCase'
 import {
   UpdateConsultationToWaitRemoveNeedleRequest,
   UpdateConsultationToWaitRemoveNeedleUseCase,
-} from 'application/consultation/UpdateConsultationToWaitRemoveNeedleUseCase'
-import { UpdateAcupunctureTreatmentRemoveNeedleAtUseCase } from 'application/consultation/UpdateAcupunctureTreatmentRemoveNeedleAtUseCase'
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
-import { UpdateMedicineTreatmentUseCase } from 'application/consultation/UpdateMedicineTreatmentUseCase'
-import { CreateAcupunctureAndMedicineUseCase } from 'application/consultation/CreateAcupunctureAndMedicineUseCase'
+} from '../../../application/consultation/UpdateConsultationToWaitRemoveNeedleUseCase'
+import { UpdateAcupunctureTreatmentRemoveNeedleAtUseCase } from '../../../application/consultation/UpdateAcupunctureTreatmentRemoveNeedleAtUseCase'
+import { IConsultationRepository } from '../../../domain/consultation/interfaces/repositories/IConsultationRepository'
+import { UpdateMedicineTreatmentUseCase } from '../../../application/consultation/UpdateMedicineTreatmentUseCase'
+import { CreateAcupunctureAndMedicineUseCase } from '../../../application/consultation/CreateAcupunctureAndMedicineUseCase'
 
 export interface IConsultationController {
   getConsultationList: (req: Request, res: Response) => Promise<Response>

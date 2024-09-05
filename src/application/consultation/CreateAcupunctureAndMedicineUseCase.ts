@@ -1,10 +1,10 @@
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { AcupunctureTreatment } from '../../domain/treatment/AcupunctureTreatment'
 import { IAcupunctureTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
 import { IMedicineTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
 import { MedicineTreatment } from '../../domain/treatment/MedicineTreatment'
 import { IUuidService } from '../../domain/utils/IUuidService'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface CreateAcupunctureAndMedicineRequest {
   consultationId: string

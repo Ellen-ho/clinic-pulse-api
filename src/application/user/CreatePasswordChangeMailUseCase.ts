@@ -2,7 +2,7 @@ import { IUserRepository } from '../../domain/user/interfaces/repositories/IUser
 import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 import jwt from 'jsonwebtoken'
 import { getResetPasswordTemplate } from './constant/MailTemplate'
-import { IMailService } from 'domain/network/interfaces/IMailService'
+import { IMailService } from '../../domain/network/interfaces/IMailService'
 
 interface CreatePasswordChangeMailRequest {
   email: string

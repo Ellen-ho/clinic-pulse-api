@@ -8,7 +8,7 @@ import {
 } from '../../../../domain/consultation/Consultation'
 import { IBaseRepository } from '../../../../domain/shared/IBaseRepository'
 import { TimePeriodType } from '../../../../domain/timeSlot/TimeSlot'
-import { MedicineTreatment } from 'domain/treatment/MedicineTreatment'
+import { MedicineTreatment } from '../../../../domain/treatment/MedicineTreatment'
 
 export interface IConsultationRepository extends IBaseRepository<Consultation> {
   findById: (id: string) => Promise<{

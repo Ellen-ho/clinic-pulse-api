@@ -99,10 +99,10 @@ import { ConsultationQueueService } from './application/queue/ConsultationQueueS
 import { GetConsultationOnsiteCanceledCountAndRateUseCase } from './application/consultation/GetConsultationOnsiteCanceledCountAndRateUseCase'
 import { GetConsultationBookingCountAndRateUseCase } from './application/consultation/GetConsultationBookingCountAndRateUseCase'
 import { PermissionRepository } from './infrastructure/entities/permission/PermissionRepository'
-import { UpdateConsultationToWaitForBedUseCase } from 'application/consultation/UpdateConsultationToWaitForBedUseCase'
-import { CreatePasswordChangeMailUseCase } from 'application/user/CreatePasswordChangeMailUseCase'
-import { UpdatePasswordUseCase } from 'application/user/UpdatePasswordUseCase'
-import { GoogleMailService } from 'infrastructure/network/GoogleMailService'
+import { UpdateConsultationToWaitForBedUseCase } from './application/consultation/UpdateConsultationToWaitForBedUseCase'
+import { CreatePasswordChangeMailUseCase } from './application/user/CreatePasswordChangeMailUseCase'
+import { UpdatePasswordUseCase } from './application/user/UpdatePasswordUseCase'
+import { GoogleMailService } from './infrastructure/network/GoogleMailService'
 void main()
 
 async function main(): Promise<void> {

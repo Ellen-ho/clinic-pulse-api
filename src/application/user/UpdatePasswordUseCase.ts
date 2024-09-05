@@ -1,7 +1,7 @@
-import { IUserRepository } from 'domain/user/interfaces/repositories/IUserRepository'
-import { AuthenticationError } from 'infrastructure/error/AuthenticationError'
+import { IUserRepository } from '../../domain/user/interfaces/repositories/IUserRepository'
+import { AuthenticationError } from '../../infrastructure/error/AuthenticationError'
 import { IHashGenerator } from '../../domain/utils/IHashGenerator'
-import { NotFoundError } from 'infrastructure/error/NotFoundError'
+import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 import jwt from 'jsonwebtoken'
 
 interface UpdatePasswordRequest {

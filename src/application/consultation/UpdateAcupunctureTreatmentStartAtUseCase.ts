@@ -1,7 +1,7 @@
-import { IConsultationRepository } from 'domain/consultation/interfaces/repositories/IConsultationRepository'
+import { IConsultationRepository } from '../../domain/consultation/interfaces/repositories/IConsultationRepository'
 import { IAcupunctureTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
 import { NotFoundError } from '../../infrastructure/error/NotFoundError'
-import { ConsultationStatus } from 'domain/consultation/Consultation'
+import { ConsultationStatus } from '../../domain/consultation/Consultation'
 
 interface UpdateAcupunctureTreatmentStartAtRequest {
   consultationId: string

@@ -1,4 +1,4 @@
-import { IAcupunctureTreatmentRepository } from 'domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
+import { IAcupunctureTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IAcupunctureTreatmentRepository'
 import {
   CONSULTATION_JOB_NAME,
   IConsultationQueueService,
