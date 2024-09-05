@@ -15,7 +15,7 @@ Content-Type: application/json
 @accessToken = Bearer {{signin.response.body.token}}
 @feedbacksPath = {{hostname}}/api/feedbacks
 ### get feedback list
-GET {{feedbacksPath}}?limit=20&page=1&startDate=2024-08-01&endDate=2024-08-29&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{feedbacksPath}}?limit=10&page=1&startDate=2024-08-21&endDate=2024-08-21&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###

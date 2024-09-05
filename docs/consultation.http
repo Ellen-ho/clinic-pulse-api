@@ -17,7 +17,7 @@ Content-Type: application/json
 @consultationsPath = {{hostname}}/api/consultations
 
 ### get consultation list
-GET {{consultationsPath}}?limit=25&page=1&startDate=2024-08-01&endDate=2024-08-31&timePeriod=EVENING_SESSION
+GET {{consultationsPath}}?limit=25&page=1&startDate=2024-09-05&endDate=2024-09-05&timePeriod=EVENING_SESSION
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
