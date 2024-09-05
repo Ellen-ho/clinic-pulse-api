@@ -97,6 +97,8 @@ export class GetDifferentTreatmentConsultationUseCase {
     }
 
     const redisKey = `different_treatments_${currentDoctorId ?? 'allDoctors'}_${
+      clinicId ?? 'allClinic'
+    }_${timePeriod ?? 'allTimePeriod'}_${
       granularity ?? 'allGranularity'
     }_${startDate}_${endDate}`
 
@@ -312,15 +314,9 @@ export class GetDifferentTreatmentConsultationUseCase {
       data: result.data,
     }
 
-    await this.redis.set(
-      `different_treatments_${currentDoctorId ?? 'allDoctors'}_${
-        granularity ?? 'allGranularity'
-      }_${startDate}_${endDate}`,
-      JSON.stringify(response),
-      {
-        expiresInSec: 31_536_000,
-      }
-    )
+    await this.redis.set(redisKey, JSON.stringify(response), {
+      expiresInSec: 31_536_000,
+    })
 
     return response
   }

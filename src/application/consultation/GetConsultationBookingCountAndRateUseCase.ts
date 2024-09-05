@@ -61,6 +61,8 @@ export class GetConsultationBookingCountAndRateUseCase {
     }
 
     const redisKey = `online_booking_${currentDoctorId ?? 'allDoctors'}_${
+      clinicId ?? 'allClinic'
+    }_${timePeriod ?? 'allTimePeriod'}_${
       granularity ?? 'allGranularity'
     }_${startDate}_${endDate}`
 

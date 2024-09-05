@@ -67,7 +67,7 @@ export class GetReviewCountAndRateUseCase {
       throw new AuthorizationError('Only admin can get this report.')
     }
 
-    const redisKey = `review_counts_and_rate_${
+    const redisKey = `review_counts_and_rate_${clinicId ?? 'allClinic'}_${
       granularity ?? 'allGranularity'
     }_${startDate}_${endDate}`
 

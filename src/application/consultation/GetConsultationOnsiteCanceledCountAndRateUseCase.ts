@@ -60,6 +60,8 @@ export class GetConsultationOnsiteCanceledCountAndRateUseCase {
     }
 
     const redisKey = `onsite_canceled_${currentDoctorId ?? 'allDoctors'}_${
+      clinicId ?? 'allClinic'
+    }_${timePeriod ?? 'allTimePeriod'}_${
       granularity ?? 'allGranularity'
     }_${startDate}_${endDate}`
 

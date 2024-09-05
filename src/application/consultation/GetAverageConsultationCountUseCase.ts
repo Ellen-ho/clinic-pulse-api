@@ -68,6 +68,8 @@ export class GetAverageConsultationCountUseCase {
     }
 
     const redisKey = `average_counts_${currentDoctorId ?? 'allDoctors'}_${
+      clinicId ?? 'allClinic'
+    }_${timePeriod ?? 'allTimePeriod'}_${
       granularity ?? 'allGranularity'
     }_${startDate}_${endDate}`
 
@@ -226,15 +228,9 @@ export class GetAverageConsultationCountUseCase {
       compareSlotRate,
     }
 
-    await this.redis.set(
-      `average_counts_${currentDoctorId ?? 'allDoctors'}_${
-        granularity ?? 'allGranularity'
-      }_${startDate}_${endDate}`,
-      JSON.stringify(finalResponse),
-      {
-        expiresInSec: 31_536_000,
-      }
-    )
+    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
+      expiresInSec: 31_536_000,
+    })
 
     return finalResponse
   }

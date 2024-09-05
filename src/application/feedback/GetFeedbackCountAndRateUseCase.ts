@@ -94,7 +94,9 @@ export class GetFeedbackCountAndRateUseCase {
 
     const redisKey = `feedback_counts_and_rate_${
       currentDoctorId ?? 'allDoctors'
-    }_${granularity ?? 'allGranularity'}_${startDate}_${endDate}`
+    }_${clinicId ?? 'allClinic'}_${timePeriod ?? 'allTimePeriod'}_${
+      granularity ?? 'allGranularity'
+    }_${startDate}_${endDate}`
 
     const cachedData = await this.redis.get(redisKey)
     if (cachedData !== null) {
