@@ -74,7 +74,7 @@ export class NotificationRepository
       >(
         `
           SELECT
-            (SELECT COUNT(*) FROM notifications WHERE user_id = $1) as total_counts,
+            (SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND deleted_at IS NULL) as total_counts,
             id,
             title,
             content,
@@ -97,7 +97,9 @@ export class NotificationRepository
 
       return {
         total_counts:
-          rawNotifications.length > 0 ? rawNotifications[0].total_counts : 0,
+          rawNotifications.length > 0
+            ? Number(rawNotifications[0].total_counts)
+            : 0,
         notifications: rawNotifications.map((notification) => ({
           id: notification.id,
           title: notification.title,

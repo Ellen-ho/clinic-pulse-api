@@ -225,6 +225,12 @@ export class ConsultationRepository
     totalCounts: number
   }> {
     try {
+      const startDateTime = dayjs(startDate)
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const endDateTime = dayjs(endDate)
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
       const modifiedClinicId =
         clinicId !== undefined && clinicId !== '' ? clinicId : null
       const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
@@ -292,7 +298,7 @@ export class ConsultationRepository
           LEFT JOIN patients p ON p.id = c.patient_id 
           LEFT JOIN acupuncture_treatments at ON at.id = c.acupuncture_treatment_id
           LEFT JOIN medicine_treatments mt ON mt.id = c.medicine_treatment_id
-          WHERE c.check_in_at BETWEEN $1 AND $2
+          WHERE c.check_in_at >= $1::timestamp AND c.check_in_at <= $2::timestamp
             AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
             AND ($4::text IS NULL OR ts.time_period = $4::text)
             AND (
@@ -323,8 +329,8 @@ export class ConsultationRepository
           LIMIT $10 OFFSET $11
         `,
         [
-          startDate,
-          endDate,
+          startDateTime,
+          endDateTime,
           modifiedClinicId,
           modifiedTimePeriod,
           modifiedTotalDurationMin,
@@ -344,7 +350,7 @@ export class ConsultationRepository
         LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
         LEFT JOIN doctors d ON d.id = ts.doctor_id
         LEFT JOIN patients p ON p.id = c.patient_id 
-        WHERE c.check_in_at BETWEEN $1 AND $2
+        WHERE c.check_in_at >= $1::timestamp AND c.check_in_at <= $2::timestamp
           AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
           AND ($4::text IS NULL OR ts.time_period = $4::text)  
           AND (
@@ -373,8 +379,8 @@ export class ConsultationRepository
           AND ($9::uuid IS NULL OR ts.doctor_id = $9::uuid)
         `,
         [
-          startDate,
-          endDate,
+          startDateTime,
+          endDateTime,
           modifiedClinicId,
           modifiedTimePeriod,
           modifiedTotalDurationMin,
@@ -495,8 +501,8 @@ export class ConsultationRepository
             ? Math.round(
                 (parseInt(row.onsite_cancel_count, 10) /
                   parseInt(row.consultation_count, 10)) *
-                  100
-              )
+                  10000
+              ) / 100
             : 0,
       }))
 
@@ -511,8 +517,8 @@ export class ConsultationRepository
       const onsiteCancelRate =
         totalConsultations > 0
           ? Math.round(
-              (consultationWithOnsiteCancel / totalConsultations) * 100
-            )
+              (consultationWithOnsiteCancel / totalConsultations) * 10000
+            ) / 100
           : 0
 
       return {
@@ -890,7 +896,7 @@ export class ConsultationRepository
         const consultationCount = parseInt(row.consultation_count, 10)
         const firstTimeRate =
           consultationCount > 0
-            ? Math.round((firstTimeCount / consultationCount) * 100)
+            ? Math.round((firstTimeCount / consultationCount) * 10000) / 100
             : 0
 
         return {
@@ -911,7 +917,9 @@ export class ConsultationRepository
       )
       const firstTimeConsultationRate =
         totalConsultations > 0
-          ? Math.round((firstTimeConsultationCount / totalConsultations) * 100)
+          ? Math.round(
+              (firstTimeConsultationCount / totalConsultations) * 10000
+            ) / 100
           : 0
 
       return {
@@ -1467,10 +1475,9 @@ export class ConsultationRepository
     }
   }
 
-  public async checkMedicineTreatment(acupunctureTreatmentId: string): Promise<{
+  public async checkMedicineTreatment(
     consultationId: string
-    medicineTreatment: MedicineTreatment
-  } | null> {
+  ): Promise<{ medicineTreatment: MedicineTreatment } | null> {
     try {
       const result = await this.getQuery<
         Array<{
@@ -1480,19 +1487,18 @@ export class ConsultationRepository
         }>
       >(
         `
-        SELECT c.id, mt.id AS medicine_treatment_id, mt.get_medicine_at
+        SELECT mt.id AS medicine_treatment_id, mt.get_medicine_at
         FROM consultations c
         LEFT JOIN medicine_treatments mt ON mt.id = c.medicine_treatment_id
-        WHERE c.acupuncture_treatment_id = $1
+        WHERE c.id = $1
         AND c.medicine_treatment_id IS NOT NULL
         LIMIT 1
         `,
-        [acupunctureTreatmentId]
+        [consultationId]
       )
 
       if (result.length > 0) {
         const {
-          id: consultationId,
           medicine_treatment_id: medicineTreatmentId,
           get_medicine_at: getMedicineAt,
         } = result[0]
@@ -1503,7 +1509,6 @@ export class ConsultationRepository
         })
 
         return {
-          consultationId,
           medicineTreatment,
         }
       }
@@ -1714,8 +1719,8 @@ export class ConsultationRepository
             ? Math.round(
                 (parseInt(row.online_booking_count, 10) /
                   parseInt(row.consultation_count, 10)) *
-                  100
-              )
+                  10000
+              ) / 100
             : 0,
       }))
 
@@ -1730,8 +1735,8 @@ export class ConsultationRepository
       const onlineBookingRate =
         totalConsultations > 0
           ? Math.round(
-              (consultationWithOnlineBooking / totalConsultations) * 100
-            )
+              (consultationWithOnlineBooking / totalConsultations) * 10000
+            ) / 100
           : 0
       return {
         totalConsultations,
@@ -1753,15 +1758,18 @@ export class ConsultationRepository
     granularity: Granularity = Granularity.WEEK
   ): Promise<{ lastStartDate: string; lastEndDate: string }> {
     const start = new Date(startDate)
-    const end = new Date(endDate)
 
     switch (granularity) {
       case Granularity.DAY: {
         const lastStartDate = new Date(start)
-        const lastEndDate = new Date(end)
+        const currentDayOfWeek = lastStartDate.getDay()
 
-        lastStartDate.setDate(start.getDate() - 7)
-        lastEndDate.setDate(end.getDate() - 7)
+        const daysToLastMonday =
+          currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1
+        lastStartDate.setDate(start.getDate() - 7 - daysToLastMonday)
+
+        const lastEndDate = new Date(lastStartDate)
+        lastEndDate.setDate(lastStartDate.getDate() + 6)
 
         return {
           lastStartDate: lastStartDate.toISOString().split('T')[0],
@@ -1769,27 +1777,40 @@ export class ConsultationRepository
         }
       }
       case Granularity.WEEK: {
-        start.setMonth(start.getMonth() - 1)
-        end.setMonth(end.getMonth() - 1)
-        break
+        const lastStartDate = new Date(start)
+        lastStartDate.setMonth(start.getMonth() - 1)
+        lastStartDate.setDate(1)
+
+        const lastEndDate = new Date(lastStartDate)
+        lastEndDate.setMonth(lastEndDate.getMonth() + 1)
+        lastEndDate.setDate(0)
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
       }
-      case Granularity.MONTH: {
-        start.setFullYear(start.getFullYear() - 1)
-        end.setFullYear(end.getFullYear() - 1)
-        break
-      }
+      case Granularity.MONTH:
       case Granularity.YEAR: {
-        start.setFullYear(start.getFullYear() - 1)
-        end.setFullYear(end.getFullYear() - 1)
-        break
+        const lastStartDate = new Date(start)
+        const lastEndDate = new Date(start)
+
+        lastStartDate.setFullYear(start.getFullYear() - 1)
+        lastEndDate.setFullYear(start.getFullYear() - 1)
+
+        lastStartDate.setMonth(0)
+        lastStartDate.setDate(1)
+
+        lastEndDate.setMonth(11)
+        lastEndDate.setDate(31)
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
       }
       default:
         throw new Error('Unsupported granularity')
-    }
-
-    return {
-      lastStartDate: start.toISOString().split('T')[0],
-      lastEndDate: end.toISOString().split('T')[0],
     }
   }
 

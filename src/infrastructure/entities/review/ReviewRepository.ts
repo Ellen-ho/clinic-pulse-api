@@ -320,7 +320,7 @@ export class ReviewRepository
       const result = await this.getQuery<
         Array<{
           date: string
-          reviewCount: string
+          reviewcount: string
           onestarreviewcount: string
           twostarreviewcount: string
           threestarreviewcount: string
@@ -330,46 +330,54 @@ export class ReviewRepository
       >(
         `SELECT 
             TO_CHAR(r.iso_date, '${dateFormat}') AS date,
-            COUNT(*) AS reviewCount,
-            COUNT(CASE WHEN r.rating = 1 THEN 1 END) AS onestarreviewcount,
-            COUNT(CASE WHEN r.rating = 2 THEN 1 END) AS twostarreviewcount,
-            COUNT(CASE WHEN r.rating = 3 THEN 1 END) AS threestarreviewcount,
-            COUNT(CASE WHEN r.rating = 4 THEN 1 END) AS fourstarreviewcount,
-            COUNT(CASE WHEN r.rating = 5 THEN 1 END) AS fivestarreviewcount
+          COUNT(*) AS reviewcount,
+          COUNT(CASE WHEN r.rating = 1 THEN 1 END) AS onestarreviewcount,
+          COUNT(CASE WHEN r.rating = 2 THEN 1 END) AS twostarreviewcount,
+          COUNT(CASE WHEN r.rating = 3 THEN 1 END) AS threestarreviewcount,
+          COUNT(CASE WHEN r.rating = 4 THEN 1 END) AS fourstarreviewcount,
+          COUNT(CASE WHEN r.rating = 5 THEN 1 END) AS fivestarreviewcount
         FROM reviews r
         JOIN clinics c ON r.clinic_id = c.id
         WHERE r.iso_date BETWEEN $1 AND $2
-          AND ($3::uuid IS NULL OR r.clinic_id = $3) -- Fix this line: changed 'ts.clinic_id' to 'r.clinic_id'
-        GROUP BY TO_CHAR(r.iso_date, '${dateFormat}')
-        ORDER BY date;
+          AND ($3::uuid IS NULL OR r.clinic_id = $3)
+        GROUP BY TO_CHAR(r.iso_date, '${dateFormat}') 
+          ORDER BY date;
       `,
         [startDateTime, endDateTime, modifiedClinicId]
       )
 
+      const parseCount = (count: string | undefined): number => {
+        return count !== undefined && count !== '' ? parseInt(count, 10) : 0
+      }
+
       const totalReviewCounts = result.reduce(
-        (sum, row) => sum + parseInt(row.reviewCount, 10),
+        (sum, row) => sum + parseCount(row.reviewcount),
         0
       )
+
       const totalOneStarReviewCount = result.reduce(
-        (sum, row) => sum + parseInt(row.onestarreviewcount, 10),
+        (sum, row) => sum + parseCount(row.onestarreviewcount),
         0
       )
       const totalTwoStarReviewCount = result.reduce(
-        (sum, row) => sum + parseInt(row.twostarreviewcount, 10),
+        (sum, row) => sum + parseCount(row.twostarreviewcount),
         0
       )
       const totalThreeStarReviewCount = result.reduce(
-        (sum, row) => sum + parseInt(row.threestarreviewcount, 10),
+        (sum, row) => sum + parseCount(row.threestarreviewcount),
         0
       )
       const totalFourStarReviewCount = result.reduce(
-        (sum, row) => sum + parseInt(row.fourstarreviewcount, 10),
+        (sum, row) => sum + parseCount(row.fourstarreviewcount),
         0
       )
       const totalFiveStarReviewCount = result.reduce(
-        (sum, row) => sum + parseInt(row.fivestarreviewcount, 10),
+        (sum, row) => sum + parseCount(row.fivestarreviewcount),
         0
       )
+
+      const calculateRate = (count: number, total: number): number =>
+        total > 0 ? parseFloat(((count / total) * 100).toFixed(2)) : 0
 
       return {
         totalReviews: totalReviewCounts,
@@ -378,61 +386,117 @@ export class ReviewRepository
         threeStarReviewCount: totalThreeStarReviewCount,
         fourStarReviewCount: totalFourStarReviewCount,
         fiveStarReviewCount: totalFiveStarReviewCount,
-        oneStarReviewRate: Math.round(
-          (totalOneStarReviewCount / totalReviewCounts) * 100
+        oneStarReviewRate: calculateRate(
+          totalOneStarReviewCount,
+          totalReviewCounts
         ),
-        twoStarReviewRate: Math.round(
-          (totalTwoStarReviewCount / totalReviewCounts) * 100
+        twoStarReviewRate: calculateRate(
+          totalTwoStarReviewCount,
+          totalReviewCounts
         ),
-        threeStarReviewRate: Math.round(
-          (totalThreeStarReviewCount / totalReviewCounts) * 100
+        threeStarReviewRate: calculateRate(
+          totalThreeStarReviewCount,
+          totalReviewCounts
         ),
-        fourStarReviewRate: Math.round(
-          (totalFourStarReviewCount / totalReviewCounts) * 100
+        fourStarReviewRate: calculateRate(
+          totalFourStarReviewCount,
+          totalReviewCounts
         ),
-        fiveStarReviewRate: Math.round(
-          (totalFiveStarReviewCount / totalReviewCounts) * 100
+        fiveStarReviewRate: calculateRate(
+          totalFiveStarReviewCount,
+          totalReviewCounts
         ),
-        data: result.map((row) => ({
-          date: row.date,
-          reviewCount: parseInt(row.reviewCount, 10),
-          oneStarReviewCount: parseInt(row.onestarreviewcount, 10),
-          twoStarReviewCount: parseInt(row.twostarreviewcount, 10),
-          threeStarReviewCount: parseInt(row.threestarreviewcount, 10),
-          fourStarReviewCount: parseInt(row.fourstarreviewcount, 10),
-          fiveStarReviewCount: parseInt(row.fivestarreviewcount, 10),
-          oneStarReviewRate: Math.round(
-            (parseInt(row.onestarreviewcount, 10) /
-              parseInt(row.reviewCount, 10)) *
-              100
-          ),
-          twoStarReviewRate: Math.round(
-            (parseInt(row.twostarreviewcount, 10) /
-              parseInt(row.reviewCount, 10)) *
-              100
-          ),
-          threeStarReviewRate: Math.round(
-            (parseInt(row.threestarreviewcount, 10) /
-              parseInt(row.reviewCount, 10)) *
-              100
-          ),
-          fourStarReviewRate: Math.round(
-            (parseInt(row.fourstarreviewcount, 10) /
-              parseInt(row.reviewCount, 10)) *
-              100
-          ),
-          fiveStarReviewRate: Math.round(
-            (parseInt(row.fivestarreviewcount, 10) /
-              parseInt(row.reviewCount, 10)) *
-              100
-          ),
-        })),
+        data: result.map((row) => {
+          const reviewCount = parseCount(row.reviewcount)
+          const oneStarCount = parseCount(row.onestarreviewcount)
+          const twoStarCount = parseCount(row.twostarreviewcount)
+          const threeStarCount = parseCount(row.threestarreviewcount)
+          const fourStarCount = parseCount(row.fourstarreviewcount)
+          const fiveStarCount = parseCount(row.fivestarreviewcount)
+
+          return {
+            date: row.date,
+            reviewCount,
+            oneStarReviewCount: oneStarCount,
+            twoStarReviewCount: twoStarCount,
+            threeStarReviewCount: threeStarCount,
+            fourStarReviewCount: fourStarCount,
+            fiveStarReviewCount: fiveStarCount,
+            oneStarReviewRate: calculateRate(oneStarCount, reviewCount),
+            twoStarReviewRate: calculateRate(twoStarCount, reviewCount),
+            threeStarReviewRate: calculateRate(threeStarCount, reviewCount),
+            fourStarReviewRate: calculateRate(fourStarCount, reviewCount),
+            fiveStarReviewRate: calculateRate(fiveStarCount, reviewCount),
+          }
+        }),
       }
     } catch (e) {
       throw new RepositoryError(
         'ReviewRepository getStarReview error',
         e as Error
       )
+    }
+  }
+
+  public async getPreviousPeriodDates(
+    startDate: string,
+    endDate: string,
+    granularity: Granularity = Granularity.WEEK
+  ): Promise<{ lastStartDate: string; lastEndDate: string }> {
+    const start = new Date(startDate)
+
+    switch (granularity) {
+      case Granularity.DAY: {
+        const lastStartDate = new Date(start)
+        const currentDayOfWeek = lastStartDate.getDay()
+
+        const daysToLastMonday =
+          currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1
+        lastStartDate.setDate(start.getDate() - 7 - daysToLastMonday)
+
+        const lastEndDate = new Date(lastStartDate)
+        lastEndDate.setDate(lastStartDate.getDate() + 6)
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
+      }
+      case Granularity.WEEK: {
+        const lastStartDate = new Date(start)
+        lastStartDate.setMonth(start.getMonth() - 1)
+        lastStartDate.setDate(1)
+
+        const lastEndDate = new Date(lastStartDate)
+        lastEndDate.setMonth(lastEndDate.getMonth() + 1)
+        lastEndDate.setDate(0)
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
+      }
+      case Granularity.MONTH:
+      case Granularity.YEAR: {
+        const lastStartDate = new Date(start)
+        const lastEndDate = new Date(start)
+
+        lastStartDate.setFullYear(start.getFullYear() - 1)
+        lastEndDate.setFullYear(start.getFullYear() - 1)
+
+        lastStartDate.setMonth(0)
+        lastStartDate.setDate(1)
+
+        lastEndDate.setMonth(11)
+        lastEndDate.setDate(31)
+
+        return {
+          lastStartDate: lastStartDate.toISOString().split('T')[0],
+          lastEndDate: lastEndDate.toISOString().split('T')[0],
+        }
+      }
+      default:
+        throw new Error('Unsupported granularity')
     }
   }
 }

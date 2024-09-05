@@ -47,7 +47,7 @@ export class ReviewController implements IReviewController {
       patientName: req.query.patientName as string,
       currentUser: req.user as User,
     }
-    const result = await this.getReviewCountAndRateUseCase.execute(request)
+    const result = await this.getReviewListUseCase.execute(request)
 
     return res.status(200).json(result)
   }

@@ -20,9 +20,13 @@ export class PatientRepository
     try {
       const rawPatients = await this.getQuery<
         Array<{ id: string; full_name: string }>
-      >(`SELECT id, full_name FROM patients WHERE full_name ILIKE $1`, [
-        `%${searchText}%`,
-      ])
+      >(
+        `SELECT id, full_name 
+         FROM patients 
+         WHERE full_name ILIKE $1 
+         LIMIT 100;`,
+        [`%${searchText}%`]
+      )
 
       return rawPatients.map((patient) => ({
         id: patient.id,

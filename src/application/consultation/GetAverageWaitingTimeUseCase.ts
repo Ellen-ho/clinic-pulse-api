@@ -80,6 +80,8 @@ export class GetAverageWaitingTimeUseCase {
     }
 
     const redisKey = `average_waiting_time_${currentDoctorId ?? 'allDoctors'}_${
+      clinicId ?? 'allClinic'
+    }_${timePeriod ?? 'allTimePeriod'}_${
       granularity ?? 'allGranularity'
     }_${startDate}_${endDate}`
 

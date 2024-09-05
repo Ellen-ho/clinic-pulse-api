@@ -17,7 +17,7 @@ Content-Type: application/json
 @consultationsPath = {{hostname}}/api/consultations
 
 ### get consultation list
-GET {{consultationsPath}}?limit=25&page=1&startDate=2024-08-01&endDate=2024-08-31&timePeriod=EVENING_SESSION
+GET {{consultationsPath}}?limit=25&page=1&startDate=2024-09-05&endDate=2024-09-05&timePeriod=EVENING_SESSION
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
@@ -30,13 +30,13 @@ Content-Type: application/json
 ###
 
 ### get consultation canceled 
-GET {{consultationsPath}}/canceled?granularity=DAY&startDate=2024-07-29&endDate=2024-08-04&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/canceled?granularity=DAY&startDate=2024-08-26&endDate=2024-09-01
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
 ### get consultation booking
-GET {{consultationsPath}}/canceled?granularity=DAY&startDate=2024-07-29&endDate=2024-08-04&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/booking?granularity=DAY&startDate=2024-09-02&endDate=2024-09-03
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
@@ -60,13 +60,13 @@ Content-Type: application/json
 ###
 
 ### get first time consultation
-GET {{consultationsPath}}/first_time?granularity=DAY&startDate=2024-07-29&endDate=2024-08-04&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/first_time?granularity=DAY&startDate=2024-09-02&endDate=2024-09-03&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
 ### get average consultation count
-GET {{consultationsPath}}/average_counts?granularity=DAY&startDate=2024-07-29&endDate=2024-08-04&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
+GET {{consultationsPath}}/average_counts?granularity=DAY&startDate=2024-09-02&endDate=2024-09-03&clinicId=16458ab0-4bb6-4141-9bf0-6d7398942d9b
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
@@ -84,30 +84,65 @@ Content-Type: application/json
 
 {
   "patientId":"00005428-bee6-4a24-bf73-19e6ddc1b3d3",
-  "timeSlotId": "ffeaea79-b30f-4f62-87b4-acee6c747d18"
+  "timeSlotId": "259c84c1-48fc-4efd-850a-bc200fd97576"
 }
 ###
 
 ### update consultation startAt
-@id = 149c5c40-9452-4ced-9435-20e5053f0329
-PATCH {{consultationsPath}}/{{id}}/start_at
+@startId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+PATCH {{consultationsPath}}/{{startId}}/start
 Authorization: {{accessToken}}
 Content-Type: application/json
 
 ###
 
 ### update consultation onsite cancel at
-@cId = 93f4dfcc-6d91-4d2f-9021-66ab57bf6e03
-PATCH {{consultationsPath}}/{{cId}}/onsite_cancel_at
+@cId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+PATCH {{consultationsPath}}/{{cId}}/onsite_cancel
 Authorization: {{accessToken}}
 Content-Type: application/json
 
 ###
 
-### update consultation to Acupuncture
-@id = 149c5c40-9452-4ced-9435-20e5053f0329
-PATCH {{consultationsPath}}/{{id}}/start_at
+### create acupuncture treatment
+@consultationId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+POST {{hostname}}/api/consultations/{{consultationId}}/acupuncture-treatment
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### update consultation assign bed and wait for acupuncture
+@assignBedId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+PATCH {{consultationsPath}}/{{assignBedId}}/acupuncture-treatment/assign_bed
 Authorization: {{accessToken}}
 Content-Type: application/json
 
+{
+  "bedId":"f1aa8a1a-a804-4d51-811c-ca5c5d963da8"
+}
+###
+
+### update consultation acupuncture start 
+@acupunctureStartId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+PATCH {{consultationsPath}}/{{acupunctureStartId}}/acupuncture-treatment/start
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "needleCounts": 10
+}
+###
+
+### update consultation remove needle and no need to get medicine
+@removeNeedleId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+PATCH {{consultationsPath}}/{{removeNeedleId}}/acupuncture-treatmen/remove_needle
+Authorization: {{accessToken}}
+Content-Type: application/json
+###
+
+### update consultation check out at
+@checkOutAtId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+PATCH {{consultationsPath}}/{{removeNeedleId}}/check_out
+Authorization: {{accessToken}}
+Content-Type: application/json
 ###

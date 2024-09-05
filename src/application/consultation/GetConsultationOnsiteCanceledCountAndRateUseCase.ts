@@ -60,6 +60,8 @@ export class GetConsultationOnsiteCanceledCountAndRateUseCase {
     }
 
     const redisKey = `onsite_canceled_${currentDoctorId ?? 'allDoctors'}_${
+      clinicId ?? 'allClinic'
+    }_${timePeriod ?? 'allTimePeriod'}_${
       granularity ?? 'allGranularity'
     }_${startDate}_${endDate}`
 
@@ -97,9 +99,19 @@ export class GetConsultationOnsiteCanceledCountAndRateUseCase {
 
     const compareConsultations =
       result.totalConsultations - lastResult.totalConsultations
+
     const compareConsultationWithOnsiteCancel =
-      result.consultationWithOnsiteCancel -
-      lastResult.consultationWithOnsiteCancel
+      lastResult.consultationWithOnsiteCancel === 0
+        ? result.consultationWithOnsiteCancel > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.consultationWithOnsiteCancel -
+              lastResult.consultationWithOnsiteCancel) /
+              lastResult.consultationWithOnsiteCancel) *
+              10000
+          ) / 100
+
     const compareOsiteCancelRates =
       lastResult.onsiteCancelRate === 0
         ? result.onsiteCancelRate > 0

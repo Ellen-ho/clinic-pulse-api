@@ -161,7 +161,7 @@ export class ConsultationQueueService implements IConsultationQueueService {
 
           if (
             consultation.status ===
-            ConsultationStatus.WAITING_FOR_BED_ASSIGNMENT
+            ConsultationStatus.WAITING_FOR_ACUPUNCTURE_TREATMENT
           ) {
             await this.notificationHelper.createNotification({
               title: '等待針灸時間超過半小時',

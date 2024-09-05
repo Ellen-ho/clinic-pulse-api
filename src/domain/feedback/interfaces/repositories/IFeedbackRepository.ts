@@ -114,4 +114,9 @@ export interface IFeedbackRepository extends IBaseRepository<Feedback> {
       doctorPoorAttitudeRate: number
     }>
   }>
+  getPreviousPeriodDates: (
+    startDate: string,
+    endDate: string,
+    granularity?: Granularity
+  ) => Promise<{ lastStartDate: string; lastEndDate: string }>
 }

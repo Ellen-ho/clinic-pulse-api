@@ -16,6 +16,12 @@ interface GetFeedbackCountAndRateRequest {
 }
 
 interface GetFeedbackCountAndRateResponse {
+  lastTotalFeedbacks: number
+  lastOneStarFeedbackCount: number
+  lastTwoStarFeedbackCount: number
+  lastThreeStarFeedbackCount: number
+  lastFourStarFeedbackCount: number
+  lastFiveStarFeedbackCount: number
   totalFeedbacks: number
   oneStarFeedbackCount: number
   twoStarFeedbackCount: number
@@ -27,6 +33,12 @@ interface GetFeedbackCountAndRateResponse {
   threeStarFeedbackRate: number
   fourStarFeedbackRate: number
   fiveStarFeedbackRate: number
+  compareTotalFeedbacks: number
+  compareOneStarFeedbackCount: number
+  compareTwoStarFeedbackCount: number
+  compareThreeStarFeedbackCount: number
+  compareFourStarFeedbackCount: number
+  compareFiveStarFeedbackCount: number
   data: Array<{
     date: string
     feedbackCount: number
@@ -82,7 +94,9 @@ export class GetFeedbackCountAndRateUseCase {
 
     const redisKey = `feedback_counts_and_rate_${
       currentDoctorId ?? 'allDoctors'
-    }_${granularity ?? 'allGranularity'}_${startDate}_${endDate}`
+    }_${clinicId ?? 'allClinic'}_${timePeriod ?? 'allTimePeriod'}_${
+      granularity ?? 'allGranularity'
+    }_${startDate}_${endDate}`
 
     const cachedData = await this.redis.get(redisKey)
     if (cachedData !== null) {
@@ -98,27 +112,120 @@ export class GetFeedbackCountAndRateUseCase {
       granularity
     )
 
-    if (result.totalFeedbacks === 0) {
-      return {
-        totalFeedbacks: 0,
-        oneStarFeedbackCount: 0,
-        twoStarFeedbackCount: 0,
-        threeStarFeedbackCount: 0,
-        fourStarFeedbackCount: 0,
-        fiveStarFeedbackCount: 0,
-        oneStarFeedbackRate: 0,
-        twoStarFeedbackRate: 0,
-        threeStarFeedbackRate: 0,
-        fourStarFeedbackRate: 0,
-        fiveStarFeedbackRate: 0,
-        data: [],
-      }
+    const { lastStartDate, lastEndDate } =
+      await this.feedbackRepository.getPreviousPeriodDates(
+        startDate,
+        endDate,
+        granularity
+      )
+
+    const lastResult = await this.feedbackRepository.getStarFeedback(
+      lastStartDate,
+      lastEndDate,
+      clinicId,
+      timePeriod,
+      currentDoctorId,
+      granularity
+    )
+
+    const compareTotalFeedbacks =
+      lastResult.totalFeedbacks === 0
+        ? result.totalFeedbacks > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalFeedbacks - lastResult.totalFeedbacks) /
+              lastResult.totalFeedbacks) *
+              10000
+          ) / 100
+
+    const compareOneStarFeedbackCount =
+      lastResult.totalFeedbacks === 0
+        ? result.totalFeedbacks > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalFeedbacks - lastResult.totalFeedbacks) /
+              lastResult.totalFeedbacks) *
+              10000
+          ) / 100
+
+    const compareTwoStarFeedbackCount =
+      lastResult.twoStarFeedbackCount === 0
+        ? result.twoStarFeedbackCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.twoStarFeedbackCount - lastResult.twoStarFeedbackCount) /
+              lastResult.twoStarFeedbackCount) *
+              10000
+          ) / 100
+
+    const compareThreeStarFeedbackCount =
+      lastResult.threeStarFeedbackCount === 0
+        ? result.threeStarFeedbackCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.threeStarFeedbackCount -
+              lastResult.threeStarFeedbackCount) /
+              lastResult.threeStarFeedbackCount) *
+              10000
+          ) / 100
+
+    const compareFourStarFeedbackCount =
+      lastResult.fourStarFeedbackCount === 0
+        ? result.fourStarFeedbackCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.fourStarFeedbackCount - lastResult.fourStarFeedbackCount) /
+              lastResult.fourStarFeedbackCount) *
+              10000
+          ) / 100
+
+    const compareFiveStarFeedbackCount =
+      lastResult.fiveStarFeedbackCount === 0
+        ? result.fiveStarFeedbackCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.fiveStarFeedbackCount - lastResult.fiveStarFeedbackCount) /
+              lastResult.fiveStarFeedbackCount) *
+              10000
+          ) / 100
+
+    const finalResponse: GetFeedbackCountAndRateResponse = {
+      lastTotalFeedbacks: lastResult.totalFeedbacks,
+      lastOneStarFeedbackCount: lastResult.oneStarFeedbackCount,
+      lastTwoStarFeedbackCount: lastResult.twoStarFeedbackCount,
+      lastThreeStarFeedbackCount: lastResult.threeStarFeedbackCount,
+      lastFourStarFeedbackCount: lastResult.fourStarFeedbackCount,
+      lastFiveStarFeedbackCount: lastResult.fiveStarFeedbackCount,
+      totalFeedbacks: result.totalFeedbacks,
+      oneStarFeedbackCount: result.oneStarFeedbackCount,
+      twoStarFeedbackCount: result.twoStarFeedbackCount,
+      threeStarFeedbackCount: result.threeStarFeedbackCount,
+      fourStarFeedbackCount: result.fourStarFeedbackCount,
+      fiveStarFeedbackCount: result.fiveStarFeedbackCount,
+      oneStarFeedbackRate: result.oneStarFeedbackRate,
+      twoStarFeedbackRate: result.twoStarFeedbackRate,
+      threeStarFeedbackRate: result.threeStarFeedbackRate,
+      fourStarFeedbackRate: result.fourStarFeedbackRate,
+      fiveStarFeedbackRate: result.fiveStarFeedbackRate,
+      compareTotalFeedbacks,
+      compareOneStarFeedbackCount,
+      compareTwoStarFeedbackCount,
+      compareThreeStarFeedbackCount,
+      compareFourStarFeedbackCount,
+      compareFiveStarFeedbackCount,
+      data: result.data,
     }
 
-    await this.redis.set(redisKey, JSON.stringify(result), {
+    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
       expiresInSec: 31_536_000,
     })
 
-    return result
+    return finalResponse
   }
 }

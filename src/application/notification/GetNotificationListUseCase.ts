@@ -5,8 +5,8 @@ import { getOffset, getPagination } from '../../infrastructure/utils/Pagination'
 
 interface GetNotificationListRequest {
   user: User
-  page?: number
-  limit?: number
+  page?: string
+  limit?: string
 }
 
 interface GetNotificationListResponse {
@@ -36,23 +36,23 @@ export class GetNotificationListUseCase {
   public async execute(
     request: GetNotificationListRequest
   ): Promise<GetNotificationListResponse> {
-    const { user } = request
-    const page: number = request.page != null ? request.page : 1
-    const limit: number = request.limit != null ? request.limit : 10
-    const offset: number = getOffset(limit, page)
+    const { user, page, limit } = request
+    const requestPage: number = page !== undefined ? Number(page) : 1
+    const requestLimit: number = limit !== undefined ? Number(limit) : 10
+    const offset: number = getOffset(requestLimit, requestPage)
 
     const existingNotificationList =
       await this.notificationRepository.findByUserIdAndIsNotDeletedAndCountAll(
         user.id,
-        limit,
+        requestLimit,
         offset
       )
 
     return {
       data: existingNotificationList.notifications,
       pagination: getPagination(
-        limit,
-        page,
+        requestLimit,
+        offset,
         existingNotificationList.total_counts
       ),
     }

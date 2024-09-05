@@ -13,6 +13,12 @@ interface GetReviewCountAndRateRequest {
 }
 
 interface GetReviewCountAndRateResponse {
+  lastTotalReviews: number
+  lastOneStarReviewCount: number
+  lastTwoStarReviewCount: number
+  lastThreeStarReviewCount: number
+  lastFourStarReviewCount: number
+  lastFiveStarReviewCount: number
   totalReviews: number
   oneStarReviewCount: number
   twoStarReviewCount: number
@@ -24,6 +30,12 @@ interface GetReviewCountAndRateResponse {
   threeStarReviewRate: number
   fourStarReviewRate: number
   fiveStarReviewRate: number
+  compareTotalReviews: number
+  compareOneStarReviewCount: number
+  compareTwoStarReviewCount: number
+  compareThreeStarReviewCount: number
+  compareFourStarReviewCount: number
+  compareFiveStarReviewCount: number
   data: Array<{
     date: string
     reviewCount: number
@@ -55,7 +67,7 @@ export class GetReviewCountAndRateUseCase {
       throw new AuthorizationError('Only admin can get this report.')
     }
 
-    const redisKey = `review_counts_and_rate_${
+    const redisKey = `review_counts_and_rate_${clinicId ?? 'allClinic'}_${
       granularity ?? 'allGranularity'
     }_${startDate}_${endDate}`
 
@@ -71,27 +83,117 @@ export class GetReviewCountAndRateUseCase {
       granularity
     )
 
-    if (result.totalReviews === 0) {
-      return {
-        totalReviews: 0,
-        oneStarReviewCount: 0,
-        twoStarReviewCount: 0,
-        threeStarReviewCount: 0,
-        fourStarReviewCount: 0,
-        fiveStarReviewCount: 0,
-        oneStarReviewRate: 0,
-        twoStarReviewRate: 0,
-        threeStarReviewRate: 0,
-        fourStarReviewRate: 0,
-        fiveStarReviewRate: 0,
-        data: [],
-      }
+    const { lastStartDate, lastEndDate } =
+      await this.reviewRepository.getPreviousPeriodDates(
+        startDate,
+        endDate,
+        granularity
+      )
+
+    const lastResult = await this.reviewRepository.getStarReview(
+      lastStartDate,
+      lastEndDate,
+      clinicId,
+      granularity
+    )
+
+    const compareTotalReviews =
+      lastResult.totalReviews === 0
+        ? result.totalReviews > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.totalReviews - lastResult.totalReviews) /
+              lastResult.totalReviews) *
+              10000
+          ) / 100
+
+    const compareOneStarReviewCount =
+      lastResult.oneStarReviewCount === 0
+        ? result.oneStarReviewCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.oneStarReviewCount - lastResult.oneStarReviewCount) /
+              lastResult.oneStarReviewCount) *
+              10000
+          ) / 100
+
+    const compareTwoStarReviewCount =
+      lastResult.twoStarReviewCount === 0
+        ? result.twoStarReviewCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.twoStarReviewCount - lastResult.twoStarReviewCount) /
+              lastResult.twoStarReviewCount) *
+              10000
+          ) / 100
+
+    const compareThreeStarReviewCount =
+      lastResult.threeStarReviewCount === 0
+        ? result.threeStarReviewCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.threeStarReviewCount - lastResult.threeStarReviewCount) /
+              lastResult.threeStarReviewCount) *
+              10000
+          ) / 100
+
+    const compareFourStarReviewCount =
+      lastResult.fourStarReviewCount === 0
+        ? result.fourStarReviewCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.fourStarReviewCount - lastResult.fourStarReviewCount) /
+              lastResult.fourStarReviewCount) *
+              10000
+          ) / 100
+
+    const compareFiveStarReviewCount =
+      lastResult.fiveStarReviewCount === 0
+        ? result.fiveStarReviewCount > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((result.fiveStarReviewCount - lastResult.fiveStarReviewCount) /
+              lastResult.fiveStarReviewCount) *
+              10000
+          ) / 100
+
+    const finalResponse: GetReviewCountAndRateResponse = {
+      lastTotalReviews: lastResult.totalReviews,
+      lastOneStarReviewCount: lastResult.oneStarReviewCount,
+      lastTwoStarReviewCount: lastResult.twoStarReviewCount,
+      lastThreeStarReviewCount: lastResult.threeStarReviewCount,
+      lastFourStarReviewCount: lastResult.fourStarReviewCount,
+      lastFiveStarReviewCount: lastResult.fiveStarReviewCount,
+      totalReviews: result.totalReviews,
+      oneStarReviewCount: result.oneStarReviewCount,
+      twoStarReviewCount: result.twoStarReviewCount,
+      threeStarReviewCount: result.threeStarReviewCount,
+      fourStarReviewCount: result.fourStarReviewCount,
+      fiveStarReviewCount: result.fiveStarReviewCount,
+      oneStarReviewRate: result.oneStarReviewRate,
+      twoStarReviewRate: result.twoStarReviewRate,
+      threeStarReviewRate: result.threeStarReviewRate,
+      fourStarReviewRate: result.fourStarReviewRate,
+      fiveStarReviewRate: result.fiveStarReviewRate,
+      compareTotalReviews,
+      compareOneStarReviewCount,
+      compareTwoStarReviewCount,
+      compareThreeStarReviewCount,
+      compareFourStarReviewCount,
+      compareFiveStarReviewCount,
+      data: result.data,
     }
 
-    await this.redis.set(redisKey, JSON.stringify(result), {
+    await this.redis.set(redisKey, JSON.stringify(finalResponse), {
       expiresInSec: 31_536_000,
     })
 
-    return result
+    return finalResponse
   }
 }

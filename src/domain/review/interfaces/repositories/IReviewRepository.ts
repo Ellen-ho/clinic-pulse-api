@@ -81,4 +81,9 @@ export interface IReviewRepository extends IBaseRepository<Review> {
       fiveStarReviewRate: number
     }>
   }>
+  getPreviousPeriodDates: (
+    startDate: string,
+    endDate: string,
+    granularity?: Granularity
+  ) => Promise<{ lastStartDate: string; lastEndDate: string }>
 }

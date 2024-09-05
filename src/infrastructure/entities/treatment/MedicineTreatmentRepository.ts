@@ -28,4 +28,32 @@ export class MedicineTreatmentRepository
       )
     }
   }
+
+  public async findByConsultationId(
+    consultationId: string
+  ): Promise<MedicineTreatment | null> {
+    try {
+      const rawQuery = `
+      SELECT at.*
+      FROM medicine_treatments at
+      INNER JOIN consultations c ON c.medicine_treatment_id = at.id
+      WHERE c.id = $1
+    `
+
+      const result = await this.getQuery<MedicineTreatmentEntity[]>(rawQuery, [
+        consultationId,
+      ])
+
+      if (result.length === 0) {
+        return null
+      }
+
+      return this.getMapper().toDomainModel(result[0])
+    } catch (e) {
+      throw new RepositoryError(
+        'MedicineTreatmentEntity findByConsultationId error',
+        e as Error
+      )
+    }
+  }
 }

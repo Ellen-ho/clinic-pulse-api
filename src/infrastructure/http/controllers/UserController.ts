@@ -6,10 +6,14 @@ import { CreateDoctorUseCase } from '../../../application/doctor/CreateDoctorUse
 import { DoctorRepository } from '../../../infrastructure/entities/doctor/DoctorRepository'
 import { getAvatarUrl } from '../../../application/helper/AvatarHelper'
 import { PermissionRepository } from '../../../infrastructure/entities/permission/PermissionRepository'
+import { CreatePasswordChangeMailUseCase } from 'application/user/CreatePasswordChangeMailUseCase'
+import { UpdatePasswordUseCase } from 'application/user/UpdatePasswordUseCase'
 
 export interface IUserController {
   signin: (req: Request, res: Response) => Promise<Response>
   signup: (req: Request, res: Response) => Promise<Response>
+  createPasswordChangeMail: (req: Request, res: Response) => Promise<Response>
+  updatePassword: (req: Request, res: Response) => Promise<Response>
 }
 
 export class UserController implements IUserController {
@@ -17,7 +21,9 @@ export class UserController implements IUserController {
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly createDoctorUseCase: CreateDoctorUseCase,
     private readonly doctorRepository: DoctorRepository,
-    private readonly permissionRepository: PermissionRepository
+    private readonly permissionRepository: PermissionRepository,
+    private readonly createPasswordChangeMailUseCase: CreatePasswordChangeMailUseCase,
+    private readonly updatePasswordUseCase: UpdatePasswordUseCase
   ) {}
 
   public signin = async (req: Request, res: Response): Promise<Response> => {
@@ -85,5 +91,27 @@ export class UserController implements IUserController {
       email: response.user.email,
       role: response.user.role,
     })
+  }
+
+  public createPasswordChangeMail = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      ...req.body,
+    }
+    const result = await this.createPasswordChangeMailUseCase.execute(request)
+    return res.status(200).json(result)
+  }
+
+  public updatePassword = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const request = {
+      ...req.body,
+    }
+    const result = await this.updatePasswordUseCase.execute(request)
+    return res.status(200).json(result)
   }
 }

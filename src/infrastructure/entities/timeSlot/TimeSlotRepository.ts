@@ -136,7 +136,6 @@ export class TimeSlotRepository
     consultationRoomNumber: RoomNumberType
     timePeriod: TimePeriodType
   } | null> {
-    const utc8Time = currentTime
     try {
       const result = await this.getQuery<
         Array<{
@@ -155,7 +154,7 @@ export class TimeSlotRepository
           AND ts.end_at + interval '1 hour' >= $2
         LIMIT 1
         `,
-        [doctorId, utc8Time]
+        [doctorId, currentTime]
       )
 
       if (result.length === 0) {

@@ -23,9 +23,31 @@ POST {{usersPath}}/signin
 Content-Type: application/json
 
 {
-  "email": "fen@gmail.com",
-  "password": "fen5"
+  "email": "doctor_zhang@example.com",
+  "password": "123456"
 }
 ###
 @accessToken = Bearer {{signin.response.body.token}}
+
+### create password change mail
+POST {{usersPath}}/reset-password-mail
+Content-Type: application/json
+
+{
+  "email": "doctor_zhang@example.com"
+}
+###
+
+
+@resetToken=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc5ZWQ5MzNlLTIyYzItNGU5YS1iZjcxLTE2MDg2ZjU0ZjNmMiIsIm1haWwiOiJ0aW1AZ21haWwuY29tIiwiaWF0IjoxNzExNTk2NjI3LCJleHAiOjE3MTE1OTg0Mjd9.W3F9p_K4_vuUopqLuBVZqVc6khXIA-ttzKKrQGPWfZs
+### update password 
+PATCH {{usersPath}}/reset-password
+# Authorization: {{resetToken}}
+Content-Type: application/json
+
+{
+  "newPassword": "123123",
+  "resetToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc5ZWQ5MzNlLTIyYzItNGU5YS1iZjcxLTE2MDg2ZjU0ZjNmMiIsIm1haWwiOiJ0aW1AZ21haWwuY29tIiwiaWF0IjoxNzExNjMxNzkzLCJleHAiOjE3MTE2MzM1OTN9.QYPubnyD7sxhMm1WKJi3Yd7uHSuq9VSG2NV59IaULCo"
+}
+###
 

@@ -28,7 +28,7 @@ Content-Type: application/json
 ###
 
 ### get review rations
-GET {{reviewsPath}}/related_ratios?granularity=WEEK&startDate=2024-05-01&endDate=2024-08-31
+GET {{reviewsPath}}/related_ratios?granularity=YEAR&startDate=2023-01-01&endDate=2023-12-31&clinicId=690d0ea3-9f8d-4143-b160-0661a003bf08
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###

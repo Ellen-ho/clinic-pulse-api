@@ -56,7 +56,11 @@ interface IConsultaionUpdateStartAt {
   startAt: Date
 }
 
-interface IConsultaionUpdateToAcupuncture {
+interface IConsultaionUpdateToWaitAcupuncture {
+  [key: string]: any
+  status: ConsultationStatus
+}
+interface IConsultaionUpdateToWaitForBed {
   [key: string]: any
   status: ConsultationStatus
   endAt: Date
@@ -156,7 +160,13 @@ export class Consultation {
     this.props.startAt = data.startAt
   }
 
-  public updateToAcupuncture(data: IConsultaionUpdateToAcupuncture): void {
+  public updateToWaitAcupuncture(
+    data: IConsultaionUpdateToWaitAcupuncture
+  ): void {
+    this.props.status = data.status
+  }
+
+  public updateToWaitForBed(data: IConsultaionUpdateToWaitForBed): void {
     this.props.status = data.status
     this.props.endAt = data.endAt
     this.props.acupunctureTreatment = data.acupunctureTreatment

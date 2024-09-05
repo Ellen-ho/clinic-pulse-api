@@ -3,7 +3,7 @@ import { IConsultationRepository } from '../../domain/consultation/interfaces/re
 import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
 interface UpdateConsultationStartAtRequest {
-  id: string
+  consultationId: string
 }
 
 interface UpdateConsultationStartAtResponse {
@@ -20,20 +20,19 @@ export class UpdateConsultationStartAtUseCase {
   public async execute(
     request: UpdateConsultationStartAtRequest
   ): Promise<UpdateConsultationStartAtResponse> {
-    const { id } = request
+    const { consultationId } = request
 
-    const existingConsultation = await this.consultationRepository.getById(id)
+    const existingConsultation = await this.consultationRepository.getById(
+      consultationId
+    )
 
     if (existingConsultation == null) {
       throw new NotFoundError('This consultation does not exist.')
     }
 
-    const updatedStatus = ConsultationStatus.IN_CONSULTATION
-    const updatedStartAt = new Date()
-
     existingConsultation.updateStartAt({
-      status: updatedStatus,
-      startAt: updatedStartAt,
+      status: ConsultationStatus.IN_CONSULTATION,
+      startAt: new Date(),
     })
 
     await this.consultationRepository.save(existingConsultation)

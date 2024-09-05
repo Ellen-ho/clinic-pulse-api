@@ -155,3 +155,57 @@ export const getConsultationRealTimeSchema = {
     doctorId: Joi.string().optional(),
   }),
 }
+
+export const createAcupunctureTreatmentSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+}
+
+export const createMedicineTreatmentSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+}
+
+export const updateConsultationWaitForAcupunctureSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    bedId: Joi.string().required(),
+  }),
+}
+
+export const updateAcupunctureStartAtSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  needleCounts: Joi.object({
+    needleCounts: Joi.number().required(),
+  }),
+}
+
+export const updateAcupunctureTreatmentRemoveNeedleAtSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+}
+
+export const updateMedicineTreatmentSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+}
+
+export const updateConsultationCheckOutSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+}
+
+export const createAcupunctureAndMedicineSchema = {
+  params: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+}
