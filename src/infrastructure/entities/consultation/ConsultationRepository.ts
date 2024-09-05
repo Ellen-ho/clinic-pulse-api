@@ -225,6 +225,12 @@ export class ConsultationRepository
     totalCounts: number
   }> {
     try {
+      const startDateTime = dayjs(startDate)
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      const endDateTime = dayjs(endDate)
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
       const modifiedClinicId =
         clinicId !== undefined && clinicId !== '' ? clinicId : null
       const modifiedTimePeriod = timePeriod !== undefined ? timePeriod : null
@@ -292,7 +298,7 @@ export class ConsultationRepository
           LEFT JOIN patients p ON p.id = c.patient_id 
           LEFT JOIN acupuncture_treatments at ON at.id = c.acupuncture_treatment_id
           LEFT JOIN medicine_treatments mt ON mt.id = c.medicine_treatment_id
-          WHERE c.check_in_at BETWEEN $1 AND $2
+          WHERE c.check_in_at >= $1::timestamp AND c.check_in_at <= $2::timestamp
             AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
             AND ($4::text IS NULL OR ts.time_period = $4::text)
             AND (
@@ -323,8 +329,8 @@ export class ConsultationRepository
           LIMIT $10 OFFSET $11
         `,
         [
-          startDate,
-          endDate,
+          startDateTime,
+          endDateTime,
           modifiedClinicId,
           modifiedTimePeriod,
           modifiedTotalDurationMin,
@@ -344,7 +350,7 @@ export class ConsultationRepository
         LEFT JOIN time_slots ts ON ts.id = c.time_slot_id
         LEFT JOIN doctors d ON d.id = ts.doctor_id
         LEFT JOIN patients p ON p.id = c.patient_id 
-        WHERE c.check_in_at BETWEEN $1 AND $2
+        WHERE c.check_in_at >= $1::timestamp AND c.check_in_at <= $2::timestamp
           AND ($3::uuid IS NULL OR ts.clinic_id = $3::uuid)
           AND ($4::text IS NULL OR ts.time_period = $4::text)  
           AND (
@@ -373,8 +379,8 @@ export class ConsultationRepository
           AND ($9::uuid IS NULL OR ts.doctor_id = $9::uuid)
         `,
         [
-          startDate,
-          endDate,
+          startDateTime,
+          endDateTime,
           modifiedClinicId,
           modifiedTimePeriod,
           modifiedTotalDurationMin,
