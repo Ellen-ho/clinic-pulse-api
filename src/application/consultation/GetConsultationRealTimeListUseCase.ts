@@ -6,6 +6,7 @@ import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/I
 import { ITimeSlotRepository } from '../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
 import { User, UserRoleType } from '../../domain/user/User'
 import { getOffset, getPagination } from '../../infrastructure/utils/Pagination'
+import { getCurrentTime } from '../../infrastructure/utils/DateFormatToUTC'
 
 interface GetConsultationRealTimeListRequest {
   clinicId?: string
@@ -59,7 +60,7 @@ export class GetConsultationRealTimeListUseCase {
       request
     const offset: number = getOffset(limit, page)
 
-    const currentTime = new Date()
+    const currentTime = getCurrentTime()
 
     let currentDoctorId
 

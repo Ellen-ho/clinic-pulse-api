@@ -1,6 +1,5 @@
 import { IMedicineTreatmentRepository } from '../../domain/treatment/interfaces/repositories/IMedicineTreatmentRepository'
 import { NotFoundError } from '../../infrastructure/error/NotFoundError'
-import { formatToUTC8 } from '../../infrastructure/utils/DateFormatToUTC'
 
 interface UpdateMedicineTreatmentRequest {
   consultationId: string
@@ -23,7 +22,7 @@ export class UpdateMedicineTreatmentUseCase {
       throw new NotFoundError('This medicine treatment does not exist.')
     }
 
-    const updatedGetMedicineAt = formatToUTC8(new Date())
+    const updatedGetMedicineAt = new Date()
 
     existingMedicneTreatment.updateMedicineTreatment({
       getMedicineAt: updatedGetMedicineAt,

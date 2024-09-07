@@ -4,6 +4,7 @@ import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/I
 import { ITimeSlotRepository } from '../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
 import { User, UserRoleType } from '../../domain/user/User'
 import { RoomNumberType } from '../../domain/consultationRoom/ConsultationRoom'
+import { getCurrentTime } from '../../infrastructure/utils/DateFormatToUTC'
 
 interface GetConsultationRealTimeCountRequest {
   clinicId?: string
@@ -39,7 +40,7 @@ export class GetConsultationRealTimeCountUseCase {
   ): Promise<GetConsultationRealTimeCountResponse | null> {
     const { clinicId, consultationRoomNumber, currentUser } = request
 
-    const currentTime = new Date()
+    const currentTime = getCurrentTime()
 
     let currentDoctorId
 
