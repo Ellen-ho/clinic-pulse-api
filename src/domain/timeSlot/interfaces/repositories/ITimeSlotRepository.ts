@@ -59,7 +59,7 @@ export interface ITimeSlotRepository extends IBaseRepository<TimeSlot> {
       }
       consultationRoom: {
         id: string
-        roomNumber: string
+        roomNumber: RoomNumberType
       }
     }>
   >
@@ -77,7 +77,7 @@ export interface ITimeSlotRepository extends IBaseRepository<TimeSlot> {
       }
       consultationRoom: {
         id: string
-        roomNumber: string
+        roomNumber: RoomNumberType
       }
     }>
   >

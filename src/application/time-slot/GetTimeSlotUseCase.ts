@@ -1,3 +1,4 @@
+import { RoomNumberType } from 'domain/consultationRoom/ConsultationRoom'
 import { IDoctorRepository } from '../../domain/doctor/interfaces/repositories/IDoctorRepository'
 import { ITimeSlotRepository } from '../../domain/timeSlot/interfaces/repositories/ITimeSlotRepository'
 import { TimePeriodType } from '../../domain/timeSlot/TimeSlot'
@@ -18,7 +19,7 @@ interface ITimeSlot {
   }
   consultationRoom: {
     id: string
-    roomNumber: string
+    roomNumber: RoomNumberType
   }
 }
 

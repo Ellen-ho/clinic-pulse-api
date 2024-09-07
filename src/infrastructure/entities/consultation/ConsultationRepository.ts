@@ -1358,16 +1358,17 @@ export class ConsultationRepository
         Array<{
           time_slot_id: string
           clinic_id: string
-          consultation_room_id: string
+          consultation_room_number: string
         }>
       >(
         `
         SELECT 
           t.id AS time_slot_id, 
           t.clinic_id AS clinic_id, 
-          t.consultation_room_id AS consultation_room_id 
+          cr.room_number AS consultation_room_number
         FROM consultations c
         JOIN time_slots t ON c.time_slot_id = t.id
+        JOIN consultation_rooms cr ON t.consultation_room_id = cr.id
         WHERE c.id = $1;
         `,
         [id]
@@ -1376,7 +1377,7 @@ export class ConsultationRepository
         timeSlotId: result[0].time_slot_id,
         clinicId: result[0].clinic_id,
         consultationRoomNumber: result[0]
-          .consultation_room_id as RoomNumberType,
+          .consultation_room_number as RoomNumberType,
       }
     } catch (e) {
       throw new RepositoryError(
@@ -1420,7 +1421,7 @@ export class ConsultationRepository
           status: ConsultationStatus
           time_slot_id: string
           clinic_id: string
-          consultation_room_number: string
+          consultation_room_number: RoomNumberType
         }>
       >(
         `
@@ -1437,11 +1438,12 @@ export class ConsultationRepository
             c.status,
             c.time_slot_id,
             t.clinic_id,
-            t.consultation_room_id AS consultation_room_number
+            cr.room_number AS consultation_room_number
           FROM consultations c
           JOIN time_slots t ON c.time_slot_id = t.id
           JOIN doctors d ON t.doctor_id = d.id
           JOIN patients p ON c.patient_id = p.id
+          JOIN consultation_rooms cr ON t.consultation_room_id = cr.id
           WHERE c.id = $1
           `,
         [id]
@@ -1465,7 +1467,7 @@ export class ConsultationRepository
         status: row.status,
         timeSlotId: row.time_slot_id,
         clinicId: row.clinic_id,
-        consultationRoomNumber: row.consultation_room_number as RoomNumberType,
+        consultationRoomNumber: row.consultation_room_number,
       }
     } catch (e) {
       throw new RepositoryError(

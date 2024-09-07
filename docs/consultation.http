@@ -89,7 +89,7 @@ Content-Type: application/json
 ###
 
 ### update consultation startAt
-@startId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+@startId = 1ee3fd6d-d1a9-4680-a281-95f9537aa0be
 PATCH {{consultationsPath}}/{{startId}}/start
 Authorization: {{accessToken}}
 Content-Type: application/json
@@ -97,7 +97,7 @@ Content-Type: application/json
 ###
 
 ### update consultation onsite cancel at
-@cId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+@cId = 1ee3fd6d-d1a9-4680-a281-95f9537aa0be
 PATCH {{consultationsPath}}/{{cId}}/onsite_cancel
 Authorization: {{accessToken}}
 Content-Type: application/json
@@ -105,14 +105,14 @@ Content-Type: application/json
 ###
 
 ### create acupuncture treatment
-@consultationId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+@consultationId = 1ee3fd6d-d1a9-4680-a281-95f9537aa0be
 POST {{hostname}}/api/consultations/{{consultationId}}/acupuncture-treatment
 Authorization: {{accessToken}}
 Content-Type: application/json
 ###
 
 ### update consultation assign bed and wait for acupuncture
-@assignBedId = ce6d1672-4441-47a6-b6a9-df9e2ca506ac
+@assignBedId = 1ee3fd6d-d1a9-4680-a281-95f9537aa0be
 PATCH {{consultationsPath}}/{{assignBedId}}/acupuncture-treatment/assign_bed
 Authorization: {{accessToken}}
 Content-Type: application/json

@@ -28,9 +28,7 @@ class RealTimeSocketService implements IRealTimeSocketService {
         return
       }
 
-      this.userSockets.set(`${userId}_${clinicId}_${consultationRoomNumber}`, [
-        socket.id,
-      ])
+      this.userSockets.set(mapKey, [socket.id])
 
       socket.on('disconnect', () => {
         this.userSockets.delete(userId)

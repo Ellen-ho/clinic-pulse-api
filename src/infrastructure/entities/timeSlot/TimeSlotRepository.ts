@@ -141,7 +141,7 @@ export class TimeSlotRepository
         Array<{
           id: string
           clinic_id: string
-          consultation_room_number: string
+          consultation_room_number: RoomNumberType
           time_period: TimePeriodType
         }>
       >(
@@ -164,8 +164,7 @@ export class TimeSlotRepository
       return {
         timeSlotId: result[0].id,
         clinicId: result[0].clinic_id,
-        consultationRoomNumber: result[0]
-          .consultation_room_number as RoomNumberType,
+        consultationRoomNumber: result[0].consultation_room_number,
         timePeriod: result[0].time_period,
       }
     } catch (e) {
@@ -266,7 +265,7 @@ export class TimeSlotRepository
       }
       consultationRoom: {
         id: string
-        roomNumber: string
+        roomNumber: RoomNumberType
       }
     }>
   > {
@@ -304,7 +303,7 @@ export class TimeSlotRepository
           doctor_first_name: string
           doctor_last_name: string
           consultation_room_id: string
-          consultation_room_number: string
+          consultation_room_number: RoomNumberType
         }>
       >(rawQuery, [clinicId])
 
@@ -346,7 +345,7 @@ export class TimeSlotRepository
       }
       consultationRoom: {
         id: string
-        roomNumber: string
+        roomNumber: RoomNumberType
       }
     }>
   > {
@@ -384,7 +383,7 @@ export class TimeSlotRepository
           doctor_first_name: string
           doctor_last_name: string
           consultation_room_id: string
-          consultation_room_number: string
+          consultation_room_number: RoomNumberType
         }>
       >(rawQuery, [doctorId])
 
