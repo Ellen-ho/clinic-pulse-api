@@ -123,8 +123,8 @@ export class Consultation {
     return this.props.endAt
   }
 
-  public get checkOutAt(): Date {
-    return this.props.checkInAt
+  public get checkOutAt(): Date | null {
+    return this.props.checkOutAt
   }
 
   public get onsiteCancelAt(): Date | null {
