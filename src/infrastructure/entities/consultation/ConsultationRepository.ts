@@ -1603,7 +1603,7 @@ export class ConsultationRepository
       JOIN patients p ON p.id = c.patient_id
       LEFT JOIN consultation_rooms cr ON cr.id = ts.consultation_room_id
       WHERE ${timeSlotCondition}
-      ORDER BY c.check_in_at ASC
+      ORDER BY c.check_in_at DESC
       LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}
       `,
         queryParams

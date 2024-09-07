@@ -83,8 +83,8 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 
 {
-  "patientId":"00005428-bee6-4a24-bf73-19e6ddc1b3d3",
-  "timeSlotId": "259c84c1-48fc-4efd-850a-bc200fd97576"
+  "patientId":"00036de9-184c-4229-ab41-086b510ffeb9",
+  "timeSlotId": "8c86666e-d645-417d-bb89-513f3eda06f5"
 }
 ###
 
