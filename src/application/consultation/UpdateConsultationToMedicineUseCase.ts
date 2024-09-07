@@ -43,7 +43,7 @@ export class UpdateConsultationToMedicineUseCase {
     await this.consultationQueueService.addConsultationJob(
       CONSULTATION_JOB_NAME.CHECK_MEDICINE_WAITING_TIME,
       { consultationId: existingConsultation.id },
-      { delay: 3600 * 1000 }
+      { delay: 1800 * 1000 }
     )
   }
 }

@@ -236,7 +236,7 @@ export class ConsultationQueueService implements IConsultationQueueService {
             consultation.status === ConsultationStatus.WAITING_FOR_GET_MEDICINE
           ) {
             await this.notificationHelper.createNotification({
-              title: '等待拿藥時間超過一小時',
+              title: '等待拿藥時間超過半小時',
               content: `Consultation ${consultationId} has been waiting for medicine for more than one hour.`,
               notificationType: NotificationType.ABNORMAL_MEDICATION_WAIT_TIME,
               referenceId: consultationId,
