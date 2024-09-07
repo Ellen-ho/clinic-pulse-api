@@ -50,7 +50,7 @@ export class CreateFeedbackUseCase {
 
     await this.notificationHelper.createNotification({
       title: '低於五星的反饋',
-      content: 'A new review with a rating below 5 has been posted.',
+      content: '有一則低於五星的新反饋。',
       notificationType: NotificationType.NEGATIVE_FEEDBACK,
       referenceId: newFeedback.id,
       user: adminUser,

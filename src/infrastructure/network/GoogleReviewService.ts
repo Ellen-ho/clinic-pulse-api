@@ -156,7 +156,7 @@ class GoogleReviewService implements IGoogleReviewService {
 
               await this.notificationHelper.createNotification({
                 title: '低於五星的評論',
-                content: '有一則低於五星的評論',
+                content: '有一則低於五星的評論。',
                 notificationType: NotificationType.NEGATIVE_REVIEW,
                 referenceId: newReview.id,
                 user: admin,
