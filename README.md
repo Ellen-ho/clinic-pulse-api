@@ -1,4 +1,45 @@
-# clinic-pulse-api
+# Clinic-Pulse-api
+
+## Table of contents
+
+- [User Interface](#User-Interface)
+- [About Clinic-Pulse](#About-Clinic-Pulse)
+- [Architecture Diagram](#architecture-diagram)
+- [Features](#Features)
+- [Local development](#local-development)
+
+## About Clinic-Pulse
+
+Clinic-Pulse is a clinic management system that integrates real-time outpatient information, historical data, statistics, and charts, enabling doctors and administrators to oversee every aspect of the medical workflow. This system not only enhances clinic operational efficiency but also leverages data analytics to optimize medical decision-making, ultimately improving the patient experience.
+
+## Architecture Diagram
+
+Users enter a URL in the browser, which Route 53 resolves to an IP address. Traffic is managed by a Load Balancer. The frontend, built with React and MUI, is deployed on S3 and delivered via CloudFront CDN. A separate S3 bucket stores doctor profile photos.
+
+The backend is containerized with Docker and runs on EC2 using Node.js and Express. Socket.IO provides real-time updates, and Bull manages asynchronous tasks. Data is stored in RDS (PostgreSQL), and Redis on another EC2 instance handles caching and queue management.
+
+Gmail Service is used to send password reset emails.
+
+## Features
+
+### Admin
+
+As admin, you can...
+
+1. egister New Employees: Create accounts for newly hired staff and enter their detailed information.
+2. Real-Time Dashboard: View the current outpatient status of each clinic room across all branches on the real-time dashboard page.
+3. Outpatient List with Advanced Filters: Use various filters to view the outpatient list, including time range, branch, time slot, doctor's name, patient's name, minimum total duration, and maximum total duration.
+4. Click on any outpatient entry to view detailed information.
+5. If there are abnormal waiting times—such as waiting for consultation, treatment bed arrangement, acupuncture treatment, needle removal, or medication pickup exceeding the set time—you will receive instant notifications automatically sent by the system.
+6. Feedback List with Advanced Filters: Use various filters to view the feedback list, including time range, branch, time slot, feedback rating, doctor's name, and patient's name. Click on any feedback entry to view detailed feedback information.
+7. Google Reviews List with Advanced Filters: Use various filters to view the Google reviews list, including time range, branch, review rating, and patient's name. Click on any review to view detailed information.
+8. Statistics Center: Access three statistical categories—Outpatient, Feedback, and Google Reviews.
+9. Outpatient Statistics: View various outpatient-related statistical charts based on time granularity, including total and average number of patients, number of first-time visits and first-visit rate, number of online appointments and online appointment rate, number of cancellations and cancellation rate, average waiting time, and the number and ratio of acupuncture and medication treatments.
+10. Feedback Statistics: View feedback-related statistical charts based on time granularity, including feedback ratings and categories.
+11. Google Reviews Statistics: View review-related statistical charts based on time granularity, including review ratings and ratios.
+12. View Outpatient Schedules: Check the outpatient schedules for each branch.
+13. Receive Low-Rating Notifications: Get automatic notifications from the system when there are feedback or reviews with ratings lower than five stars.
+14. Manage Notifications: Click on the bell icon to view the notification list. You can mark notifications as read or delete them individually or all at once. Clicking on any notification allows you to see the related outpatient, feedback, or review details.
 
 ## Local development
 
