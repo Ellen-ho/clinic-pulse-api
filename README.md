@@ -8,6 +8,26 @@
 - [Features](#Features)
 - [Local development](#local-development)
 
+## User Interface
+
+### Admin selects a branch and consultation room to view real-time clinic status
+
+<p align="center">
+  <img width="80%" align="center" src="./demo/real_time.gif">
+</p>
+
+### Admin views the feedback list using filters and can click to see corresponding consultation details
+
+<p align="center">
+  <img width="80%" align="center" src="./demo/feedback_list.gif">
+</p>
+
+### Admin can view various statistical charts based on time granularity and multiple filters
+
+<p align="center">
+  <img width="80%" align="center" src="./demo/report.gif">
+</p>
+
 ## About Clinic-Pulse
 
 Clinic-Pulse is a clinic management system that integrates real-time outpatient information, historical data, statistics, and charts, enabling doctors and administrators to oversee every aspect of the medical workflow. This system not only enhances clinic operational efficiency but also leverages data analytics to optimize medical decision-making, ultimately improving the patient experience.
@@ -72,36 +92,36 @@ As admin, you can...
 
 As doctor, you can...
 
-## 1. Profile Management
+### 1. Profile Management
 
 - **Edit your avatar and change your default password.**
 
-## 2. Real-time Dashboard
+### 2. Real-time Dashboard
 
 - **View the current status of your clinic sessions.**
 
-## 3. Consultation List
+### 3. Consultation List
 
 - **Use diverse filters to view your consultation list, including time intervals, session times, patient names, minimum and maximum total duration.**
   - Clicking on any consultation in the list will show detailed information about that consultation.
   - You will receive automatic real-time notifications for any abnormal wait times such as waiting for consultation, arranging a treatment bed, acupuncture treatment, needle removal, and medication pickup that exceed set times.
 
-## 4. Feedback List
+### 4. Feedback List
 
 - **Use diverse filters to view your feedback list, including time intervals, session times, feedback ratings, and patient names.**
   - Clicking on any feedback will show detailed information about that feedback.
 
-## 5. Statistics Center
+### 5. Statistics Center
 
 - **In the Statistics Center, there are two types of statistics: consultations and feedback.**
   - **Consultation Statistics Center:** View statistical charts related to your consultations based on time granularity, including total and average patient numbers, number of first-time consultations and their rate, online appointment numbers and their rate, cancellation numbers and their rate, average waiting time, and numbers and rates of acupuncture and medication treatments.
   - **Feedback Statistics Center:** View statistical charts related to your feedback based on time granularity, including feedback star ratings and categories.
 
-## 6. Clinic Schedule
+### 6. Clinic Schedule
 
 - **View your clinic schedule.**
 
-## 7. Notifications
+### 7. Notifications
 
 - **Click on the bell icon to view the notification list.**
   - You can read and delete notifications individually or all at once.
