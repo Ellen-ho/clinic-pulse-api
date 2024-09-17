@@ -15,10 +15,15 @@
 
 <br>
 
+## About Clinic-Pulse
+
+Clinic-Pulse is a clinic management system that integrates real-time outpatient information, historical data, statistics, and charts, enabling doctors and administrators to oversee every aspect of the medical workflow. This system not only enhances clinic operational efficiency but also leverages data analytics to optimize medical decision-making, ultimately improving the patient experience.
+
+<br>
+
 ## Table of contents
 
 - [Test Account](#test-account)
-- [About Clinic-Pulse](#About-Clinic-Pulse)
 - [User Interface](#User-Interface)
 - [Architecture Diagram](#architecture-diagram)
 - [Features](#Features)
@@ -32,12 +37,6 @@
 | ------ | ------------------------ | -------- |
 | Admin  | admin@example.com        | 123456   |
 | Doctor | doctor_zhang@example.com | 123456   |
-
-<br>
-
-## About Clinic-Pulse
-
-Clinic-Pulse is a clinic management system that integrates real-time outpatient information, historical data, statistics, and charts, enabling doctors and administrators to oversee every aspect of the medical workflow. This system not only enhances clinic operational efficiency but also leverages data analytics to optimize medical decision-making, ultimately improving the patient experience.
 
 <br>
 
