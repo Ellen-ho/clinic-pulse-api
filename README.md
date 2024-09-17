@@ -1,12 +1,35 @@
 # Clinic-Pulse-api
 
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
+
+<div align="center">
+  <img width="100%" align="center" src="./demo/clinic_pulse.png">
+</div>
+
+<br>
+<br>
+<p align="center">
+  <a href="https://myclinics.life/">Start using Clinic Pulse</a>
+  <a href="#test-account">(test account)</a>
+</p>
+
+<br>
+
 ## Table of contents
 
+- [Test Account](#test-account)
 - [User Interface](#User-Interface)
 - [About Clinic-Pulse](#About-Clinic-Pulse)
 - [Architecture Diagram](#architecture-diagram)
 - [Features](#Features)
 - [Local development](#local-development)
+
+## Test Account
+
+| Role   | Email                    | Password |
+| ------ | ------------------------ | -------- | ------ |
+| Admin  | admin@example.com        | 123456   | 123456 |
+| Doctor | doctor_zhang@example.com | 123456   |
 
 ## User Interface
 
@@ -16,11 +39,15 @@
   <img width="80%" align="center" src="./demo/real_time.gif">
 </p>
 
+<br><br>
+
 ### Admin views the feedback list using filters and can click to see corresponding consultation details
 
 <p align="center">
   <img width="80%" align="center" src="./demo/feedback_list.gif">
 </p>
+
+<br><br>
 
 ### Admin can view various statistical charts based on time granularity and multiple filters
 
@@ -33,6 +60,10 @@
 Clinic-Pulse is a clinic management system that integrates real-time outpatient information, historical data, statistics, and charts, enabling doctors and administrators to oversee every aspect of the medical workflow. This system not only enhances clinic operational efficiency but also leverages data analytics to optimize medical decision-making, ultimately improving the patient experience.
 
 ## Architecture Diagram
+
+<p align="center">
+  <img width="80%" align="center" src="./demo/architecture.png">
+</p>
 
 Users enter a URL in the browser, which Route 53 resolves to an IP address. Traffic is managed by a Load Balancer. The frontend, built with React and MUI, is deployed on S3 and delivered via CloudFront CDN. A separate S3 bucket stores doctor profile photos.
 
