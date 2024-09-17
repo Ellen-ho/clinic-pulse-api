@@ -9,7 +9,7 @@
 <br>
 <br>
 <p align="center">
-  <a href="https://myclinics.life/">Start using Clinic Pulse</a>
+  <a href="https://myclinics.life/">Start Using Clinic Pulse</a>
   <a href="#test-account">(test account)</a>
 </p>
 
@@ -27,8 +27,8 @@
 ## Test Account
 
 | Role   | Email                    | Password |
-| ------ | ------------------------ | -------- | ------ |
-| Admin  | admin@example.com        | 123456   | 123456 |
+| ------ | ------------------------ | -------- |
+| Admin  | admin@example.com        | 123456   |
 | Doctor | doctor_zhang@example.com | 123456   |
 
 ## User Interface
