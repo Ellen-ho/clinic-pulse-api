@@ -26,20 +26,86 @@ Gmail Service is used to send password reset emails.
 
 As admin, you can...
 
-1. egister New Employees: Create accounts for newly hired staff and enter their detailed information.
-2. Real-Time Dashboard: View the current outpatient status of each clinic room across all branches on the real-time dashboard page.
-3. Outpatient List with Advanced Filters: Use various filters to view the outpatient list, including time range, branch, time slot, doctor's name, patient's name, minimum total duration, and maximum total duration.
-4. Click on any outpatient entry to view detailed information.
-5. If there are abnormal waiting times—such as waiting for consultation, treatment bed arrangement, acupuncture treatment, needle removal, or medication pickup exceeding the set time—you will receive instant notifications automatically sent by the system.
-6. Feedback List with Advanced Filters: Use various filters to view the feedback list, including time range, branch, time slot, feedback rating, doctor's name, and patient's name. Click on any feedback entry to view detailed feedback information.
-7. Google Reviews List with Advanced Filters: Use various filters to view the Google reviews list, including time range, branch, review rating, and patient's name. Click on any review to view detailed information.
-8. Statistics Center: Access three statistical categories—Outpatient, Feedback, and Google Reviews.
-9. Outpatient Statistics: View various outpatient-related statistical charts based on time granularity, including total and average number of patients, number of first-time visits and first-visit rate, number of online appointments and online appointment rate, number of cancellations and cancellation rate, average waiting time, and the number and ratio of acupuncture and medication treatments.
-10. Feedback Statistics: View feedback-related statistical charts based on time granularity, including feedback ratings and categories.
-11. Google Reviews Statistics: View review-related statistical charts based on time granularity, including review ratings and ratios.
-12. View Outpatient Schedules: Check the outpatient schedules for each branch.
-13. Receive Low-Rating Notifications: Get automatic notifications from the system when there are feedback or reviews with ratings lower than five stars.
-14. Manage Notifications: Click on the bell icon to view the notification list. You can mark notifications as read or delete them individually or all at once. Clicking on any notification allows you to see the related outpatient, feedback, or review details.
+### 1. Register New Employees
+
+- **Create accounts for newly hired staff and enter their detailed information.**
+
+### 2. Real-Time Dashboard
+
+- **View the current outpatient status of each clinic room across all branches.**
+
+### 3. Outpatient List with Advanced Filters
+
+- **Use various filters to view the outpatient list, including time range, branch, time slot, doctor's name, patient's name, minimum total duration, and maximum total duration.**
+  - **View Outpatient Details**: Click on any outpatient entry to view detailed information.
+
+### 4. Notifications for Abnormal Waiting Times
+
+- **Receive automatic notifications for abnormal waiting times such as waiting for consultation, treatment bed arrangement, acupuncture treatment, needle removal, or medication pickup exceeding the set time.**
+
+### 5. Feedback and Reviews Lists
+
+- **Feedback List with Advanced Filters**: Use filters to view feedback, including time range, branch, time slot, feedback rating, doctor's name, and patient's name.
+- **Google Reviews List with Advanced Filters**: Filters include time range, branch, review rating, and patient's name.
+  - Click on any feedback or review to view detailed information.
+
+### 6. Statistics Center
+
+- **Access three statistical categories—Outpatient, Feedback, and Google Reviews.**
+  - **Outpatient Statistics**: View charts including patient numbers, first-time visit rates, appointment rates, cancellation rates, and average waiting times.
+  - **Feedback Statistics**: Charts based on feedback ratings and categories.
+  - **Google Reviews Statistics**: Charts based on review ratings and ratios.
+
+### 7. Outpatient Schedules
+
+- **View the outpatient schedules for each branch.**
+
+### 8. Low-Rating Notifications
+
+- **Receive automatic notifications for feedback or reviews with ratings lower than five stars.**
+
+### 9. Manage Notifications
+
+- **Click on the bell icon to view the notification list.** Mark notifications as read, delete individually or all at once, and view related outpatient, feedback, or review details.
+
+### Doctor
+
+As doctor, you can...
+
+## 1. Profile Management
+
+- **Edit your avatar and change your default password.**
+
+## 2. Real-time Dashboard
+
+- **View the current status of your clinic sessions.**
+
+## 3. Consultation List
+
+- **Use diverse filters to view your consultation list, including time intervals, session times, patient names, minimum and maximum total duration.**
+  - Clicking on any consultation in the list will show detailed information about that consultation.
+  - You will receive automatic real-time notifications for any abnormal wait times such as waiting for consultation, arranging a treatment bed, acupuncture treatment, needle removal, and medication pickup that exceed set times.
+
+## 4. Feedback List
+
+- **Use diverse filters to view your feedback list, including time intervals, session times, feedback ratings, and patient names.**
+  - Clicking on any feedback will show detailed information about that feedback.
+
+## 5. Statistics Center
+
+- **In the Statistics Center, there are two types of statistics: consultations and feedback.**
+  - **Consultation Statistics Center:** View statistical charts related to your consultations based on time granularity, including total and average patient numbers, number of first-time consultations and their rate, online appointment numbers and their rate, cancellation numbers and their rate, average waiting time, and numbers and rates of acupuncture and medication treatments.
+  - **Feedback Statistics Center:** View statistical charts related to your feedback based on time granularity, including feedback star ratings and categories.
+
+## 6. Clinic Schedule
+
+- **View your clinic schedule.**
+
+## 7. Notifications
+
+- **Click on the bell icon to view the notification list.**
+  - You can read and delete notifications individually or all at once.
+  - Clicking on any notification will show details related to that specific consultation.
 
 ## Local development
 
