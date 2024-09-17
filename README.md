@@ -24,12 +24,16 @@
 - [Features](#Features)
 - [Local development](#local-development)
 
+<br>
+
 ## Test Account
 
 | Role   | Email                    | Password |
 | ------ | ------------------------ | -------- |
 | Admin  | admin@example.com        | 123456   |
 | Doctor | doctor_zhang@example.com | 123456   |
+
+<br>
 
 ## User Interface
 
@@ -55,9 +59,13 @@
   <img width="80%" align="center" src="./demo/report.gif">
 </p>
 
+<br>
+
 ## About Clinic-Pulse
 
 Clinic-Pulse is a clinic management system that integrates real-time outpatient information, historical data, statistics, and charts, enabling doctors and administrators to oversee every aspect of the medical workflow. This system not only enhances clinic operational efficiency but also leverages data analytics to optimize medical decision-making, ultimately improving the patient experience.
+
+<br>
 
 ## Architecture Diagram
 
@@ -70,6 +78,8 @@ Users enter a URL in the browser, which Route 53 resolves to an IP address. Traf
 The backend is containerized with Docker and runs on EC2 using Node.js and Express. Socket.IO provides real-time updates, and Bull manages asynchronous tasks. Data is stored in RDS (PostgreSQL), and Redis on another EC2 instance handles caching and queue management.
 
 Gmail Service is used to send password reset emails.
+
+<br>
 
 ## Features
 
@@ -157,6 +167,8 @@ As doctor, you can...
 - **Click on the bell icon to view the notification list.**
   - You can read and delete notifications individually or all at once.
   - Clicking on any notification will show details related to that specific consultation.
+
+<br>
 
 ## Local development
 
