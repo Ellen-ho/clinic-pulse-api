@@ -59,4 +59,12 @@ export class UserRepository
       throw new RepositoryError('UserRepository findAdmin error', e as Error)
     }
   }
+
+  public async save(user: User): Promise<void> {
+    try {
+      await super.save(user)
+    } catch (e) {
+      throw new Error('UserRoomRepository save error: ' + (e as Error).message)
+    }
+  }
 }

@@ -125,4 +125,12 @@ export class DoctorRepository
       throw new RepositoryError('DoctorRepository findById error', e as Error)
     }
   }
+
+  public async save(doctor: Doctor): Promise<void> {
+    try {
+      await super.save(doctor)
+    } catch (e) {
+      throw new Error('DoctorRepository save error: ' + (e as Error).message)
+    }
+  }
 }

@@ -2,7 +2,7 @@ import { IEntityMapper } from '../../../domain/shared/IEntityMapper'
 import { ConsultationRoomEntity } from './ConsultationRoomEntity'
 import { ConsultationRoom } from '../../../domain/consultationRoom/ConsultationRoom'
 
-export class PatientMapper
+export class ConsultationRoomMapper
   implements IEntityMapper<ConsultationRoomEntity, ConsultationRoom>
 {
   public toDomainModel(entity: ConsultationRoomEntity): ConsultationRoom {
