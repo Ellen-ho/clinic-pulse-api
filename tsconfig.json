@@ -16,10 +16,7 @@
     "baseUrl": "./src",
     "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "src/**/*.ts",
-    "src/domain/consultation/MockConsultation.ts"
-  ],
+  "include": ["src/**/*.ts", "src/domain/consultation/MockConsultation.ts"],
   "exclude": ["node_modules", "scripts", "migrations", "build", "seeder"],
   "ts-node": {
     "transpileOnly": true

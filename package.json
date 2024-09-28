@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "export NODE_ENV=development && nodemon",
     "test:unit": "jest --watch src --coverage",
+    "test:integration": "export NODE_ENV=test && jest --detectOpenHandles --runInBand --testRegex='.*\\.integration.test\\.ts'",
     "lint": "eslint ./src --ext .ts",
     "prettier": "prettier --check .",
     "build": "rimraf ./build && tsc",
@@ -29,6 +30,7 @@
     "dayjs": "^1.11.12",
     "express": "^4.18.2",
     "express-session": "^1.17.1",
+    "fishery": "^2.2.2",
     "googleapis": "^118.0.0",
     "joi": "^17.9.1",
     "jsonwebtoken": "^9.0.0",
@@ -56,6 +58,7 @@
     "@types/express-session": "^1.17.7",
     "@types/jest": "^29.5.13",
     "@types/jsonwebtoken": "^9.0.1",
+    "@types/mockdate": "^3.0.0",
     "@types/multer": "^1.4.12",
     "@types/node-schedule": "^2.1.0",
     "@types/nodemailer": "^6.4.15",

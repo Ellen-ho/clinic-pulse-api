@@ -1,10 +1,10 @@
-import { IUserRepository } from '../../../domain/user/interfaces/repositories/IUserRepository'
-import { IHashGenerator } from '../../../domain/utils/IHashGenerator'
-import { IUuidService } from '../../../domain/utils/IUuidService'
+import { IUserRepository } from '../../domain/user/interfaces/repositories/IUserRepository'
+import { IHashGenerator } from '../../domain/utils/IHashGenerator'
+import { IUuidService } from '../../domain/utils/IUuidService'
 import { mock } from 'jest-mock-extended'
-import { CreateUserUseCase } from '../CreateUserUseCase'
-import { User, UserRoleType } from '../../../domain/user/User'
-import { ValidationError } from '../../../infrastructure/error/ValidationError'
+import { CreateUserUseCase } from './CreateUserUseCase'
+import { User, UserRoleType } from '../../domain/user/User'
+import { ValidationError } from '../../infrastructure/error/ValidationError'
 
 describe('Unit test: CreateUserUseCase', () => {
   const mockUserRepo = mock<IUserRepository>()
