@@ -5,7 +5,7 @@ import { User, UserRoleType } from '../../domain/user/User'
 import { AuthorizationError } from '../../infrastructure/error/AuthorizationError'
 import { NotFoundError } from '../../infrastructure/error/NotFoundError'
 
-interface GetDoctorProfileRequest {
+export interface GetDoctorProfileRequest {
   doctorId: string
   currentUser: User
 }

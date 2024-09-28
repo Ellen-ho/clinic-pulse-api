@@ -23,6 +23,7 @@ export class TimeSlotMapper implements IEntityMapper<TimeSlotEntity, TimeSlot> {
     timeSlotEntity.id = domainModel.id
     timeSlotEntity.startAt = domainModel.startAt
     timeSlotEntity.endAt = domainModel.endAt
+    timeSlotEntity.timePeriod = domainModel.timePeriod
     timeSlotEntity.createdAt = domainModel.createdAt
     timeSlotEntity.updatedAt = domainModel.updatedAt
     timeSlotEntity.doctorId = domainModel.doctorId
