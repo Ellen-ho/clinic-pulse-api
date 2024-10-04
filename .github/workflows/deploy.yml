@@ -31,6 +31,7 @@ jobs:
           sudo docker stop ellenerica31725/clinic-pulse-api || true
           sudo docker rm ellenerica31725/clinic-pulse-api || true
           sudo docker run -p 80:80 \
+          --name ellenerica31725/clinic-pulse-api \
           --network clinic-pulse-network \
           -e SECRET_KEY='${{ secrets.SECRET_KEY }}' \
           -e API_PORT='${{ secrets.API_PORT }}' \
