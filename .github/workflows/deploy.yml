@@ -30,7 +30,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
           sudo docker stop clinic-pulse-api || true
           sudo docker rm clinic-pulse-api || true
-          sudo docker run -p 80:80 \
+          sudo docker run -d -p 80:80 \
           --name clinic-pulse-api \
           --network clinic-pulse-network \
           -e SECRET_KEY='${{ secrets.SECRET_KEY }}' \
