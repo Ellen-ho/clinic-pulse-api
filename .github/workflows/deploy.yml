@@ -1,0 +1,70 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.EC2_KEY }}
+
+      - name: Build Docker image
+        run: docker build -t="ellenerica31725/clinic-pulse-api" .
+
+      - name: Deploy to EC2
+        env:
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+          docker stop ellenerica31725/clinic-pulse-api || true
+          docker rm ellenerica31725/clinic-pulse-api || true
+          docker run -p 80:80 \
+          --network clinic-pulse-network \
+          -e SECRET_KEY='${{ secrets.SECRET_KEY }}' \
+          -e API_PORT='${{ secrets.API_PORT }}' \
+          -e POSTGRES_USER='${{ secrets.POSTGRES_USER }}' \
+          -e POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}' \
+          -e POSTGRES_LOGGING_ENABLED='true' \
+          -e POSTGRES_HOST='${{ secrets.POSTGRES_HOST }}' \
+          -e POSTGRES_DB_NAME='${{ secrets.POSTGRES_DB_NAME }}' \
+          -e POSTGRES_PORT='${{ secrets.POSTGRES_PORT }}' \
+          -e DB_USER='${{ secrets.DB_USER }}' \
+          -e DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
+          -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
+          -e CLIENT_URL='${{ secrets.CLIENT_URL }}' \
+          -e CORS_ORIGIN='${{ secrets.CORS_ORIGIN }}' \
+          -e BUCKET_NAME='${{ secrets.BUCKET_NAME }}' \
+          -e BUCKET_REGION='${{ secrets.BUCKET_REGION }}' \
+          -e ACCESS_KEY='${{ secrets.ACCESS_KEY }}' \
+          -e SECRET_ACCESS_KEY='${{ secrets.SECRET_ACCESS_KEY }}' \
+          -e OBJECT_NAME_PREFIX='${{ secrets.OBJECT_NAME_PREFIX }}' \
+          -e REDIS_HOST='${{ secrets.REDIS_HOST }}' \
+          -e REDIS_PORT='${{ secrets.REDIS_PORT }}' \
+          -e REDIS_AUTH_TOKEN='${{ secrets.REDIS_AUTH_TOKEN }}' \
+          -e REDIS_RECONNECT_ATTEMPTS='${{ secrets.REDIS_RECONNECT_ATTEMPTS }}' \
+          -e REDIS_RECONNECT_DELAY_MS='${{ secrets.REDIS_RECONNECT_DELAY_MS }}' \
+          -e REDIS_AWS_TLS_ENABLED='${{ secrets.REDIS_AWS_TLS_ENABLED }}' \
+          -e CLOUDFRONT_DOMAIN='${{ secrets.CLOUDFRONT_DOMAIN }}' \
+          -e API_KEY='${{ secrets.API_KEY }}' \
+          -e PLACE_TAICHUNG_ID='${{ secrets.PLACE_TAICHUNG_ID }}' \
+          -e PLACE_KAOHSIUNG_ID='${{ secrets.PLACE_KAOHSIUNG_ID }}' \
+          -e PLACE_TAIPEI_ID='${{ secrets.PLACE_TAIPEI_ID }}' \
+          -e RESET_PASSWORD_MAIL_JWT_SECRET='${{ secrets.RESET_PASSWORD_MAIL_JWT_SECRET }}' \
+          -e GMAIL_PASSWORD='${{ secrets.GMAIL_PASSWORD }}' \
+          -e SENDER_EMAIL_ADDRESS='${{ secrets.SENDER_EMAIL_ADDRESS }}' \
+          -e GOOGLE_CLIENT_ID='${{ secrets.GOOGLE_CLIENT_ID }}' \
+          -e GOOGLE_CLIENT_SECRET='${{ secrets.GOOGLE_CLIENT_SECRET }}' \
+          -e GOOGLE_CALLBACK_URL='${{ secrets.GOOGLE_CALLBACK_URL }}' \
+          ellenerica31725/clinic-pulse-api
+          EOF
